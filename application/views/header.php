@@ -147,7 +147,7 @@
 						<select id="l" name="l"  onChange="this.form.submit()" >
 						<option value="cp_HT">Kreyol (CP)</option>
 						<option value="fr_FR">Français (FR)</option>
-						<option value="es_UY">Español, Castellano (UY)</option>
+						<option value="es_AR">Español (AR)</option>
 						<option value="en_US" selected="selected">English (US)</option>
 						</select>
 					</form>
