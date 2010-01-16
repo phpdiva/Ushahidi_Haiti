@@ -48,7 +48,8 @@ class Reports_Controller extends Main_Controller {
 				'query_string' => 'page',
 				'items_per_page' => (int) Kohana::config('settings.items_per_page'),
 				'total_items' => ORM::factory('incident')
-					->join('incident_category', 'incident.id', 'incident_category.incident_id')
+					->select('DISTINCT incident.*')
+					//->join('incident_category', 'incident.id', 'incident_category.incident_id')
 					->where('incident_active', '1')
 					->where($category_filter)
 					->count_all()
@@ -56,7 +57,7 @@ class Reports_Controller extends Main_Controller {
 
 		$incidents = ORM::factory('incident')
 				->select('DISTINCT incident.*')
-				->join('incident_category', 'incident.id', 'incident_category.incident_id')
+				->join('incident_category', 'incident.id', 'incident_category.incident_id', 'left')
 				->where('incident_active', '1')
 				->where($category_filter)
 				->groupby('incident.id')
