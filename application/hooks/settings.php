@@ -52,6 +52,21 @@ Kohana::config_set('settings.email_ssl', $settings->email_ssl);
 Kohana::config_set('settings.alerts_email', $settings->alerts_email);
 
 
+// Email Settings
+if ($settings->email_smtp)
+{ // Configure SMTP Settings
+	Kohana::config_set('email.driver', 'smtp');
+	Kohana::config_set('email.options',
+		 array(
+			'hostname'=>$settings->email_host_smtp, 
+			'port'=>$settings->email_port_smtp, 
+			'username'=>$settings->email_username, 
+			'password'=>$settings->email_password, 
+			'encryption' => 'tls'	// Secure
+		));
+}
+
+
 $default_map = $settings->default_map;
 $api_google = $settings->api_google;
 $api_yahoo = $settings->api_yahoo;
