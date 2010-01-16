@@ -231,8 +231,11 @@ class Alerts_Controller extends Main_Controller
      * 
      * @param string $code
      */
-	public function unsubscribe($code = NULL)
+	public function unsubscribe()
 	{
+		$code = (isset($_GET['c']) && !empty($_GET['c'])) ?
+			$_GET['c'] : "";
+		
        	$this->template->content = new View('alerts_unsubscribe');
         $this->template->header->this_page = 'alerts';
 		$this->template->content->unsubscribed = FALSE;

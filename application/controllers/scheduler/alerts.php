@@ -18,7 +18,11 @@ class Alerts_Controller extends Controller
 	public function __construct()
     {
         parent::__construct();
-	}	
+		
+		set_time_limit(60);
+		
+		//$profiler = new Profiler;
+	}
 	
 	public function index() 
 	{
@@ -30,6 +34,22 @@ class Alerts_Controller extends Controller
 		$settings = NULL;
 		$sms_from = NULL;
 		$clickatell = NULL;
+		$miles = FALSE; // Change to True to calculate distances in Miles
+		$max_recipients = 50; // Limit each script execution to 50 recipients
+		
+		// Get/Set Alerts Email Configuration
+		if ($settings['email_smtp'])
+		{ // Configure SMTP Settings
+			Kohana::config_set('email.driver', 'smtp');
+			Kohana::config_set('email.options',
+				 array(
+					'hostname'=>$settings['alerts_host'], 
+					'port'=>$settings['alerts_port'], 
+					'username'=>$settings['alerts_username'], 
+					'password'=>$settings['alerts_password'], 
+					'encryption' => 'tls'	// Secure
+				));
+		}
 
 		$db = new Database();
 		
@@ -42,12 +62,14 @@ class Alerts_Controller extends Controller
 		  - 1, Incident has been tagged for sending by updating it with 'approved' or 'verified'
 		  - 2, Incident has been tagged as sent. No need to resend again
 		*/
+		
+		
+		// 1 - Retrieve All the Incidents that haven't been sent
 		$incidents = $db->query("SELECT incident.id, incident_title, 
 								 incident_description, incident_verified, 
-								 location.latitude, location.longitude, alert_sent.alert_id, alert_sent.incident_id
+								 location.latitude, location.longitude
 								 FROM incident INNER JOIN location ON incident.location_id = location.id
-								 LEFT OUTER JOIN alert_sent ON incident.id = alert_sent.incident_id WHERE
-								 incident.incident_active=1 AND incident.incident_alert_status = 1 ");
+								 WHERE incident.incident_active=1 AND incident.incident_alert_status = 1 ");
 		
 		foreach ($incidents as $incident)
 		{
@@ -55,92 +77,101 @@ class Alerts_Controller extends Controller
 			$latitude = (double) $incident->latitude;
 			$longitude = (double) $incident->longitude;
 			
-			// Get all alertees
-			$alertees = ORM::factory('alert')
-				->where('alert_confirmed','1')
-				->find_all();
+			// 2 - Retrieve All Qualifying Alertees Based on Distance and Make sure they haven't received this alert
+			$distance_type = ($miles) ? "" : " * 1.609344";
+			$alertees = $db->query('SELECT DISTINCT alert.*, ((ACOS(SIN('.$latitude.' * PI() / 180) * 
+									SIN(`alert`.`alert_lat` * PI() / 180) + COS('.$latitude.' * PI() / 180) * 
+									COS(`alert`.`alert_lat` * PI() / 180) * COS(('.$longitude.' - `alert`.`alert_lon`)
+									 * PI() / 180)) * 180 / PI()) * 60 * 1.1515 '.$distance_type.') AS distance
+									FROM alert WHERE alert.alert_confirmed = 1  
+									HAVING distance <= alert_radius ');	
 			
+			$i = 0;
 			foreach ($alertees as $alertee)
 			{
-				// Has this alert been sent to this alertee?
-				if ($alertee->id == $incident->alert_id)
+				// 3 - Has this incident alert been sent to this alertee?
+				$alert_sent = ORM::factory('alert_sent')
+					->where('alert_id', $alertee->id)
+					->where('incident_id', $incident->id)
+					->find();
+				if ($alert_sent->loaded) // A record Exists
 					continue;
 				
-				$alert_radius = (int) $alertee->alert_radius;
+				// 4 - Get Alert Type. 1=SMS, 2=EMAIL
 				$alert_type = (int) $alertee->alert_type;
-				$latitude2 = (double) $alertee->alert_lat;
-				$longitude2 = (double) $alertee->alert_lon;
 				
-				$distance = (string) new Distance($latitude, $longitude, $latitude2, $longitude2);
-				
-				// If the calculated distance between the incident and the alert fits...
-				if ($distance <= $alert_radius)
+				if ($alert_type == 1) // SMS alertee
 				{
-					if ($alert_type == 1) // SMS alertee
+					if ($settings == null)
 					{
-						if ($settings == null)
+						$settings = ORM::factory('settings', 1);
+						if ($settings->loaded == true)
 						{
-							$settings = ORM::factory('settings', 1);
-							if ($settings->loaded == true)
-							{
-								// Get SMS Numbers
-								if (!empty($settings->sms_no3))
-									$sms_from = $settings->sms_no3;
-								elseif (!empty($settings->sms_no2))
-									$sms_from = $settings->sms_no2;
-								elseif (!empty($settings->sms_no1))
-									$sms_from = $settings->sms_no1;
-								else
-									$sms_from = "000";      // Admin needs to set up an SMS number
-							}
-
-							$clickatell = new Clickatell();
-							$clickatell->api_id = $settings->clickatell_api;
-							$clickatell->user = $settings->clickatell_username;
-							$clickatell->password = $settings->clickatell_password;
-							$clickatell->use_ssl = false;
-							$clickatell->sms();
-						}	
-
-						$message = $incident->incident_description;
-						
-						// If Clickatell Is Set Up
-						if ($clickatell->send($alertee->alert_recipient, $sms_from, $message) == "OK")
-						{
-							$alert = ORM::factory('alert_sent');
-							$alert->alert_id = $alertee->id;
-							$alert->incident_id = $incident->id;
-							$alert->alert_date = date("Y-m-d H:i:s");
-							$alert->save();
+							// Get SMS Numbers
+							if (!empty($settings->sms_no3))
+								$sms_from = $settings->sms_no3;
+							elseif (!empty($settings->sms_no2))
+								$sms_from = $settings->sms_no2;
+							elseif (!empty($settings->sms_no1))
+								$sms_from = $settings->sms_no1;
+							else
+								$sms_from = "000";      // Admin needs to set up an SMS number
 						}
-					}
 
-					elseif ($alert_type == 2) // Email alertee
-                    {
-                    	//for some reason, mail function complains about bad parameters 
-                    	// in the function so i'm disallowing these characters in the 
-                    	// subject field to allow the mail function to work.
-                    	$disallowed_chars = array("(",")","[","]","-");
+						$clickatell = new Clickatell();
+						$clickatell->api_id = $settings->clickatell_api;
+						$clickatell->user = $settings->clickatell_username;
+						$clickatell->password = $settings->clickatell_password;
+						$clickatell->use_ssl = false;
+						$clickatell->sms();
+					}	
 
-						$to = $alertee->alert_recipient;
-						$from = $alerts_email;
-						$subject = trim(str_replace($disallowed_chars,"",$site_name).": ".str_replace($disallowed_chars,"",$incident->incident_title));
-						
-						$message = $incident->incident_description
-                                                                        ."<p>".url::base()."reports/view/".$incident->id."</p>"
-									."<p>".$unsubscribe_message
-                                                                        .$alertee->alert_code."</p>";
-						
-						if (email::send($to, $from, $subject, $message, TRUE) == 1)
-						{
-							$alert = ORM::factory('alert_sent');
-							$alert->alert_id = $alertee->id;
-							$alert->incident_id = $incident->id;
-							$alert->alert_date = date("Y-m-d H:i:s");
-							$alert->save();
-						}
+					$message = $incident->incident_description;
+					
+					// If Clickatell Is Set Up
+					if ($clickatell->send($alertee->alert_recipient, $sms_from, $message) == "OK")
+					{
+						$alert = ORM::factory('alert_sent');
+						$alert->alert_id = $alertee->id;
+						$alert->incident_id = $incident->id;
+						$alert->alert_date = date("Y-m-d H:i:s");
+						$alert->save();
 					}
 				}
+
+				elseif ($alert_type == 2) // Email alertee
+				{	
+                   	//for some reason, mail function complains about bad parameters 
+                   	// in the function so i'm disallowing these characters in the 
+                   	// subject field to allow the mail function to work.
+                   	$disallowed_chars = array("(",")","[","]","-");
+
+					$to = $alertee->alert_recipient;
+					$from = $alerts_email;
+					$subject = trim(str_replace($disallowed_chars,"",$site_name).": ".str_replace($disallowed_chars,"",$incident->incident_title));
+					
+					$message = $incident->incident_description
+                                                                       ."<p>".url::base()."reports/view/".$incident->id."</p>"
+								."<p>".$unsubscribe_message
+                                                                       ."?c=".$alertee->alert_code."</p>";
+					
+					if (email::send($to, $from, $subject, $message, TRUE) == 1)
+					{
+						$alert = ORM::factory('alert_sent');
+						$alert->alert_id = $alertee->id;
+						$alert->incident_id = $incident->id;
+						$alert->alert_date = date("Y-m-d H:i:s");
+						$alert->save();
+					}
+				}
+				
+				$i++;
+				
+				if ($i == $max_recipients)
+				{
+					exit;
+				}
+
 			} // End For Each Loop
 			
 			
