@@ -141,10 +141,10 @@
 				<div id="language-switch">
                    <h3>Select Language</h3>
                    <p>
-                        <a href="#" id="cp_HT"><span><img src="themes/haiti/ht.png" align="left" /></span>Kreyol (CP)</a>
-                        <a href="#" id="fr_FR"><span><img src="themes/haiti/fr.png" align="left" /></span>Français (FR)</a>
-                        <a class="active" href="#" id="es_UY"><span><img src="themes/haiti/es.png" align="left" /></span>Español (UY)</a>
-                        <a href="#" id="en_US"><span><img src="themes/haiti/us.png" align="left" /></span>English (US)</a>
+                        <a href="?l=cp_HT" id="cp_HT"><span><img src="themes/haiti/ht.png" align="left" /></span>Kreyol (CP)</a>
+                        <a href="?l=fr_FR" id="fr_FR"><span><img src="themes/haiti/fr.png" align="left" /></span>Français (FR)</a>
+                        <a class="active" href="?l=es_UY" id="es_UY"><span><img src="themes/haiti/es.png" align="left" /></span>Español (UY)</a>
+                        <a href="?l=en_US" id="en_US"><span><img src="themes/haiti/us.png" align="left" /></span>English (US)</a>
                    </p>
                                 
                 </div>
