@@ -21,7 +21,7 @@
 				
 						<!-- right column -->
 						<div id="right" class="clearingfix">
-					
+						
 							<!-- category filters -->
 							<div class="cat-filters clearingfix">
 								<strong><?php echo Kohana::lang('ui_main.category_filter');?></strong>
@@ -134,6 +134,23 @@
 					
 						<!-- content column -->
 						<div id="content" class="clearingfix">
+                        	<div id="shortcode-info">
+                            	<h3><?php echo Kohana::lang('ui_main.shortcode_announcement_title'); ?></h3>
+                                <p>
+                                <?php echo Kohana::lang('ui_main.shortcode_announcement_1'); ?> 
+                                <span>
+                                	<?php 
+										foreach ($phone_array as $phone) {
+											echo "<strong>". $phone ."</strong>";
+											if ($phone != end($phone_array)) {
+												echo " or ";
+											}
+										} 
+									?>
+                                </span> 
+                                 <?php echo Kohana::lang('ui_main.shortcode_announcement_2'); ?>
+                                </p>
+                            </div>
 							<div class="floatbox">
 							
 								<!-- filters -->
@@ -241,8 +258,13 @@
 									?>
                                 </td>
                                 
-                                <td class="mm-youtube">
-                                <h3>On Youtube</h3>
+                                
+								<td class="mm-youtube">
+                                <h3>Person Finder</h3>
+                                <iframe src="http://haiticrisis.appspot.com/?small=yes" width="300" height="300" frameborder="0" style="border: dashed 2px #77c; background:#fff;"></iframe>
+								
+								<?php /*
+								<h3>On Youtube</h3>
                                 	 <!-- ++Begin Video Search Control Wizard Generated Code++ -->
                       <!--
                       // Created with a Google AJAX Search Wizard
@@ -306,6 +328,8 @@
                         GSearch.setOnLoadCallback(LoadVideoSearchControl);
                       </script>
                     <!-- --End Video Search Control Wizard Generated Code-- -->
+                                
+								*/ ?>
                                 </td>
                             </tr>
                         </table>

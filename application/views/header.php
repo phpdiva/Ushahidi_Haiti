@@ -138,12 +138,30 @@
 </head>
 
 <body id="page">
-				<div id="language-switch">
+	<div id="shortcode-header-wrap">
+    	<p id="shortcode-header-info">
+        	<?php echo Kohana::lang('ui_main.shortcode_announcement_1'); ?> 
+            <span>
+                <?php
+					
+                    foreach ($phone_array as $phone) {
+                        echo "<strong>". $phone ."</strong>";
+                        if ($phone != end($phone_array)) {
+                            echo " or ";
+                        }
+                    } 
+                ?>
+            </span> 
+             <?php echo Kohana::lang('ui_main.shortcode_announcement_2'); ?>
+        </p>
+	</div>
+    	
+                <div id="language-switch">
                    <h3>Select Language</h3>
                    <p>
                         <a href="?l=cp_HT" id="cp_HT" <?php if(Kohana::config('locale.language') == 'cp_HT' ) echo 'class="active"' ?> ><span><img src="<?php echo url::base() ?>themes/haiti/ht.png" align="left" /></span>Kreyol (CP)</a>
                         <a href="?l=fr_FR" id="fr_FR" <?php if(Kohana::config('locale.language') == 'fr_FR' ) echo 'class="active"' ?> ><span><img src="<?php echo url::base() ?>themes/haiti/fr.png" align="left" /></span>Français (FR)</a>
-                        <a href="?l=es_UY" id="es_UY" <?php if(Kohana::config('locale.language') == 'es_UY' ) echo 'class="active"' ?> ><span><img src="<?php echo url::base() ?>themes/haiti/es.png" align="left" /></span>Español (UY)</a>
+                        <a href="?l=es_AR" id="es_AR" <?php if(Kohana::config('locale.language') == 'es_AR' ) echo 'class="active"' ?> ><span><img src="<?php echo url::base() ?>themes/haiti/es.png" align="left" /></span>Español (AR)</a>
                         <a href="?l=en_US" id="en_US" <?php if(Kohana::config('locale.language') == 'en_US' ) echo 'class="active"' ?> ><span><img src="<?php echo url::base() ?>themes/haiti/us.png" align="left" /></span>English (US)</a>
                    </p>
                                 
@@ -160,7 +178,7 @@
 				
 				<!-- languages -->
 				<div class="language-box">
-					<form>
+					<form style="display:none;">
 						<?php /* print form::dropdown('l', $locales_array, $l, ' onChange="this.form.submit()" ');*/ ?>
 						<select id="l" name="l"  onChange="this.form.submit()" >
 						<option value="cp_HT">Kreyol (CP)</option>
@@ -168,7 +186,9 @@
 						<option value="es_UY">Español, Castellano (UY)</option>
 						<option value="en_US" selected="selected">English (US)</option>
 						</select>
+                       
 					</form>
+                     <strong>Search Reports Here:</strong> 
 				</div>
                 
 				<!-- / languages -->

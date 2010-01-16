@@ -14,7 +14,7 @@ $config['language'] = array('en_US', 'English_United States');
  * Activate new languages by adding them to this array
  */
 $config['all_languages'] = array ( 'cp_HT' => 'Kreyol (CP)','en_US'=>'English (US)', 'fr_FR'=>'Français',
-	'es_AR' => '', 'es_UY' => 'Español, Castellano (UY)', 'sw_KE' => 'Swhahili (KE)',  );
+	'es_AR' => 'Español (AR)', 'es_UY' => 'Español, Castellano (Ar)', 'sw_KE' => 'Swhahili (KE)',  );
 
 /**
  * Locale timezone. Defaults to use the server timezone.

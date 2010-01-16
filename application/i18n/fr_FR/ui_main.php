@@ -69,5 +69,8 @@ $lang = array(
 	'alerts_rss' => 'Fils RSS (copier l\'URL ci-dessous)',
 	'alerts_btn_send' => 'Soumettre',
 	'alert_confirm_previous' => 'Confirmer alerte precedente',
-	'layers_filter' => 'Other Layers'
+	'layers_filter' => 'Other Layers',
+	'shortcode_announcement_title' => 'Rapport par téléphone mobile',
+	'shortcode_announcement_1' => 'An Ayiti? Text ',
+	'shortcode_announcement_2' => ' avek ki <strong>kote ou ye e sa ou bezwen</strong>. Kontakte nou pou kriz e moun ou paka jwenn.'
 );
