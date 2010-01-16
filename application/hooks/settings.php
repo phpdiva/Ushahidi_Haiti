@@ -43,6 +43,7 @@ Kohana::config_set('settings.items_per_page', $settings->items_per_page);
 Kohana::config_set('settings.items_per_page_admin', $settings->items_per_page_admin);
 Kohana::config_set('settings.google_analytics', $settings->google_analytics);
 Kohana::config_set('settings.twitter_hashtags', $settings->twitter_hashtags);
+Kohana::config_set('settings.email_smtp', $settings->email_smtp);
 Kohana::config_set('settings.email_username', $settings->email_username);
 Kohana::config_set('settings.email_password', $settings->email_password);
 Kohana::config_set('settings.email_port', $settings->email_port);
@@ -60,9 +61,9 @@ if ($settings->email_smtp)
 		 array(
 			'hostname'=>$settings->email_host_smtp, 
 			'port'=>$settings->email_port_smtp, 
-			'username'=>$settings->email_username, 
-			'password'=>$settings->email_password, 
-			'encryption' => 'tls'	// Secure
+			'username'=>$settings->email_smtp_username, 
+			'password'=>$settings->email_smtp_password
+			//'encryption' => 'tls'	// Secure
 		));
 }
 

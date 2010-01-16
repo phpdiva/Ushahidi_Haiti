@@ -45,7 +45,7 @@ class Alerts_Controller extends Controller
 					'port'=>$settings->alerts_port, 
 					'username'=>$settings->alerts_username, 
 					'password'=>$settings->alerts_password, 
-					'encryption' => 'tls'	// Secure
+					//'encryption' => 'tls'	// Secure
 				));
 		}
 
