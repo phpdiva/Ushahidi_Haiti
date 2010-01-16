@@ -17,8 +17,6 @@
 					<div class="content-bg">
 						<!-- start report form block -->
 						<?php print form::open(NULL, array('enctype' => 'multipart/form-data', 'id' => 'reportForm', 'name' => 'reportForm', 'class' => 'gen_forms')); ?>
-						<input type="hidden" name="latitude" id="latitude" value="<?php echo $form['latitude']; ?>">
-						<input type="hidden" name="longitude" id="longitude" value="<?php echo $form['longitude']; ?>">
 						<div class="big-block">
 							<h1><?php echo Kohana::lang('ui_main.reports_submit_new'); ?></h1>
 							<?php
@@ -167,6 +165,10 @@ $("#incident_ampm option[value='"+ampm+"']").attr("selected","true");
 								<div class="report_row">
 									<h4><?php echo Kohana::lang('ui_main.reports_find_location'); ?></h4>
 									<?php print form::dropdown('select_city',$cities,'', ' class="select" '); ?>
+								</div>
+								<div class="report_row">
+									Lat: <?php print form::input('latitude', $form['latitude'], ' class="text short"'); ?>
+									&nbsp;Lon: <?php print form::input('longitude', $form['longitude'], ' class="text short"'); ?>
 								</div>
 								<?php
 									 }
