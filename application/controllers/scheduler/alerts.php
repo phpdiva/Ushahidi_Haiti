@@ -26,27 +26,25 @@ class Alerts_Controller extends Controller
 	
 	public function index() 
 	{
-		$settings = kohana::config('settings');
-		$site_name = $settings['site_name'];
-		$alerts_email = $settings['alerts_email'];
+		$settings = ORM::factory('settings')->find(1);
+		$site_name = $settings->site_name;
+		$alerts_email = $settings->alerts_email;
 		$unsubscribe_message = Kohana::lang('alerts.unsubscribe')
 								.url::site().'alerts/unsubscribe/';
-		$settings = NULL;
 		$sms_from = NULL;
 		$clickatell = NULL;
 		$miles = FALSE; // Change to True to calculate distances in Miles
 		$max_recipients = 50; // Limit each script execution to 50 recipients
 		
-		// Get/Set Alerts Email Configuration
-		if ($settings['email_smtp'])
-		{ // Configure SMTP Settings
+		if ($settings->email_smtp == 1)
+		{
 			Kohana::config_set('email.driver', 'smtp');
 			Kohana::config_set('email.options',
 				 array(
-					'hostname'=>$settings['alerts_host'], 
-					'port'=>$settings['alerts_port'], 
-					'username'=>$settings['alerts_username'], 
-					'password'=>$settings['alerts_password'], 
+					'hostname'=>$settings->alerts_host, 
+					'port'=>$settings->alerts_port, 
+					'username'=>$settings->alerts_username, 
+					'password'=>$settings->alerts_password, 
 					'encryption' => 'tls'	// Secure
 				));
 		}
@@ -102,29 +100,22 @@ class Alerts_Controller extends Controller
 				
 				if ($alert_type == 1) // SMS alertee
 				{
-					if ($settings == null)
-					{
-						$settings = ORM::factory('settings', 1);
-						if ($settings->loaded == true)
-						{
-							// Get SMS Numbers
-							if (!empty($settings->sms_no3))
-								$sms_from = $settings->sms_no3;
-							elseif (!empty($settings->sms_no2))
-								$sms_from = $settings->sms_no2;
-							elseif (!empty($settings->sms_no1))
-								$sms_from = $settings->sms_no1;
-							else
-								$sms_from = "000";      // Admin needs to set up an SMS number
-						}
+					// Get SMS Numbers
+					if (!empty($settings->sms_no3))
+						$sms_from = $settings->sms_no3;
+					elseif (!empty($settings->sms_no2))
+						$sms_from = $settings->sms_no2;
+					elseif (!empty($settings->sms_no1))
+						$sms_from = $settings->sms_no1;
+					else
+						$sms_from = "000";      // Admin needs to set up an SMS number
 
-						$clickatell = new Clickatell();
-						$clickatell->api_id = $settings->clickatell_api;
-						$clickatell->user = $settings->clickatell_username;
-						$clickatell->password = $settings->clickatell_password;
-						$clickatell->use_ssl = false;
-						$clickatell->sms();
-					}	
+					$clickatell = new Clickatell();
+					$clickatell->api_id = $settings->clickatell_api;
+					$clickatell->user = $settings->clickatell_username;
+					$clickatell->password = $settings->clickatell_password;
+					$clickatell->use_ssl = false;
+					$clickatell->sms();	
 
 					$message = $incident->incident_description;
 					
@@ -168,7 +159,7 @@ class Alerts_Controller extends Controller
 				$i++;
 				
 				if ($i == $max_recipients)
-				{
+				{	
 					exit;
 				}
 
