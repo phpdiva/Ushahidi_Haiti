@@ -145,8 +145,13 @@ class Alerts_Controller extends Main_Controller
      * 
      * @param string $code
      */
-    public function verify($code = NULL, $email = NULL)
-    {   
+    public function verify()
+    {
+		$code = (isset($_GET['c']) && !empty($_GET['c'])) ?
+			$_GET['c'] : "";
+			
+		$email = (isset($_GET['e']) && !empty($_GET['e'])) ?
+			$_GET['e'] : "";
         
         // Define error codes for this view.
         define("ER_CODE_VERIFIED", 0);
@@ -326,7 +331,7 @@ class Alerts_Controller extends Main_Controller
 		$subject = $settings['site_name']." "
 					.Kohana::lang('alerts.verification_email_subject');
 		$message = Kohana::lang('alerts.confirm_request')
-					.url::site().'alerts/verify/'.$alert_code."/".$alert_email;
+					.url::site().'alerts/verify/?c='.$alert_code."&e=".$alert_email;
 
 		if (email::send($to, $from, $subject, $message, TRUE) == 1)
 		{

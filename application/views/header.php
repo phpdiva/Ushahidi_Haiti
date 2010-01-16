@@ -101,6 +101,14 @@
 		   ui_click: true
 		}	
 		<?php echo $js . "\n"; ?>
+		
+		// Language Switcher
+		$(function(){
+			$("#language-switch").hover(
+        		function(){ $(this).addClass("on"); },
+            	function(){ $(this).removeClass("on")}
+        	);
+		});
 	</script>
 	
 	<?php
@@ -130,6 +138,16 @@
 </head>
 
 <body id="page">
+				<div id="language-switch">
+                   <h3>Select Language</h3>
+                   <p>
+                        <a href="?l=cp_HT" id="cp_HT" <?php if($_GET['l'] == 'cp_HT' ) echo 'class="active"' ?> ><span><img src="themes/haiti/ht.png" align="left" /></span>Kreyol (CP)</a>
+                        <a href="?l=fr_FR" id="fr_FR" <?php if($_GET['l'] == 'fr_FR' ) echo 'class="active"' ?> ><span><img src="themes/haiti/fr.png" align="left" /></span>Français (FR)</a>
+                        <a href="?l=es_UY" id="es_UY" <?php if($_GET['l'] == 'es_UY' ) echo 'class="active"' ?> ><span><img src="themes/haiti/es.png" align="left" /></span>Español (UY)</a>
+                        <a href="?l=en_US" id="en_US" <?php if($_GET['l'] == 'en_US' ) echo 'class="active"' ?> ><span><img src="themes/haiti/us.png" align="left" /></span>English (US)</a>
+                   </p>
+                                
+                </div>
 	<!-- wrapper -->
 	<div class="rapidxwpr floatholder">
 
@@ -152,6 +170,7 @@
 						</select>
 					</form>
 				</div>
+                
 				<!-- / languages -->
 			
 				<!-- searchform -->
