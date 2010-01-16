@@ -117,11 +117,12 @@ class Alerts_Controller extends Controller
 
 					elseif ($alert_type == 2) // Email alertee
                     {
-                    	$disallowed_chars = array("(",")","[","]","-",":");
+                    	$disallowed_chars = array("(",")","[","]","-");
 
 						$to = $alertee->alert_recipient;
 						$from = $alerts_email;
 						$subject = trim(str_replace($disallowed_chars,"",$site_name).": ".str_replace($disallowed_chars,"",$incident->incident_title));
+						
 						$message = $incident->incident_description
                                                                         ."<p>".url::base()."reports/view/".$incident->id."</p>"
 									."<p>".$unsubscribe_message
