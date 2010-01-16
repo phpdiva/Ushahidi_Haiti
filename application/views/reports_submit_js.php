@@ -289,6 +289,21 @@
 				}
 			});
 			
+			// Event on Latitude/Longitude Typing Change
+			$('#latitude, #longitude').bind("change keyup", function() {
+				var newlat = $("#latitude").val();
+				var newlon = $("#longitude").val();
+				if (!isNaN(newlat) && !isNaN(newlon))
+				{
+					var lonlat = new OpenLayers.LonLat(newlon, newlat);
+					lonlat.transform(proj_4326,proj_900913);
+					m = new OpenLayers.Marker(lonlat);
+					markers.clearMarkers();
+			    	markers.addMarker(m);
+					map.setCenter(lonlat, <?php echo $default_zoom; ?>);
+				}
+			});
+			
 			/* 
 			Google GeoCoder
 			TODO - Add Yahoo and Bing Geocoding Services

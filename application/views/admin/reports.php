@@ -151,6 +151,18 @@
 									$incident_approved = $incident->incident_active;
 									$incident_verified = $incident->incident_verified;
 									
+									// Get Edit Log
+									$edit_count = $incident->verify->count();
+									$edit_css = ($edit_count == 0) ? "post-edit-log-red" : "post-edit-log-gray";
+									$edit_log  = "<div class=\"".$edit_css."\">";
+									$edit_log .= "<a href=\"javascript:showLog('edit_log_".$incident_id."')\">Edit Log:</a> (".$edit_count.")</div>";
+									$edit_log .= "<div id=\"edit_log_".$incident_id."\" class=\"post-edit-log\"><ul>";
+									foreach ($incident->verify as $verify)
+									{
+										$edit_log .= "<li>Edited by ".$verify->user->name." at ".$verify->verified_date."</li>";
+									}
+									$edit_log .= "</ul></div>";
+									
 									// Get Any Translations
 									$i = 1;
 									$incident_translation  = "<div class=\"post-trans-new\">";
@@ -181,6 +193,7 @@
 											<?php
 											//XXX DISABLED Until Completed
 											// echo $incident_translation;
+											echo $edit_log;
 											?>
 										</td>
 										<td class="col-3"><?php echo $incident_date; ?></td>
