@@ -64,12 +64,12 @@ class Alerts_Controller extends Controller
 		*/
 		
 		
-		// 1 - Retrieve All the Incidents that haven't been sent
+		// 1 - Retrieve All the Incidents that haven't been sent (Process only 1 per script execution)
 		$incidents = $db->query("SELECT incident.id, incident_title, 
 								 incident_description, incident_verified, 
 								 location.latitude, location.longitude
 								 FROM incident INNER JOIN location ON incident.location_id = location.id
-								 WHERE incident.incident_active=1 AND incident.incident_alert_status = 1 ");
+								 WHERE incident.incident_active=1 AND incident.incident_alert_status = 1 LIMIT 1 ");
 		
 		foreach ($incidents as $incident)
 		{
@@ -83,7 +83,7 @@ class Alerts_Controller extends Controller
 									SIN(`alert`.`alert_lat` * PI() / 180) + COS('.$latitude.' * PI() / 180) * 
 									COS(`alert`.`alert_lat` * PI() / 180) * COS(('.$longitude.' - `alert`.`alert_lon`)
 									 * PI() / 180)) * 180 / PI()) * 60 * 1.1515 '.$distance_type.') AS distance
-									FROM alert WHERE alert.alert_confirmed = 1  
+									FROM alert WHERE alert.alert_confirmed = 1 AND (alert.id = 116 OR alert.id = 117) 
 									HAVING distance <= alert_radius ');	
 			
 			$i = 0;
@@ -93,8 +93,8 @@ class Alerts_Controller extends Controller
 				$alert_sent = ORM::factory('alert_sent')
 					->where('alert_id', $alertee->id)
 					->where('incident_id', $incident->id)
-					->find();
-				if ($alert_sent->loaded) // A record Exists
+					->count_all();
+				if ($alert_sent > 0) // A record Exists
 					continue;
 				
 				// 4 - Get Alert Type. 1=SMS, 2=EMAIL
