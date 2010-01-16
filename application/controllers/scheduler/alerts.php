@@ -117,6 +117,9 @@ class Alerts_Controller extends Controller
 
 					elseif ($alert_type == 2) // Email alertee
                     {
+                    	//for some reason, mail function complains about bad parameters 
+                    	// in the function so i'm disallowing these characters in the 
+                    	// subject field to allow the mail function to work.
                     	$disallowed_chars = array("(",")","[","]","-");
 
 						$to = $alertee->alert_recipient;
