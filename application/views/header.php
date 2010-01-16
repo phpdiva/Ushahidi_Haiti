@@ -141,10 +141,10 @@
 				<div id="language-switch">
                    <h3>Select Language</h3>
                    <p>
-                        <a href="?l=cp_HT" id="cp_HT" <?php if($_GET['l'] == 'cp_HT' ) echo 'class="active"' ?> ><span><img src="themes/haiti/ht.png" align="left" /></span>Kreyol (CP)</a>
-                        <a href="?l=fr_FR" id="fr_FR" <?php if($_GET['l'] == 'fr_FR' ) echo 'class="active"' ?> ><span><img src="themes/haiti/fr.png" align="left" /></span>Français (FR)</a>
-                        <a href="?l=es_UY" id="es_UY" <?php if($_GET['l'] == 'es_UY' ) echo 'class="active"' ?> ><span><img src="themes/haiti/es.png" align="left" /></span>Español (UY)</a>
-                        <a href="?l=en_US" id="en_US" <?php if($_GET['l'] == 'en_US' ) echo 'class="active"' ?> ><span><img src="themes/haiti/us.png" align="left" /></span>English (US)</a>
+                        <a href="?l=cp_HT" id="cp_HT" <?php if(Kohana::config('locale.language') == 'cp_HT' ) echo 'class="active"' ?> ><span><img src="<?php echo url::base() ?>themes/haiti/ht.png" align="left" /></span>Kreyol (CP)</a>
+                        <a href="?l=fr_FR" id="fr_FR" <?php if(Kohana::config('locale.language') == 'fr_FR' ) echo 'class="active"' ?> ><span><img src="<?php echo url::base() ?>themes/haiti/fr.png" align="left" /></span>Français (FR)</a>
+                        <a href="?l=es_UY" id="es_UY" <?php if(Kohana::config('locale.language') == 'es_UY' ) echo 'class="active"' ?> ><span><img src="<?php echo url::base() ?>themes/haiti/es.png" align="left" /></span>Español (UY)</a>
+                        <a href="?l=en_US" id="en_US" <?php if(Kohana::config('locale.language') == 'en_US' ) echo 'class="active"' ?> ><span><img src="<?php echo url::base() ?>themes/haiti/us.png" align="left" /></span>English (US)</a>
                    </p>
                                 
                 </div>
@@ -157,7 +157,7 @@
 			<!-- searchbox -->
 			<div id="searchbox">
 				<a class="share addthis_button" href="http://www.addthis.com/bookmark.php?v=250&amp;pub=xa-4aee423643f8276e">Share</a>
-
+				
 				<!-- languages -->
 				<div class="language-box">
 					<form>
