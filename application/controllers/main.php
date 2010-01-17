@@ -514,13 +514,14 @@ class Main_Controller extends Template_Controller {
 		(
 				'feedback_message' => '',
 				'person_email' => '',
-				'feedback_captcha' => ''
+				//'feedback_captcha' => '',
 		);
 		
 		// Load Akismet API Key (Spam Blocker)
 		$api_akismet = Kohana::config('settings.api_akismet');
 		
-		$captcha = Captcha::factory();
+		// See issue 10 - this is breaking the comment form.
+		//$captcha = Captcha::factory();
 		
 		//  copy the form as errors, so the errors will be stored with keys corresponding to the form field names
 		$errors = $form;
@@ -538,7 +539,7 @@ class Main_Controller extends Template_Controller {
 			//Add validation rules
 			$post->add_rules('feedback_message','required');
 			$post->add_rules('person_email', 'required','email');
-			$post->add_rules('feedback_captcha', 'required', 'Captcha::valid');
+			//$post->add_rules('feedback_captcha', 'required', 'Captcha::valid');
 			if( $post->validate() ) { 
 				if($api_akismet != "" ) {
 					// Run Akismet Spam Checker
@@ -621,7 +622,7 @@ class Main_Controller extends Template_Controller {
 		}
 		$this->template->footer->js = new View('footer_form_js');
 		$this->template->footer->form = $form;
-		$this->template->footer->captcha = $captcha;
+		//$this->template->footer->captcha = $captcha;
 		$this->template->footer->errors = $errors;
 		$this->template->footer->form_error = $form_error;
         }

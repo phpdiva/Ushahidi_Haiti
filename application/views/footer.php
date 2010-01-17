@@ -73,7 +73,9 @@
 								</div>
 							</td>
 						</tr>
-						<tr>
+						<?php
+						/* // See issue 10
+            <tr>
 							<td>
 								<div class="report_row">
 									<strong>Security Code:</strong><br />
@@ -86,6 +88,8 @@
 								</div>
 							</td>
 						</tr>
+						*/
+						?>
 						<tr>
 							<td colspan="3">
 								<?php $email = empty($form['person_email']) ? 'Email address' : $form['person_email']; ?>
