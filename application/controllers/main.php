@@ -77,6 +77,10 @@ class Main_Controller extends Template_Controller {
 		// Display News Feed?
 		$this->template->header->allow_feed = Kohana::config('settings.allow_feed');
 		
+		// Header SMS Numbers
+		$this->template->header->sms_no1 = Kohana::config('settings.sms_no1');
+		$this->template->header->sms_no2 = Kohana::config('settings.sms_no2');
+		
 		// Javascript Header
 		$this->template->header->map_enabled = FALSE;
 		$this->template->header->validator_enabled = FALSE;
