@@ -904,6 +904,7 @@ class Reports_Controller extends Main_Controller {
 
 		foreach (ORM::factory('category')
                  ->where('category_visible', '1')
+								 ->orderby('category_title', 'asc')
                  ->find_all() as $category)
 		{
 			// Create a list of all categories

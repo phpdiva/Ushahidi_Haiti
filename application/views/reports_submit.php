@@ -123,7 +123,9 @@ $("#incident_ampm option[value='"+ampm+"']").attr("selected","true");
 											{
 												$category_checked = FALSE;
 											}
-											echo "\n<li><label>";
+											// Indent categories of type 1a., 2e., etc.
+											$li_class = (is_numeric($category_title[0]) AND ctype_alpha($category_title[1])) ? 'sub_category' : '';
+											echo "\n".'<li class="'.$li_class.'"><label>';
 											echo form::checkbox('incident_category[]', $category, $category_checked, ' class="check-box"');
 											echo "$category_title";
 											echo "</label></li>";

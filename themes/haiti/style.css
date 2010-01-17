@@ -80,3 +80,11 @@ div#logo span{
 	#shortcode-info p {}
 	#shortcode-info p span,
 	#shortcode-header-info span { padding:5px; background:#fff; font-weight:bold; color:#F00; } 
+
+/* Categories on submit report page */
+
+	#reportForm .report_category ul li { padding: 2px 5px 2px 19px; min-height: 28px; }
+	#reportForm .report_category ul li.sub_category { padding-left: 23px; }
+	#reportForm .report_category ul li input.check-box { margin: 0 3px 0 -18px; }
+	#reportForm .report_category ul li.hover,
+	#reportForm .report_category ul li:hover { background: #efefef; }
