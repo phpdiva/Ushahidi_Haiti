@@ -81,7 +81,7 @@ class Alerts_Controller extends Controller
 									SIN(`alert`.`alert_lat` * PI() / 180) + COS('.$latitude.' * PI() / 180) * 
 									COS(`alert`.`alert_lat` * PI() / 180) * COS(('.$longitude.' - `alert`.`alert_lon`)
 									 * PI() / 180)) * 180 / PI()) * 60 * 1.1515 '.$distance_type.') AS distance
-									FROM alert WHERE alert.alert_confirmed = 1 AND (alert.id = 116 OR alert.id = 117) 
+									FROM alert WHERE alert.alert_confirmed = 1 
 									HAVING distance <= alert_radius ');	
 			
 			$i = 0;
