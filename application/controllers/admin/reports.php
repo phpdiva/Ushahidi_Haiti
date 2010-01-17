@@ -609,6 +609,14 @@ class Reports_Controller extends Admin_Controller
 				//Save
 				$incident->save();
 				
+				// Tag this as a report that needs to be sent out as an alert
+				if ($incident->incident_alert_status == 0
+						&& $incident->incident_active == 1)
+				{
+					$incident->incident_alert_status = '1';
+					$incident->save($incident->id);
+				}
+				
 				// Record Approval/Verification Action
 				$verify = new Verify_Model();
 				$verify->incident_id = $incident->id;
