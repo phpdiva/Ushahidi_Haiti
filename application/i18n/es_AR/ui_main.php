@@ -305,6 +305,8 @@ $lang = array(
     'report_edit_dropdown_2_item_5' => 'No verificada, posible rumor',
     'report_edit_dropdown_2_item_6' => 'Desconocido',
     'report_option_1' => 'Enviando un Mensaje al Teléfono', //By sending a message to
+	'report_option_1-local' => 'Locales, Envíe un SMS al',
+	'report_option_1-international' => 'Internacional, envíe un SMS al',
     'report_option_2' => 'Enviando un Correo Electrónico a', //By sending an email to 
     'report_option_3' => 'Enviando un Tweet con el/los hashtag/s', //By sending a tweet with the hashtag/s
     'report_option_4' => 'Completando un Formulario',
@@ -456,4 +458,8 @@ $lang = array(
     'weight' => 'Peso',
     'yes' => 'Si',
     'yesterday' => 'Ayer',
+	'shortcode_announcement_title' => 'Informe por teléfono móvil',
+	'shortcode_announcement_1' => '?En Ayiti? Envia un texto a ',
+	'shortcode_announcement_2' => ' con su <strong>ubicacion y lo que necesita</strong>. Informanos sobre emergencias y personas desaparecidas.',
+	'shortcode_announcement_3' => 'Internacional:'
 );

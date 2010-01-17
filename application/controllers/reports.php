@@ -36,6 +36,8 @@ class Reports_Controller extends Main_Controller {
 	 */
 	public function index() 
 	{
+		$db = new Database;	
+		
 		$this->template->header->this_page = 'reports';
 		$this->template->content = new View('reports');
 		
@@ -47,12 +49,7 @@ class Reports_Controller extends Main_Controller {
 		$pagination = new Pagination(array(
 				'query_string' => 'page',
 				'items_per_page' => (int) Kohana::config('settings.items_per_page'),
-				'total_items' => ORM::factory('incident')
-					->select('DISTINCT incident.*')
-					//->join('incident_category', 'incident.id', 'incident_category.incident_id')
-					->where('incident_active', '1')
-					->where($category_filter)
-					->count_all()
+				'total_items' => $db->query('SELECT distinct incident.id  FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) WHERE `incident_active` = 1 AND '.$category_filter)->count()
 				));
 
 		$incidents = ORM::factory('incident')
@@ -547,7 +544,7 @@ class Reports_Controller extends Main_Controller {
 			
 			// Check, has the form been submitted, if so, setup validation
 			if ($_POST)
-			{
+			{				
 				// Instantiate Validation, use $post, so we don't overwrite $_POST fields with our own things
 				$post = Validation::factory($_POST);
 

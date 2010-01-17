@@ -21,7 +21,7 @@
 				
 						<!-- right column -->
 						<div id="right" class="clearingfix">
-					
+						
 							<!-- category filters -->
 							<div class="cat-filters clearingfix">
 								<strong><?php echo Kohana::lang('ui_main.category_filter');?></strong>
@@ -108,12 +108,12 @@
 								<h5><?php echo Kohana::lang('ui_main.how_to_report'); ?></h5>
 								<ol>
 									<?php if (!empty($phone_array)) 
-									{ ?><li><?php echo Kohana::lang('ui_main.report_option_1'); ?> <?php foreach ($phone_array as $phone) {
-										echo "<strong>". $phone ."</strong>";
-										if ($phone != end($phone_array)) {
-											echo " or ";
-										}
-									} ?></li><?php } ?>
+									{ ?><li>
+									
+										<?php echo Kohana::lang('ui_main.report_option_1-local').' '.$sms_no2."."; ?> <br />
+										<?php echo Kohana::lang('ui_main.report_option_1-international').' '.$sms_no1."."; ?>
+                                        
+                                    </li><?php } ?>
 									<?php if (!empty($report_email)) 
 									{ ?><li><?php echo Kohana::lang('ui_main.report_option_2'); ?> <a href="mailto:<?php echo $report_email?>"><?php echo $report_email?></a></li><?php } ?>
 									<?php if (!empty($twitter_hashtag_array)) 
@@ -134,6 +134,17 @@
 					
 						<!-- content column -->
 						<div id="content" class="clearingfix">
+                        	<div id="shortcode-info">
+                            	<h3><?php echo Kohana::lang('ui_main.shortcode_announcement_title'); ?></h3>
+                                <p>
+								   <?php echo Kohana::lang('ui_main.shortcode_announcement_1'); ?> 
+                                    <span> <?php echo $sms_no2; ?> </span>  
+                                    <?php 
+                                        echo '&nbsp;('.Kohana::lang('ui_main.shortcode_announcement_3').'<span>'.$sms_no1.'</span>'.')&nbsp;';
+                                        echo Kohana::lang('ui_main.shortcode_announcement_2'); 
+                                    ?>
+                                </p>
+                            </div>
 							<div class="floatbox">
 							
 								<!-- filters -->
@@ -241,8 +252,13 @@
 									?>
                                 </td>
                                 
-                                <td class="mm-youtube">
-                                <h3>On Youtube</h3>
+                                
+								<td class="mm-youtube">
+                                <h3>Person Finder</h3>
+                                <iframe src="http://haiticrisis.appspot.com/?small=yes" width="300" height="300" frameborder="0" style="border: dashed 2px #77c; background:#fff;"></iframe>
+								
+								<?php /*
+								<h3>On Youtube</h3>
                                 	 <!-- ++Begin Video Search Control Wizard Generated Code++ -->
                       <!--
                       // Created with a Google AJAX Search Wizard
@@ -306,6 +322,8 @@
                         GSearch.setOnLoadCallback(LoadVideoSearchControl);
                       </script>
                     <!-- --End Video Search Control Wizard Generated Code-- -->
+                                
+								*/ ?>
                                 </td>
                             </tr>
                         </table>

@@ -77,6 +77,10 @@ class Main_Controller extends Template_Controller {
 		// Display News Feed?
 		$this->template->header->allow_feed = Kohana::config('settings.allow_feed');
 		
+		// Header SMS Numbers
+		$this->template->header->sms_no1 = Kohana::config('settings.sms_no1');
+		$this->template->header->sms_no2 = Kohana::config('settings.sms_no2');
+		
 		// Javascript Header
 		$this->template->header->map_enabled = FALSE;
 		$this->template->header->validator_enabled = FALSE;
@@ -229,7 +233,14 @@ class Main_Controller extends Template_Controller {
 			$phone_array[] = $sms_no3;
 		}
 		$this->template->content->phone_array = $phone_array;
+		$this->template->header->phone_array = $phone_array;
 		
+			// Because we need some custom language around these numbers, 
+			// I'm just sending them straight to the template for "hardcoding"
+			$this->template->content->sms_no1 = $sms_no1;
+			$this->template->content->sms_no2 = $sms_no2;
+			$this->template->header->sms_no1 = $sms_no1;
+			$this->template->header->sms_no2 = $sms_no2;
 
 		// Get RSS News Feeds
 		$this->template->content->feeds = ORM::factory('feed_item')
@@ -291,7 +302,6 @@ class Main_Controller extends Template_Controller {
 		
 		/** OLD SLIDER SET UP **/
         // Next, Get the Range of Years
-// Uncomment $query line
 //        $query = $db->query('SELECT DATE_FORMAT(incident_date, \'%Y\') AS incident_date FROM incident WHERE incident_active = 1 GROUP BY DATE_FORMAT(incident_date, \'%Y\') ORDER BY incident_date');
 		$query = array();
         foreach ($query as $slider_date)

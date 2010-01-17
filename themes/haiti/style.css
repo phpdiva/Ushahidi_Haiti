@@ -9,7 +9,8 @@ Author Email: david@ushahidi.com
 
 /* header background */
 body#page{
-	background: #585858 url(bkg.gif) 50% 0 repeat-x;
+	background: #585858 url(bkg.gif) repeat-x;
+	background-position:0px 33px;
 	overflow-x:hidden;
 }
 
@@ -20,7 +21,7 @@ div#header{
 /* Logo Box */
 div#logo{
 	background-color:transparent;
-	padding-top:15px;
+	padding-top:5px;
 	padding-bottom:0;
 	height:50px;
 }
@@ -35,16 +36,18 @@ div#logo span{
 
 
 /* Submit Button */
-div.submit-incident{
-	margin-top:58px;
-}
-div.submit-incident a{
-    background-color: #E0DC52;
-    color: #000;
-}
+	div.submit-incident{
+		margin-top:58px;
+	}
+	div.submit-incident a{
+		background-color: #E0DC52;
+		color: #000;
+	}
+	
+/* Multimedia Integration */
 	.multimedia-integration { padding-bottom:18px; }
 	.mm-twitter { padding:0 0 0 10px; }
-	.mm-flickr { width:300px; padding:0 28px 0 58px; }
+	.mm-flickr { width:300px; padding:0 4px 0 20px; }
 	.mm-youtube { vertical-align:top; }
 
 
@@ -56,7 +59,7 @@ div.submit-incident a{
 		.child {}
 	.cat-title { font-size:11px; }
 	
-/* New Style Switcher */
+/* New Language Switcher */
 
 	#language-switch { border-bottom:2px solid #FFFFFF; border-left:2px solid #FFFFFF; border-top:2px solid #FFFFFF; position:absolute; right:-104px; top:160px; z-index:1; background:#cfe3ec; padding:8px; }
 	#language-switch.on {right:0px; } 
@@ -65,4 +68,15 @@ div.submit-incident a{
 	#language-switch p a { display:block; clear:both; color:#585858; }
 	#language-switch p a span { display:block; float:left; background:transparent; widows:16px; height:11px; padding:5px; margin:0 9px 0 0; }
 	#language-switch p a.active span { background:#fff; margin-right:7px; border:1px solid #000; }
-	#language-switch p a img { border:none; } 
+	#language-switch p a img { border:none; }
+	
+	#language-box { margin-top:12px; }
+	
+/* SMS Shortcode Announcement */
+	#shortcode-header-wrap { width:100%; background:#FFF9D8; padding:9px; border:1px solid #ffed8d; }
+	#shortcode-header-info { width:960px; margin:0 auto; padding:0 0 3px 18px; background:transparent url(icons.png) 0 -97px no-repeat; }
+	#shortcode-info { background:#FFF9D8; padding:18px; margin:0 0 10px 0; border:1px solid #ffed8d; }
+	#shortcode-info h3 { margin:0 0 10px 0; background:transparent url(icons.png) 0 -97px no-repeat; font-size:14px; padding:0 0 0 18px; }
+	#shortcode-info p {}
+	#shortcode-info p span,
+	#shortcode-header-info span { padding:5px; background:#fff; font-weight:bold; color:#F00; } 
