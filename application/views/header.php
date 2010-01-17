@@ -141,18 +141,11 @@
 	<div id="shortcode-header-wrap">
     	<p id="shortcode-header-info">
         	<?php echo Kohana::lang('ui_main.shortcode_announcement_1'); ?> 
-            <span>
-                <?php
-					
-                    foreach ($phone_array as $phone) {
-                        echo "<strong>". $phone ."</strong>";
-                        if ($phone != end($phone_array)) {
-                            echo " or ";
-                        }
-                    } 
-                ?>
-            </span> 
-             <?php echo Kohana::lang('ui_main.shortcode_announcement_2'); ?>
+            <span> <?php echo $sms_no2; ?> </span>  
+            <?php 
+				echo '&nbsp;('.Kohana::lang('ui_main.shortcode_announcement_3').'<span>'.$sms_no1.'</span>'.')&nbsp;';
+				echo Kohana::lang('ui_main.shortcode_announcement_2'); 
+			?>
         </p>
 	</div>
     	

@@ -231,6 +231,12 @@ class Main_Controller extends Template_Controller {
 		$this->template->content->phone_array = $phone_array;
 		$this->template->header->phone_array = $phone_array;
 		
+			// Because we need some custom language around these numbers, 
+			// I'm just sending them straight to the template for "hardcoding"
+			$this->template->content->sms_no1 = $sms_no1;
+			$this->template->content->sms_no2 = $sms_no2;
+			$this->template->header->sms_no1 = $sms_no1;
+			$this->template->header->sms_no2 = $sms_no2;
 
 		// Get RSS News Feeds
 		$this->template->content->feeds = ORM::factory('feed_item')

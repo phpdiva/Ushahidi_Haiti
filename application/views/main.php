@@ -108,12 +108,12 @@
 								<h5><?php echo Kohana::lang('ui_main.how_to_report'); ?></h5>
 								<ol>
 									<?php if (!empty($phone_array)) 
-									{ ?><li><?php echo Kohana::lang('ui_main.report_option_1'); ?> <?php foreach ($phone_array as $phone) {
-										echo "<strong>". $phone ."</strong>";
-										if ($phone != end($phone_array)) {
-											echo " or ";
-										}
-									} ?></li><?php } ?>
+									{ ?><li>
+									
+										<?php echo Kohana::lang('ui_main.report_option_1-local').' '.$sms_no2."."; ?> <br />
+										<?php echo Kohana::lang('ui_main.report_option_1-international').' '.$sms_no1."."; ?>
+                                        
+                                    </li><?php } ?>
 									<?php if (!empty($report_email)) 
 									{ ?><li><?php echo Kohana::lang('ui_main.report_option_2'); ?> <a href="mailto:<?php echo $report_email?>"><?php echo $report_email?></a></li><?php } ?>
 									<?php if (!empty($twitter_hashtag_array)) 
@@ -137,18 +137,12 @@
                         	<div id="shortcode-info">
                             	<h3><?php echo Kohana::lang('ui_main.shortcode_announcement_title'); ?></h3>
                                 <p>
-                                <?php echo Kohana::lang('ui_main.shortcode_announcement_1'); ?> 
-                                <span>
-                                	<?php 
-										foreach ($phone_array as $phone) {
-											echo "<strong>". $phone ."</strong>";
-											if ($phone != end($phone_array)) {
-												echo " or ";
-											}
-										} 
-									?>
-                                </span> 
-                                 <?php echo Kohana::lang('ui_main.shortcode_announcement_2'); ?>
+								   <?php echo Kohana::lang('ui_main.shortcode_announcement_1'); ?> 
+                                    <span> <?php echo $sms_no2; ?> </span>  
+                                    <?php 
+                                        echo '&nbsp;('.Kohana::lang('ui_main.shortcode_announcement_3').'<span>'.$sms_no1.'</span>'.')&nbsp;';
+                                        echo Kohana::lang('ui_main.shortcode_announcement_2'); 
+                                    ?>
                                 </p>
                             </div>
 							<div class="floatbox">
