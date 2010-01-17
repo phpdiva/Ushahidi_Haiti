@@ -229,6 +229,7 @@ class Main_Controller extends Template_Controller {
 			$phone_array[] = $sms_no3;
 		}
 		$this->template->content->phone_array = $phone_array;
+		$this->template->header->phone_array = $phone_array;
 		
 
 		// Get RSS News Feeds

@@ -71,6 +71,6 @@ $lang = array(
 	'alert_confirm_previous' => 'Confirmer alerte precedente',
 	'layers_filter' => 'Other Layers',
 	'shortcode_announcement_title' => 'Rapport par téléphone mobile',
-	'shortcode_announcement_1' => 'An Ayiti? Text ',
-	'shortcode_announcement_2' => ' avek ki <strong>kote ou ye e sa ou bezwen</strong>. Kontakte nou pou kriz e moun ou paka jwenn.'
+	'shortcode_announcement_1' => 'En Haiti?  Envoyez un texte a ',
+	'shortcode_announcement_2' => ' avec <strong>votre lieu et vos besoins</strong>. Rapportez emergences et personnes disparues.'
 );
