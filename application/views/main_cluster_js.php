@@ -102,7 +102,7 @@
 					
 				addMarkers(catID, '', '', currZoom, currCenter, gMediaType);
 				
-				graphData = allGraphData[0][catID];
+				graphData = dailyGraphData[0][catID];
 				gCategoryId = catID;
 				var startTime = new Date($("#startDate").val() * 1000);
 				var endTime = new Date($("#endDate").val() * 1000);
