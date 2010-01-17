@@ -460,6 +460,6 @@ $lang = array(
     'yesterday' => 'Ayer',
 	'shortcode_announcement_title' => 'Informe por teléfono móvil',
 	'shortcode_announcement_1' => '?En Ayiti? Envia un texto a ',
-	'shortcode_announcement_2' => ' con su <strong>ubicacion y lo que necesita</strong>. Informanos sobre emergencias y personas desaparecidas.',
+	'shortcode_announcement_2' => ' en Digicel con su <strong>ubicacion y lo que necesita</strong>. Informanos sobre emergencias y personas desaparecidas.',
 	'shortcode_announcement_3' => 'Internacional:'
 );
