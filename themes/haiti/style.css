@@ -104,3 +104,12 @@ div#logo span{
 	#reportForm .report_category ul li input.check-box { margin: 0 3px 0 -18px; }
 	#reportForm .report_category ul li.hover,
 	#reportForm .report_category ul li:hover { background: #efefef; }
+	
+/* Download Reports (front-end) */
+	.bg { padding:0 18px; margin:0 0 18px 0; overflow:auto; }
+	.download-info { background:#FFF9D8; padding:18px; margin:0 0 10px 18px; border:1px solid #ffed8d; float:left; }
+
+	table.data_points{ width: 580px; border-width: 3px 0 3px; border-color: #669eb9; border-style: solid; float:left; }
+
+	table.data_points td { padding: 10px; background-color: #f2f7fa; }
+	table.data_points td input { margin:0 10px 0 0; }
