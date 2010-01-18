@@ -75,7 +75,7 @@ div#logo span{
 /* SMS Shortcode Announcement */
 	#shortcode-header-wrap { width:100%; background:#FFF9D8; padding:9px; border:1px solid #ffed8d; }
 	#shortcode-header-info { width:960px; margin:0 auto; padding:0 0 3px 18px; background:transparent url(icons.png) 0 -97px no-repeat; }
-	#shortcode-info { background:#FFF9D8; padding:18px; margin:0 0 10px 0; border:1px solid #ffed8d; }
+	#shortcode-info { background:#FFF9D8; padding:18px; margin:0 0 10px 0; border:1px solid #ffed8d; display:none; }
 	#shortcode-info h3 { margin:0 0 10px 0; background:transparent url(icons.png) 0 -97px no-repeat; font-size:14px; padding:0 0 0 18px; }
 	#shortcode-info p {}
 	#shortcode-info p span,
