@@ -39,6 +39,7 @@
 					<li><a href="#"><?php echo Kohana::lang('ui_main.about'); ?></a></li>
 					<li><a href="#"><?php echo Kohana::lang('ui_main.contact'); ?></a></li>
 					<li><a href="#"><?php echo Kohana::lang('ui_main.blog'); ?></a></li>
+                    <li><a href="<?php echo url::base() ?>feed">All Reports RSS</a></li>
 				</ul>
 				<p><?php echo Kohana::lang('ui_main.copyright'); ?></p>
 			</div>

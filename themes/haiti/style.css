@@ -17,6 +17,7 @@ body#page{
 div#header{
 	height:110px;
 }
+	#reports-rss { outline:none; background:transparent url(rss_32.png) right 0 no-repeat; color:#CB5834; display:block; float:left; font-size:14px; font-weight:bold; margin:4px 0 0; padding:7px 38px 6px 0; text-decoration:underline; }
 
 /* Logo Box */
 div#logo{
@@ -60,17 +61,16 @@ div#logo span{
 	.cat-title { font-size:11px; }
 	
 /* New Language Switcher */
-
-	#language-switch { border-bottom:2px solid #FFFFFF; border-left:2px solid #FFFFFF; border-top:2px solid #FFFFFF; position:absolute; right:-104px; top:160px; z-index:1; background:#cfe3ec; padding:8px; }
-	#language-switch.on {right:0px; } 
-	#language-switch h3 { font-size:12px; font-weight:bold; background:transparent url(icon-language.png) 0 0 no-repeat; padding:0 0 0 28px; line-height:20px; margin-bottom:3px; }
-	#language-switch p { margin:0; padding:0; }
+	#language-switch { width:27px; border-bottom:2px solid #FFFFFF; border-left:2px solid #FFFFFF; border-top:2px solid #FFFFFF; position:absolute; overflow:hidden; right:0; top:160px; z-index:1; background:#cfe3ec; padding:8px 0 8px 8px; }
+	#language-switch.on { width:120px; } 
+	#language-switch h3 { width:120px; font-size:12px; font-weight:bold; background:transparent url(icon-language.png) 0 0 no-repeat; padding:0 0 0 28px; line-height:20px; margin-bottom:3px; }
+	#language-switch p {  width:120px; margin:0; padding:0; }
 	#language-switch p a { display:block; clear:both; color:#585858; }
 	#language-switch p a span { display:block; float:left; background:transparent; widows:16px; height:11px; padding:5px; margin:0 9px 0 0; }
 	#language-switch p a.active span { background:#fff; margin-right:7px; border:1px solid #000; }
 	#language-switch p a img { border:none; }
 	
-	#language-box { margin-top:12px; }
+	div.language-box { margin-top:12px; }
 	
 /* SMS Shortcode Announcement */
 	#shortcode-header-wrap { width:100%; background:#FFF9D8; padding:9px; border:1px solid #ffed8d; }
@@ -80,9 +80,12 @@ div#logo span{
 	#shortcode-info p {}
 	#shortcode-info p span,
 	#shortcode-header-info span { padding:5px; background:#fff; font-weight:bold; color:#F00; } 
+	
+/* Category Filter on Home Page */
+	ul.category-filters li a { font-size:11px; }
+
 
 /* Categories on submit report page */
-
 	#reportForm .report_category ul li { padding: 2px 5px 2px 19px; min-height: 28px; }
 	#reportForm .report_category ul li.sub_category { padding-left: 23px; }
 	#reportForm .report_category ul li input.check-box { margin: 0 3px 0 -18px; }
