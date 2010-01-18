@@ -108,21 +108,34 @@
 									$message_to = $message->message_to;
 									$incident_id = $message->incident_id;
 									$message_description = text::auto_link($message->message);
-									$message_detail = text::auto_link($message->message_detail);
+									$message_detail = nl2br(text::auto_link($message->message_detail));
 									$message_date = date('Y-m-d', strtotime($message->message_date));
 									$message_type = $message->message_type;
+									$location_id = $message->location_id;
+									$message_reply = $message->message_reply;
 									?>
 									<tr>
 										<td class="col-1"><input name="message_id[]" value="<?php echo $message_id; ?>" type="checkbox" class="check-box"/></td>
 										<td class="col-2">
 											<div class="post">
-												<p><?php echo $message_description; ?></p>
+												<p <?php
+												if ($message_reply)
+												{
+													echo " class=\"new_reply\" ";
+												}
+												?>><?php echo $message_description; ?></p>
+												<p><?php
+												if ($message_detail)
+												{?><a href="javascript:preview('message_preview_<?php echo $message_id?>')">+Read More...</a>&nbsp;&nbsp;|&nbsp;&nbsp;<?php
+												}
+												
+												if ($service_id == 1 && $message_type == 1) {
+												?><a href="javascript:showReply('reply_<?php echo $message_id; ?>')" class="more">+Send Reply</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:showReplies('<?php echo $message_id; ?>')" class="more">+View Replies</a><?php } ?></p>
 												<?php
 												if ($message_detail)
 												{
 													?>
-													<p><a href="javascript:preview('message_preview_<?php echo $message_id?>')">Preview Message</a></p>
-													<div id="message_preview_<?php echo $message_id?>" style="display:none;">
+													<div id="message_preview_<?php echo $message_id?>" class="message_more">
 														<?php echo $message_detail; ?>
 													</div>
 													<?php
@@ -132,14 +145,32 @@
 												if ($service_id == 1 && $message_type == 1)
 												{
 													?>
-													<div id="replies">
-
+													<div id="replies_<?php echo $message_id; ?>" class="replies">
+														<?php
+														$message_replies = $replies->where('parent_id', $message_id)
+															->orderby('message_date', 'desc')
+															->find_all();
+														
+														foreach ($message_replies as $reply)
+														{
+															$reply_type = $reply->message_type;
+															$reply_message = $reply->message;
+															$reply_detail = $reply->message_detail;
+															echo "<div class=\"reply_message";
+															if ($reply_type == 2)
+																echo " reply_message_out";
+															echo "\">&middot;&nbsp;".$reply_message;
+															if ($reply_detail)
+																echo "<BR>~~~<BR>".$reply_detail;
+															echo "</div>";
+														}
+														?>
 													</div>
-													<a href="javascript:showReply('reply_<?php echo $message_id; ?>')" class="more">+Reply</a>
 													<div id="reply_<?php echo $message_id; ?>" class="reply">
 														<?php print form::open(url::base() . 'admin/messages/send/',array('id' => 'newreply_' . $message_id,
 														 	'name' => 'newreply_' . $message_id)); ?>
-														<div class="reply_can"><a href="javascript:cannedReply('1', 'message_<?php echo $message_id; ?>')">+Request Location</a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('2', 'message_<?php echo $message_id; ?>')">+Request More Information</a></div>
+														<div class="reply_can">
+															<a href="javascript:cannedReply('1', 'message_<?php echo $message_id; ?>')">+Location (EN)</a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('2', 'message_<?php echo $message_id; ?>')">+More Information(EN)</a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('3', 'message_<?php echo $message_id; ?>')">+Location (KY)</a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('4', 'message_<?php echo $message_id; ?>')">+More Information (KY)</a></div>
 														<div id="replyerror_<?php echo $message_id; ?>" class="reply_error"></div>
 														<div class="reply_input"><?php print form::input('message_' .  $message_id, '', ' class="text long2" onkeyup="limitChars(this.id, \'160\', \'replyleft_' . $message_id . '\')" '); ?></div>
 														<div class="reply_input"><a href="javascript:sendMessage('<?php echo $message_id; ?>' , 'sending_<?php echo $message_id; ?>')" title="Submit Message"><img src="<?php echo url::base() ?>media/img/admin/btn-send.gif" alt="Submit" border="0" /></a></div>
@@ -156,11 +187,15 @@
 												<?php
 												if ($message_type == 2)
 												{
-													?><li class="none-separator">To: <strong><?php echo $message_to; ?></strong><?php
+													?><li class="none-separator">To: <strong><?php echo $message_to; ?></strong></li><?php
 												}
 												else
 												{
-													?><li class="none-separator">From: <strong><?php echo $message_from; ?></strong><?php
+													?><li class="none-separator">From: <strong><?php echo $message_from; ?></strong></li><?php
+													if ($location_id)
+													{
+														?><li>Location: <strong>Available</strong></li><?php
+													}
 												}
 												?>
 											</ul>

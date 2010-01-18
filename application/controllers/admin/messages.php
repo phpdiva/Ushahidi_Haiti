@@ -106,6 +106,7 @@ class Messages_Controller extends Admin_Controller
 			'total_items'    => ORM::factory('message')
 				->join('reporter','message.reporter_id','reporter.id')
 				->where($filter)
+				->where('parent_id', 0)
 				->where('service_id', $service_id)
 				->count_all()
 		));
@@ -114,10 +115,14 @@ class Messages_Controller extends Admin_Controller
 			->join('reporter','message.reporter_id','reporter.id')
 			->where('service_id', $service_id)
 			->where($filter)
-			->orderby('message_date','desc')
+			->where('parent_id', 0)
+			->orderby( array('message_reply'=>'desc', 'message_date'=>'desc'))
 			->find_all((int) Kohana::config('settings.items_per_page_admin'), $pagination->sql_offset);
+			
+		$replies = ORM::factory('message');
 
 		$this->template->content->messages = $messages;
+		$this->template->content->replies = $replies;
 		$this->template->content->service_id = $service_id;
 		$this->template->content->services = ORM::factory('service')->find_all();
 		$this->template->content->pagination = $pagination;
@@ -245,6 +250,26 @@ class Messages_Controller extends Admin_Controller
 	        }
 	    }
 
+	}
+
+
+	/**
+	* Mark a message as read
+    */
+	function read($message_id = NULL)
+	{
+		$this->template = "";
+		$this->auto_render = FALSE;
+		
+		if ($message_id)
+		{
+			$message = ORM::factory('message')->find($message_id);
+			if ($message->loaded)
+			{
+				$message->message_reply = 0;
+				$message->save($message_id);
+			}
+		}
 	}
 
     /**

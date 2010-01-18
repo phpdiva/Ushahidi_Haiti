@@ -26,6 +26,7 @@ class Frontlinesms_Controller extends Controller
 			$message_from = $_GET['s'];
 			// Remove non-numeric characters from string
 			$message_from = ereg_replace("[^0-9]", "", $message_from);
+			$message_from = intval($message_from);
 		}
 		
 		if (isset($_GET['m'])) {
@@ -35,7 +36,7 @@ class Frontlinesms_Controller extends Controller
 		if (!empty($frontlinesms_key) 
 			&& !empty($message_from) 
 			&& !empty($message_description))
-		{
+		{			
 			// Is this a valid FrontlineSMS Key?
 			$keycheck = ORM::factory('settings', 1)
 							->where('frontlinesms_key', $frontlinesms_key)
@@ -43,6 +44,8 @@ class Frontlinesms_Controller extends Controller
 
 			if ($keycheck->loaded == TRUE)
 			{
+				$parent_id = 0;
+				
 				$services = new Service_Model();
 				$service = $services->where('service_name', 'SMS')->find();
 				if (!$service) 
@@ -53,7 +56,7 @@ class Frontlinesms_Controller extends Controller
 									->where('service_account', $message_from)
 									->find();
 
-				if (!$reporter->loaded == TRUE)
+				if (!$reporter->loaded)
 				{
 					// get default reporter level (Untrusted)
 					$level = ORM::factory('level')
@@ -72,10 +75,27 @@ class Frontlinesms_Controller extends Controller
 					$reporter->reporter_date = date('Y-m-d');
 					$reporter->save();
 				}
+				// Number is in our database
+				else
+				{
+					// Find previous message and use it as parent
+					$parent = ORM::factory('message')
+						->where('reporter_id', $reporter->id)
+						->where('message_type', '1')
+						->where('parent_id', '0')
+						->orderby('message_date', 'desc')
+						->find();
+					if ($parent->loaded)
+					{
+						$parent_id = $parent->id;
+						$parent->message_reply = 1;
+						$parent->save($parent->id);
+					}
+				}
 				
 				// Save Message
 				$message = new Message_Model();
-				$message->parent_id = 0;
+				$message->parent_id = $parent_id;
 				$message->incident_id = 0;
 				$message->user_id = 0;
 				$message->reporter_id = $reporter->id;

@@ -399,6 +399,19 @@ class Reports_Controller extends Admin_Controller
 				$form['person_first'] = $message->reporter->reporter_first;
 				$form['person_last'] = $message->reporter->reporter_last;
 				
+				// Does this message have location info?
+				if ($message->location_id)
+				{
+					$message_location = ORM::factory('location')->find($message->location_id);
+					if ($message_location->loaded)
+					{
+						$form['latitude'] = $message_location->latitude;
+						$form['longitude'] = $message_location->longitude;
+						$form['location_name'] = ($message_location->location_name) ? 
+							$message_location->location_name: "UNKNOWN";
+					}
+				}
+				
 				// Retrieve Last 5 Messages From this account
 				$this->template->content->all_messages = ORM::factory('message')
 					->where('reporter_id', $message->reporter_id)

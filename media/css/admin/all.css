@@ -1444,14 +1444,33 @@ table.p_replace td.special{
 }
 
 /*-- Messages --*/
+.message_more{
+	display:none;
+	margin:10px 0 0 0;
+	padding:5px;
+	background-color:#ffffcc;
+}
 .reply{
 	display:none;
-	margin:5px 0 0 0;
+	margin:10px 0 0 0;
 	padding:5px;
 	background-color:#eee;
 }
-#replies{
-	margin:0 0 10px 0;
+.new_reply{
+	background-color:#FDD0C7;
+}
+.replies{
+	display:none;
+	border:1px solid #ccc;
+	margin:10px 0 10px 0;
+	padding:2px;
+}
+.reply_message{
+	padding:2px 2px 2px 5px;
+}
+.reply_message_out{
+	background-color:#eee;
+	font-color:#666;
 }
 .reply_can{
 	font-size:11px;

@@ -40,6 +40,14 @@
 			}
 		}
 		
+		function showReplies(id)
+		{
+			if (id) {
+				$.get("<?php echo url::base() . 'admin/messages/read/' ?>"+id);
+				$('#replies_' + id).toggle(400);
+			}
+		}
+		
 		function sendMessage(id, loader)
 		{
 			$('#' + loader).html('<img src="<?php echo url::base() . "media/img/loading_g.gif"; ?>">');
@@ -61,9 +69,13 @@
 			var autoreply;
 			$("#" + field).attr("value", "");
 			if (id == 1) {
-				autoreply = "Thank you for sending a message to Ushahidi. What is the closest town or city for your last message?";
+				autoreply = "Thank you for sending us a message. What is the closest town or city to you?";
 			}else if (id == 2) {
-				autoreply = "Thank you for sending a message to Ushahidi. Can you send more information on the incident?"
+				autoreply = "Thank you for sending us a message. Can you send more information?"
+			}else if (id == 3) {
+				autoreply = "Mesi pou voye nou yon mesaj. Ki vil ki pi pwoch ou?"
+			}else if (id == 4) {
+				autoreply = "Mesi pou voye nou yon mesaj. Eske ou kapab voye nou plis enfomasyon?"
 			};
 			$("#" + field).attr("value", autoreply);		
 		}
