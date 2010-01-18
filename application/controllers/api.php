@@ -143,7 +143,12 @@ class Api_Controller extends Controller {
 					break;
 				}else {
 					$q = $request['q'];
-					$limit = $request['limit'];
+					if($this->_verifyArrayIndex($request,'limit')){ 
+						$limit = $request['limit'];
+					
+					}else{
+						$limit = "";
+					}
 					
 					$ret = $this->_getSearchResults($q,$limit);
 					break;
@@ -1277,12 +1282,13 @@ class Api_Controller extends Controller {
 		 */
 		 
 		$search_query = "";
+		$keyword_string = "";
 		$where_string = "";
 		$plus = "";
 		$or = "";
 		$search_info = "";
 		$html = "";
-		$json_incidents = array();
+		$json_searches = array();
 		
 		// Stop words that we won't search for
 		// Add words as needed!!
@@ -1336,15 +1342,30 @@ class Api_Controller extends Controller {
 			$total_items = ORM::factory('incident')->where($where_string)->count_all();	
 			
 			$db = new Database();
+			$l =  $limit == "" ? " " : $limit;
+			$s = $search_query . $l;
 			
-			$query = $db->query($search_query . $limit == "" ? "" : $limit );
+			$query = $db->query($s );
 			
 			// Results Bar
 			if ($total_items != 0)
-			{	$xml-writeElement('total',$total_items);		
+			{	
+				if($this->responseType == 'json') { 
+					$json_searches[] = array("total" => $total_items);
+				}else { 
+				
+					$xml->writeElement('total',$total_items);	
+				}	
 				
 			} else {
+				
 				$xml->writeElement('total', $total_items); 
+				//create the json array
+				$data = array(
+					"payload" => array("searches" => $json_searches),
+					"error" => $this->_getErrorMsg(0)
+				);
+				
 				if($this->responseType == 'json'){
 					$retJsonOrXml = $this->_arrayAsJSON($data);
 					return $retJsonOrXml;
@@ -1365,66 +1386,27 @@ class Api_Controller extends Controller {
 	        	
 				$incident_id = $search->id;
 				$incident_title = $search->incident_title;
-				$highlight_title = "";
-				$incident_title_arr = explode(' ', $incident_title); 
 				
 				//build xml file
 				$xml->startElement('search');
 			
 				$xml->writeElement('id',$incident_id);
+				$xml->writeElement('title',$incident_title);
 				
-				$xml->writeElement('date',$item->incidentdate);
-				$xml->writeElement('mode',$item->incidentmode);
-				$xml->writeElement('active',$item->incidentactive);
-				$xml->writeElement('verified',$item->incidentverified);
-				$xml->startElement('location');
-				$xml->writeElement('id',$item->locationid);
-				$xml->writeElement('name',$item->locationname);
-				$xml->writeElement('latitude',$item->locationlatitude);
-				$xml->writeElement('longitude',$item->locationlongitude);  	
-				$xml->endElement();
-				$xml->startElement('categories');
-				
-				foreach($incident_title_arr as $value) {
-					if (in_array(strtolower($value),$keywords) && !in_array(strtolower($value),$stop_words))
-					{
-						$xml->writeElement('title',$value);
-					}
-					else
-					{
-						$xml->writeElement('title',$value . " ");
-					}
-				}
 				$incident_description = $search->incident_description;
-					// Remove any markup, otherwise trimming below will mess things up
-					$incident_description = strip_tags($incident_description);
+				// Remove any markup, otherwise trimming below will mess things up
+				$incident_description = strip_tags($incident_description);
 
-					// Trim to 180 characters without cutting words
-					if ((strlen($incident_description) > 180) && (strlen($incident_description) > 1)) {
-						$whitespaceposition = strpos($incident_description," ",175)-1;
-						$incident_description = substr($incident_description, 0, $whitespaceposition);
-					}
-					$highlight_description = "";
-					$incident_description_arr = explode(' ', $incident_description); 
-					foreach($incident_description_arr as $value) {
-						if (in_array(strtolower($value),$keywords) && !in_array(strtolower($value),$stop_words))
-						{
-							$xml->writeElement('description',$value);
-						}
-						else
-						{
-							$xml->writeElement('description',$value." ");
-						}
-					}
+				$xml->writeElement('description',$incident_description);
 				$incident_date = date('D M j Y g:i:s a', strtotime($search->incident_date));
 				$xml->writeElement('date',$incident_date);
 				$xml->writeElement('relevance', $search->relevance);
 				$xml->endElement(); // end searches
 				
 				//needs different treatment depending on the output
-				//if($this->responseType == 'json'){
-					//$json_incidents[] = array("incident" => $item, "media" => $json_incident_media);
-				//}
+				if($this->responseType == 'json'){
+					$json_searches[] = array("search" => $search);
+				}
 				
 			}
 			
