@@ -196,7 +196,7 @@
 					</form>
 				</div>
 				<!-- / searchform -->
-                <a id="reports-rss" href="#">All Reports RSS</a>
+                <a id="reports-rss" href="<?php echo url::base() . 'feed/'; ?>">All Reports RSS</a>
 		
 			</div>
 			<!-- / searchbox -->
