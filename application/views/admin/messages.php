@@ -113,6 +113,8 @@
 									$message_type = $message->message_type;
 									$location_id = $message->location_id;
 									$message_reply = $message->message_reply;
+									$reply_count = $replies->where('parent_id', $message_id)
+										->count_all();
 									?>
 									<tr>
 										<td class="col-1"><input name="message_id[]" value="<?php echo $message_id; ?>" type="checkbox" class="check-box"/></td>
@@ -130,7 +132,7 @@
 												}
 												
 												if ($service_id == 1 && $message_type == 1) {
-												?><a href="javascript:showReply('reply_<?php echo $message_id; ?>')" class="more">+Send Reply</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:showReplies('<?php echo $message_id; ?>')" class="more">+View Replies</a><?php } ?></p>
+												?><a href="javascript:showReply('reply_<?php echo $message_id; ?>')" class="more">+Send Reply</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:showReplies('<?php echo $message_id; ?>')" class="more">+View Replies</a> (<?php echo $reply_count; ?>)<?php } ?></p>
 												<?php
 												if ($message_detail)
 												{

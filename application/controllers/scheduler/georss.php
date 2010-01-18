@@ -24,7 +24,7 @@ class Georss_Controller extends Controller
         parent::__construct();
 		set_time_limit(60);
 		
-		$profiler = New Profiler;
+		//$profiler = New Profiler;
 	}
 	
 	public function index()
