@@ -1339,10 +1339,18 @@ class Api_Controller extends Controller {
 		
 		if(!empty($search_query)) 
 		{
-			$total_items = ORM::factory('incident')->where($where_string)->count_all();	
+			//$l =  $limit == "" ? " " : "LIMIT 0 ,".$limit;
+			
+			if( !empty($limit) && is_numeric($limit)  ) {
+				$l =  "LIMIT 0 ,".$limit;
+			} else {
+				$l =  " ";	
+			}	
+			
+			$total_items = ORM::factory('incident')->where($where_string)->count_all();
 			
 			$db = new Database();
-			$l =  $limit == "" ? " " : $limit;
+			
 			$s = $search_query . $l;
 			
 			$query = $db->query($s );
@@ -1369,6 +1377,7 @@ class Api_Controller extends Controller {
 				if($this->responseType == 'json'){
 					$retJsonOrXml = $this->_arrayAsJSON($data);
 					return $retJsonOrXml;
+				
 				} else {
 					$xml->endElement(); //end searches
 					$xml->endElement(); // end payload
@@ -1387,25 +1396,30 @@ class Api_Controller extends Controller {
 				$incident_id = $search->id;
 				$incident_title = $search->incident_title;
 				
-				//build xml file
-				$xml->startElement('search');
-			
-				$xml->writeElement('id',$incident_id);
-				$xml->writeElement('title',$incident_title);
-				
 				$incident_description = $search->incident_description;
 				// Remove any markup, otherwise trimming below will mess things up
 				$incident_description = strip_tags($incident_description);
-
-				$xml->writeElement('description',$incident_description);
 				$incident_date = date('D M j Y g:i:s a', strtotime($search->incident_date));
-				$xml->writeElement('date',$incident_date);
-				$xml->writeElement('relevance', $search->relevance);
-				$xml->endElement(); // end searches
 				
 				//needs different treatment depending on the output
 				if($this->responseType == 'json'){
-					$json_searches[] = array("search" => $search);
+					$json_searches[] = array("search" => array(
+						"id" => $incident_id,
+						"title" => $search->incident_title,
+						"description" => $incident_description,
+						"date" => $incident_date,
+						"relevance" => $search->relevance));
+				} else { 
+				
+					//build xml file
+					$xml->startElement('search');
+					$xml->writeElement('id',$incident_id);
+					$xml->writeElement('title',$incident_title);
+					$xml->writeElement('description',$incident_description);	
+					$xml->writeElement('date',$incident_date);
+					$xml->writeElement('relevance', $search->relevance);
+					$xml->endElement(); // end searches
+				
 				}
 				
 			}
@@ -1414,7 +1428,7 @@ class Api_Controller extends Controller {
 		
 		//create the json array
 		$data = array(
-			"payload" => array("searches" => $json_incidents),
+			"payload" => array("searches" => $json_searches),
 			"error" => $this->_getErrorMsg(0)
 		);
 		
