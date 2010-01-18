@@ -1339,7 +1339,6 @@ class Api_Controller extends Controller {
 		
 		if(!empty($search_query)) 
 		{
-			//$l =  $limit == "" ? " " : "LIMIT 0 ,".$limit;
 			
 			if( !empty($limit) && is_numeric($limit)  ) {
 				$l =  "LIMIT 0 ,".$limit;
