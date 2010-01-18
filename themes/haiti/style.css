@@ -84,6 +84,19 @@ div#logo span{
 /* Category Filter on Home Page */
 	ul.category-filters li a { font-size:11px; }
 
+/* KML Filters */
+	ul.cf-kml { margin:0; overflow:auto; }
+	ul.cf-kml li { float:left; width:181px; margin:0; }
+	
+	ul.cf-kml li a { border:none; }
+	ul.cf-kml li a:hover,
+	ul.cf-kml li a.active { border:none; }
+	
+	ul.cf-kml li a div.swatch { height:18px; width:18px; margin:0 10px 18px; }
+	
+	ul.cf-kml li a div.cat-title { text-transform:capitalize; line-height:11px;  }
+	ul.cf-kml li a:hover div.cat-title { }
+
 
 /* Categories on submit report page */
 	#reportForm .report_category ul li { padding: 2px 5px 2px 19px; min-height: 28px; }
