@@ -100,7 +100,9 @@
 		
 							</div>
 							<!-- / additional content -->
-					
+							<div class="additional-content download-reports">
+								<p><a class="button btn_download" href="<?php echo url::base() . 'download/'; ?>"><span>Download reports (csv)</span></a></p>
+                            </div>
 						</div>
 						<!-- / right column -->
 					
