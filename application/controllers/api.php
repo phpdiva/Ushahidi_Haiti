@@ -20,6 +20,8 @@ class Api_Controller extends Controller {
 	private $responseType; //type of response, either json or xml as specified, defaults to json in set in __construct
 	private $error_messages; // validation error messages
 	private $messages = array(); // form validation error messages
+	private $cache_ttl; // API request cache TTL. @todo: move this into config somewhere?
+	private $cache; // Instance of cache
 	
 	/**
 	 * constructor
@@ -28,6 +30,8 @@ class Api_Controller extends Controller {
 		$this->db = new Database;
 		$this->list_limit = '1000';
 		$this->responseType = 'json';
+		$this->cache = Cache::instance();
+		$this->cache_ttl = 3600; // set time to live to 1 hour.
 	}
 	
 	/**
@@ -55,347 +59,375 @@ class Api_Controller extends Controller {
 			$task = $request['task'];
 		}
 		
-		//response type
+		// Response type. Define this regardless of caching, since we'll need it to set mime type.
 		if(!$this->_verifyArrayIndex($request, 'resp')){
 			$this->responseType = 'json';
 		} else {
 			$this->responseType = $request['resp'];
 		}
 		
-		switch($task){
-			case "report": //report/add an incident
-				$ret = $this->_report();
-			break;
+		// Define default response.
+		$ret = NULL;
+		
+		// Is this request cache-able? TRUE if this is a GET request and time to live is set.
+		$is_cacheable = ((int) $this->cache_ttl > 0 && $_SERVER['REQUEST_METHOD'] == 'GET');
+		$request_identifier = NULL;
+		
+		// Check if this request is cached.
+		if ($is_cacheable) {
+			// Create a unique key for this request.
+			// Since request may contain potentially harmful characters, just use a hash of the query string.
+			$request_query_string = url::current(TRUE);
+			$request_hash = md5($request_query_string);
+			$request_identifier = 'api_'.$request_hash;
+			$ret = $this->cache->get($request_identifier);
+		}
+		
+		// If POST or request is not cached, generate response.
+		if ($ret == NULL) {
 			
-			case "3dkml": //report/add an incident
-				$ret = $this->_3dkml();
-			break;
+			switch($task){
+				case "report": //report/add an incident
+					$ret = $this->_report();
+				break;
 				
-			case "tagnews": //tag a news item to an incident
-			
-			case "tagvideo": //report/add an incident
-			
-			case "tagphoto": //report/add an incident
-				$incidentid = '';
+				case "3dkml": //report/add an incident
+					$ret = $this->_3dkml();
+				break;
+					
+				case "tagnews": //tag a news item to an incident
 				
-				if(!$this->_verifyArrayIndex($request, 'id')) {
-					$error = array("error" => 
-					$this->_getErrorMsg(001, 'id'));
+				case "tagvideo": //report/add an incident
+				
+				case "tagphoto": //report/add an incident
+					$incidentid = '';
+					
+					if(!$this->_verifyArrayIndex($request, 'id')) {
+						$error = array("error" => 
+						$this->_getErrorMsg(001, 'id'));
+						break;
+					} else {
+						$incidentid = $request['id'];
+					}	
+					
+					$mediatype = 0;
+		
+					if($task == "tagnews") $mediatype = 4;
+						
+					if($task == "tagvideo") $mediatype = 2;
+						
+					if($task == "tagphoto") $mediatype = 1;
+						
+					$ret = $this->_tagMedia($incidentid, $mediatype);
+					
 					break;
-				} else {
-					$incidentid = $request['id'];
-				}	
+			
+				case "apikeys":
+					$by = '';
+					if(!$this->_verifyArrayIndex($request, 'by')) {
+						$error = array("error" => 
+						$this->_getErrorMsg(001, 'by'));
+						break;
+					}else {
+						$by = $request['by'];
+					}
 				
-				$mediatype = 0;
+					switch($by) {
+						case "google":
+							$ret = $this->_apiKey('api_google');
+							break;
 	
-				if($task == "tagnews") $mediatype = 4;
-					
-				if($task == "tagvideo") $mediatype = 2;
-					
-				if($task == "tagphoto") $mediatype = 1;
-					
-				$ret = $this->_tagMedia($incidentid, $mediatype);
-				
-				break;
-		
-			case "apikeys":
-				$by = '';
-				if(!$this->_verifyArrayIndex($request, 'by')) {
-					$error = array("error" => 
-					$this->_getErrorMsg(001, 'by'));
-					break;
-				}else {
-					$by = $request['by'];
-				}
-			
-				switch($by) {
-					case "google":
-						$ret = $this->_apiKey('api_google');
-						break;
-
-					case "yahoo":
-						$ret = $this->_apiKey('api_yahoo');
-						break;
-
-					case "microsoft":
-						$ret = $this->_apiKey('api_live');
-						break;
-					
-					default:
-						$error = array("error" =>$this->_getErrorMsg(002));
-				}
-				break;
-					
-			case "categories": //retrieve all categories
-				$ret = $this->_categories();
-				break;
-			
-			case "version": //retrieve an ushahidi instance version number
-				$ret = $this->_getVersionNumber();
-				break;
-			
-			//search for reports
-			case "search":
-				$by = '';
-				if(!$this->_verifyArrayIndex($request, 'q')) {
-					$error = array("error" => 
-					$this->_getErrorMsg(001, 'q'));
-					break;
-				}else {
-					$q = $request['q'];
-					if($this->_verifyArrayIndex($request,'limit')){ 
-						$limit = $request['limit'];
-					
-					}else{
-						$limit = "";
-					}
-					
-					$ret = $this->_getSearchResults($q,$limit);
-					break;
-				}
-				
-			case "category": //retrieve categories
-				$id = 0;
-				
-				if(!$this->_verifyArrayIndex($request, 'id')){
-					$error = array("error" => 
-					$this->_getErrorMsg(001, 'id'));
-					break;
-				} else {
-					$id = $request['id'];
-				}
-				
-				$ret = $this->_category($id);
-				break;
-				
-			case "locations": //retrieve locations
-				$ret = $this->_locations();
-				break;		
-		
-			case "location": //retrieve locations
-				$by = '';
-				
-				if(!$this->_verifyArrayIndex($request, 'by')){
-					$error = array("error" => 
-					$this->_getErrorMsg(001, 'by'));
-					break;
-				} else {
-					$by = $request['by'];
-				}
-		
-				switch ($by){
-					case "latlon": //latitude and longitude
-						break;
-					
-					case "locid": //id
-						if(($this->_verifyArrayIndex($request, 'id'))){
-							$ret = $this->_locationById($request['id']);
-						} else {
-							$error = array("error" => $this->_getErrorMsg(001, 'id'));
-						}
-						break;
-			
-					case "country": //id
-						if(($this->_verifyArrayIndex($request, 'id'))){
-							$ret = $this->_locationByCountryId($request['id']);
-						} else {
-							$error = array("error" => $this->_getErrorMsg(001, 'id'));
-						}
-						break;
-				
-					default:
-						$error = array("error" => $this->_getErrorMsg(002));
-				}
-				
-				break;
-				
-			case "countries": //retrieve countries
-				$ret = $this->_countries();
-				break;
-				
-			case "country": //retrieve countries
-				$by = '';
-			
-				if(!$this->_verifyArrayIndex($request, 'by')){
-					$error = array("error" => $this->_getErrorMsg(001, 'by'));
-					break;
-				} else {
-					$by = $request['by'];
-				}
-			
-				switch ($by){
-					case "countryid": //id
-						if(($this->_verifyArrayIndex($request, 'id'))){
-							$ret = $this->_countryById($request['id']);
-						} else {
-							$error = array("error" => $this->_getErrorMsg(001, 'id'));
-						}
-						break;
-			
-					case "countryname": //name
-						if(($this->_verifyArrayIndex($request, 'name'))){
-							$ret = $this->_countryByName($request['name']);
-						} else {
-							$error = array("error" => $this->_getErrorMsg(001, 'name'));
-						}
-						break;
-			
-					case "countryiso": //name
-						if(($this->_verifyArrayIndex($request, 'iso'))){
-							$ret = $this->_countryByIso($request['iso']);
-						} else {
-							$error = array("error" => $this->_getErrorMsg(001, 'iso'));
-						}
-						break;
-					
-					default:
-						$error = array("error" => $this->_getErrorMsg(002));
-				}
-			
-				break;
-				
-			case "incidents": //retrieve incidents
-				/**
-				* 
-				* there are several ways to get incidents by
-				*/
-				$by = '';
-				$sort = 'asc';
-				$orderfield = 'incidentid';
-			
-				if(!$this->_verifyArrayIndex($request, 'by')){
-					$error = array("error" => $this->_getErrorMsg(001, 'by'));
-					break;
-				} else {
-					$by = $request['by'];
-				}
-				/*IF we have an order by, 0=default=asc 1=desc */
-				if($this->_verifyArrayIndex($request, 'sort')){
-					if ( $request['sort'] == '1' ){
-						$sort = 'desc';
-					}
-				}						
-			
-				/* Order field  */
-				if($this->_verifyArrayIndex($request, 'orderfield')){
-					switch ( $request['orderfield'] ){
-						case 'id':
-							$orderfield = 'incidentid';
+						case "yahoo":
+							$ret = $this->_apiKey('api_yahoo');
 							break;
-						case 'locid':
-							$orderfield = 'locationid';
+	
+						case "microsoft":
+							$ret = $this->_apiKey('api_live');
 							break;
-						case 'date':
-							$orderfield = 'incidentdate';
-							break;
+						
 						default:
-							/* Again... it's set but let's cast it in concrete */
-							$orderfield = 'incidentid';
+							$error = array("error" =>$this->_getErrorMsg(002));
 					}
-
-				}
-				switch ($by){
-					case "all": // incidents
-						$ret = $this->_incidentsByAll($orderfield, $sort);
-						break;
+					break;
+						
+				case "categories": //retrieve all categories
+					$ret = $this->_categories();
+					break;
 				
-					case "latlon": //latitude and longitude
-						if(($this->_verifyArrayIndex($request, 'latitude')) && ($this->_verifyArrayIndex($request, 'longitude'))){
-							$ret = $this->_incidentsByLatLon($request['latitude'],$orderfield,$request['longitude'],$sort);
-						} else {
-							$error = array("error" => $this->_getErrorMsg(001,'latitude or longitude'));
-						}
+				case "version": //retrieve an ushahidi instance version number
+					$ret = $this->_getVersionNumber();
+					break;
+				
+				//search for reports
+				case "search":
+					$by = '';
+					if(!$this->_verifyArrayIndex($request, 'q')) {
+						$error = array("error" => 
+						$this->_getErrorMsg(001, 'q'));
 						break;
-
-					case "locid": //Location Id
-						if(($this->_verifyArrayIndex($request, 'id'))){
-							$ret = $this->_incidentsByLocitionId($request['id'], $orderfield, $sort);
-						} else {
-							$error = array("error" => $this->_getErrorMsg(001, 'id'));
+					}else {
+						$q = $request['q'];
+						if($this->_verifyArrayIndex($request,'limit')){ 
+							$limit = $request['limit'];
+						
+						}else{
+							$limit = "";
 						}
+						
+						$ret = $this->_getSearchResults($q,$limit);
 						break;
-			
-					case "locname": //Location Name
-						if(($this->_verifyArrayIndex($request, 'name'))){
-							$ret = $this->_incidentsByLocationName($request['name'], $orderfield, $sort);
-						} else {
-							$error = array("error" => $this->_getErrorMsg(001, 'name'));
-						}
-						break;
+					}
 					
-					case "catid": //Category Id
-						if(($this->_verifyArrayIndex($request, 'id'))){
-							$ret = $this->_incidentsByCategoryId($request['id'], $orderfield, $sort);
-						} else {
-							$error = array("error" => $this->_getErrorMsg(001, 'id'));
-						}
+				case "category": //retrieve categories
+					$id = 0;
+					
+					if(!$this->_verifyArrayIndex($request, 'id')){
+						$error = array("error" => 
+						$this->_getErrorMsg(001, 'id'));
 						break;
+					} else {
+						$id = $request['id'];
+					}
+					
+					$ret = $this->_category($id);
+					break;
+					
+				case "locations": //retrieve locations
+					$ret = $this->_locations();
+					break;		
 			
-					case "catname": //Category Name
-						if(($this->_verifyArrayIndex($request, 'name'))){
-							$ret = $this->_incidentsByCategoryName($request['name'], $orderfield, $sort);
-						} else {
-							$error = array("error" => $this->_getErrorMsg(001, 'name'));
+				case "location": //retrieve locations
+					$by = '';
+					
+					if(!$this->_verifyArrayIndex($request, 'by')){
+						$error = array("error" => 
+						$this->_getErrorMsg(001, 'by'));
+						break;
+					} else {
+						$by = $request['by'];
+					}
+			
+					switch ($by){
+						case "latlon": //latitude and longitude
+							break;
+						
+						case "locid": //id
+							if(($this->_verifyArrayIndex($request, 'id'))){
+								$ret = $this->_locationById($request['id']);
+							} else {
+								$error = array("error" => $this->_getErrorMsg(001, 'id'));
+							}
+							break;
+				
+						case "country": //id
+							if(($this->_verifyArrayIndex($request, 'id'))){
+								$ret = $this->_locationByCountryId($request['id']);
+							} else {
+								$error = array("error" => $this->_getErrorMsg(001, 'id'));
+							}
+							break;
+					
+						default:
+							$error = array("error" => $this->_getErrorMsg(002));
+					}
+					
+					break;
+					
+				case "countries": //retrieve countries
+					$ret = $this->_countries();
+					break;
+					
+				case "country": //retrieve countries
+					$by = '';
+				
+					if(!$this->_verifyArrayIndex($request, 'by')){
+						$error = array("error" => $this->_getErrorMsg(001, 'by'));
+						break;
+					} else {
+						$by = $request['by'];
+					}
+				
+					switch ($by){
+						case "countryid": //id
+							if(($this->_verifyArrayIndex($request, 'id'))){
+								$ret = $this->_countryById($request['id']);
+							} else {
+								$error = array("error" => $this->_getErrorMsg(001, 'id'));
+							}
+							break;
+				
+						case "countryname": //name
+							if(($this->_verifyArrayIndex($request, 'name'))){
+								$ret = $this->_countryByName($request['name']);
+							} else {
+								$error = array("error" => $this->_getErrorMsg(001, 'name'));
+							}
+							break;
+				
+						case "countryiso": //name
+							if(($this->_verifyArrayIndex($request, 'iso'))){
+								$ret = $this->_countryByIso($request['iso']);
+							} else {
+								$error = array("error" => $this->_getErrorMsg(001, 'iso'));
+							}
+							break;
+						
+						default:
+							$error = array("error" => $this->_getErrorMsg(002));
+					}
+				
+					break;
+					
+				case "incidents": //retrieve incidents
+					/**
+					* 
+					* there are several ways to get incidents by
+					*/
+					$by = '';
+					$sort = 'asc';
+					$orderfield = 'incidentid';
+				
+					if(!$this->_verifyArrayIndex($request, 'by')){
+						$error = array("error" => $this->_getErrorMsg(001, 'by'));
+						break;
+					} else {
+						$by = $request['by'];
+					}
+					/*IF we have an order by, 0=default=asc 1=desc */
+					if($this->_verifyArrayIndex($request, 'sort')){
+						if ( $request['sort'] == '1' ){
+							$sort = 'desc';
 						}
-                                                break;
-                                        case "sinceid": //Since Id
-                                                if(($this->_verifyArrayIndex($request,'id'))){
-                                                        $ret = $this->_incidentsBySinceId($request['id'], $orderfield, $sort);
-                                                } else {
-                                                        $error = array("error" => $this->_getErrorMsg(001,'id'));
-                                                }
-                                                break;
-
-					default:
-						$error = array("error" => $this->_getErrorMsg(002));
-				}
+					}						
+				
+					/* Order field  */
+					if($this->_verifyArrayIndex($request, 'orderfield')){
+						switch ( $request['orderfield'] ){
+							case 'id':
+								$orderfield = 'incidentid';
+								break;
+							case 'locid':
+								$orderfield = 'locationid';
+								break;
+							case 'date':
+								$orderfield = 'incidentdate';
+								break;
+							default:
+								/* Again... it's set but let's cast it in concrete */
+								$orderfield = 'incidentid';
+						}
+	
+					}
+					switch ($by){
+						case "all": // incidents
+							$ret = $this->_incidentsByAll($orderfield, $sort);
+							break;
+					
+						case "latlon": //latitude and longitude
+							if(($this->_verifyArrayIndex($request, 'latitude')) && ($this->_verifyArrayIndex($request, 'longitude'))){
+								$ret = $this->_incidentsByLatLon($request['latitude'],$orderfield,$request['longitude'],$sort);
+							} else {
+								$error = array("error" => $this->_getErrorMsg(001,'latitude or longitude'));
+							}
+							break;
+	
+						case "locid": //Location Id
+							if(($this->_verifyArrayIndex($request, 'id'))){
+								$ret = $this->_incidentsByLocitionId($request['id'], $orderfield, $sort);
+							} else {
+								$error = array("error" => $this->_getErrorMsg(001, 'id'));
+							}
+							break;
+				
+						case "locname": //Location Name
+							if(($this->_verifyArrayIndex($request, 'name'))){
+								$ret = $this->_incidentsByLocationName($request['name'], $orderfield, $sort);
+							} else {
+								$error = array("error" => $this->_getErrorMsg(001, 'name'));
+							}
+							break;
+						
+						case "catid": //Category Id
+							if(($this->_verifyArrayIndex($request, 'id'))){
+								$ret = $this->_incidentsByCategoryId($request['id'], $orderfield, $sort);
+							} else {
+								$error = array("error" => $this->_getErrorMsg(001, 'id'));
+							}
+							break;
+				
+						case "catname": //Category Name
+							if(($this->_verifyArrayIndex($request, 'name'))){
+								$ret = $this->_incidentsByCategoryName($request['name'], $orderfield, $sort);
+							} else {
+								$error = array("error" => $this->_getErrorMsg(001, 'name'));
+							}
+																									break;
+																					case "sinceid": //Since Id
+																									if(($this->_verifyArrayIndex($request,'id'))){
+																													$ret = $this->_incidentsBySinceId($request['id'], $orderfield, $sort);
+																									} else {
+																													$error = array("error" => $this->_getErrorMsg(001,'id'));
+																									}
+																									break;
+	
+						default:
+							$error = array("error" => $this->_getErrorMsg(002));
+					}
+				
+					break;
+					
+					
+				case "sharing": //Sharing Data based on Permissions
+					if( $this->_verifyArrayIndex($request, 'sharing_key') && $this->_verifyArrayIndex($request, 'sharing_site_name') && $this->_verifyArrayIndex($request, 'sharing_email') && $this->_verifyArrayIndex($request, 'sharing_url') && $this->_verifyArrayIndex($request, 'type') && $this->_verifyArrayIndex($request, 'session') ){
+						$ret = $this->_sharing($request['type'], 
+						$request['session'], 
+						$request['sharing_key'], 
+						$request['sharing_site_name'], 
+						$request['sharing_email'],
+						$request['sharing_url'],
+						$request['sharing_data']);
+					} else {
+						$error = json_encode(array("error" => $this->_getErrorMsg(001,'Authentication Credentials')));
+					}
+					break;
 			
-				break;
+				case "validate": //Validate Session
+					if(!$this->_verifyArrayIndex($request,'session')){
+						$error = array("error" => $this->_getErrorMsg(006, 'session'));
+					} else {
+						$ret = $this->_validate($request['session']);
+					}
+					break;
+					
+				case "statistics":
+					if(!Kohana::config('settings.allow_stat_sharing')){
+						$error = array("error" => $this->_getErrorMsg(005));
+					} else {
+						$ret = $this->_statistics();
+					}
+					break;
 				
-				
-			case "sharing": //Sharing Data based on Permissions
-				if( $this->_verifyArrayIndex($request, 'sharing_key') && $this->_verifyArrayIndex($request, 'sharing_site_name') && $this->_verifyArrayIndex($request, 'sharing_email') && $this->_verifyArrayIndex($request, 'sharing_url') && $this->_verifyArrayIndex($request, 'type') && $this->_verifyArrayIndex($request, 'session') ){
-					$ret = $this->_sharing($request['type'], 
-					$request['session'], 
-					$request['sharing_key'], 
-					$request['sharing_site_name'], 
-					$request['sharing_email'],
-					$request['sharing_url'],
-					$request['sharing_data']);
-				} else {
-					$error = json_encode(array("error" => $this->_getErrorMsg(001,'Authentication Credentials')));
-				}
-				break;
-		
-			case "validate": //Validate Session
-				if(!$this->_verifyArrayIndex($request,'session')){
-					$error = array("error" => $this->_getErrorMsg(006, 'session'));
-				} else {
-					$ret = $this->_validate($request['session']);
-				}
-				break;
-				
-			case "statistics":
-				if(!Kohana::config('settings.allow_stat_sharing')){
-					$error = array("error" => $this->_getErrorMsg(005));
-				} else {
-					$ret = $this->_statistics();
-				}
-				break;
-			
-			default:
-				$error = array("error" => $this->_getErrorMsg(999));
-				break;
-		}
-		
-		//create the response depending on the kind that was requested
-		if(!empty($error) || count($error) > 0){
-			if($this->responseType == 'json'){
-				$ret = json_encode($error);
-			} else {
-				$ret = $this->_arrayAsXML($error, array());
+				default:
+					$error = array("error" => $this->_getErrorMsg(999));
+					break;
 			}
-		}
+			
+			//create the response depending on the kind that was requested
+			if(!empty($error) || count($error) > 0){
+				if($this->responseType == 'json'){
+					$ret = json_encode($error);
+				} else {
+					$ret = $this->_arrayAsXML($error, array());
+				}
+			}
+			
+			// Save response to cache.
+			if ($is_cacheable && $request_identifier != NULL) {
+				$this->cache->set($request_identifier, $ret, array('api'), $this->cache_ttl);
+			}
+			
+		} // end "if response is cached"
+		
 		
 		//avoid caching
 		header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
