@@ -63,6 +63,17 @@
 											}
 										?>
 									</li>
+                  
+                  <?php if ($incident_action_taken): ?>
+                  	<div class="action-taken clearingfix">
+                    	<div id="action-taken-badge">
+                      	Action Taken
+                      </div>
+                      <?php if (!empty($incident_action_summary)): ?>
+                      	<strong>Summary: </strong><?php echo $incident_action_summary; ?>
+                      <?php endif; ?>
+                    </div>
+                  <?php endif; ?>
 								</ul>
 							</div>
 							<div class="location">
@@ -156,7 +167,7 @@
 									<?php echo $feed_title ?></a>
 								</td>
 								<td class="w-02"><?php echo $feed_source; ?></td
-									<td class="w-03"><?php echo $feed_date; ?></td>
+									><td class="w-03"><?php echo $feed_date; ?></td>
 							</tr>
 							<?php
 								}

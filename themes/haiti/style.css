@@ -98,6 +98,11 @@ div#logo span{
 	ul.cf-kml li a:hover div.cat-title { }
 
 
+/* Action Taken feature */
+	/* Front-end */
+		div.action-taken { margin: 1em 0; padding: 1em; background: #fffbe0; border: solid 2px #FFF19F; line-height: 1.3em; }
+		#action-taken-badge { font-size: 1.2em; background: #009200; font-weight: bold; color: #fff; padding: 0.25em 0.5em; margin: 0 1em 0 0; float: left; }
+
 /* Categories on submit report page */
 	#reportForm .report_category ul li { padding: 2px 5px 2px 19px; min-height: 28px; }
 	#reportForm .report_category ul li.sub_category { padding-left: 23px; }
