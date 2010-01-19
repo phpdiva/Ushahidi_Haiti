@@ -129,10 +129,30 @@ class Api_Controller extends Controller {
 			case "categories": //retrieve all categories
 				$ret = $this->_categories();
 				break;
-
+			
 			case "version": //retrieve an ushahidi instance version number
 				$ret = $this->_getVersionNumber();
 				break;
+			
+			//search for reports
+			case "search":
+				$by = '';
+				if(!$this->_verifyArrayIndex($request, 'q')) {
+					$error = array("error" => 
+					$this->_getErrorMsg(001, 'q'));
+					break;
+				}else {
+					$q = $request['q'];
+					if($this->_verifyArrayIndex($request,'limit')){ 
+						$limit = $request['limit'];
+					
+					}else{
+						$limit = "";
+					}
+					
+					$ret = $this->_getSearchResults($q,$limit);
+					break;
+				}
 				
 			case "category": //retrieve categories
 				$id = 0;
@@ -1229,6 +1249,13 @@ class Api_Controller extends Controller {
 	}
 	
 	/**
+	 * get the search results either in json or xml
+	 */
+	function _getSearchResults($q, $limit = "" ) {
+		return $this->_doSearch($q, $limit);
+	}
+	
+	/**
  	* get a single location by id
  	*/
 	function _locations(){
@@ -1236,6 +1263,189 @@ class Api_Controller extends Controller {
 		$where .= "ORDER by id DESC";
 		$limit = "\nLIMIT 0, $this->list_limit";
 		return $this->_getLocations($where, $limit);
+	}
+	
+	/**
+	 * do the search via the API
+	 * @param q - the search string.
+	 * 
+	 * @param limit - the value to limit by.
+	 * 
+	 * @return the search result.
+	 */
+	 
+	function _doSearch( $q, $limit ) {
+		
+		/**
+		 * This is borrowed from the search functionality 
+		 * see application/controller/search.php
+		 */
+		 
+		$search_query = "";
+		$keyword_string = "";
+		$where_string = "";
+		$plus = "";
+		$or = "";
+		$search_info = "";
+		$html = "";
+		$json_searches = array();
+		
+		// Stop words that we won't search for
+		// Add words as needed!!
+		$stop_words = array('the', 'and', 'a', 'to', 'of', 'in', 'i', 'is', 'that', 'it', 
+		'on', 'you', 'this', 'for', 'but', 'with', 'are', 'have', 'be', 
+		'at', 'or', 'as', 'was', 'so', 'if', 'out', 'not');
+		
+		$retJsonOrXml = ''; //will hold the json/xml string to return
+		
+		$replar = array(); //assists in proper xml generation
+		
+		// Doing this manaully. It was wasting my time trying to modularize it.
+		// Will have to visit this again after a good rest. I mean a good rest.
+		
+		//XML elements
+		$xml = new XmlWriter();
+		$xml->openMemory();
+		$xml->startDocument('1.0', 'UTF-8');
+		$xml->startElement('response');
+		$xml->startElement('payload');
+		$xml->startElement('searches');
+		
+		$keywords = explode(' ',$q);
+		if(is_array($keywords) && !empty($keywords) ) {
+			array_change_key_case($keywords, CASE_LOWER);
+			$i = 0;
+			foreach($keywords as $value) {
+				if (!in_array($value,$stop_words) && !empty($value))
+				{
+					$chunk = mysql_real_escape_string($value);
+					if ($i > 0) {
+						$plus = ' + ';
+						$or = ' OR ';
+					}
+					// Give relevancy weighting
+					// Title weight = 2
+					// Description weight = 1
+					$keyword_string = $keyword_string.$plus."(CASE WHEN incident_title LIKE '%$chunk%' THEN 2 ELSE 0 END) + (CASE WHEN incident_description LIKE '%$chunk%' THEN 1 ELSE 0 END)";
+					$where_string = $where_string.$or."incident_title LIKE '%$chunk%' OR incident_description LIKE '%$chunk%'";
+					$i++;
+				}
+			}
+			if (!empty($keyword_string) && !empty($where_string))
+			{
+				$search_query = "SELECT *, (".$keyword_string.") AS relevance FROM incident WHERE (".$where_string.") ORDER BY relevance DESC ";
+			}
+		}
+		
+		if(!empty($search_query)) 
+		{
+			
+			if( !empty($limit) && is_numeric($limit)  ) {
+				$l =  "LIMIT 0 ,".$limit;
+			} else {
+				$l =  " ";	
+			}	
+			
+			$total_items = ORM::factory('incident')->where($where_string)->count_all();
+			
+			$db = new Database();
+			
+			$s = $search_query . $l;
+			
+			$query = $db->query($s );
+			
+			// Results Bar
+			if ($total_items != 0)
+			{	
+				if($this->responseType == 'json') { 
+					$json_searches[] = array("total" => $total_items);
+				}else { 
+				
+					$xml->writeElement('total',$total_items);	
+				}	
+				
+			} else {
+				
+				$xml->writeElement('total', $total_items); 
+				//create the json array
+				$data = array(
+					"payload" => array("searches" => $json_searches),
+					"error" => $this->_getErrorMsg(0)
+				);
+				
+				if($this->responseType == 'json'){
+					$retJsonOrXml = $this->_arrayAsJSON($data);
+					return $retJsonOrXml;
+				
+				} else {
+					$xml->endElement(); //end searches
+					$xml->endElement(); // end payload
+					$xml->startElement('error');
+					$xml->writeElement('code',0);
+					$xml->writeElement('message','No Error');
+					$xml->endElement();//end error
+					$xml->endElement(); // end response
+					return $xml->outputMemory(true);
+				}	
+			}
+			
+			foreach ($query as $search)
+	        {
+	        	
+				$incident_id = $search->id;
+				$incident_title = $search->incident_title;
+				
+				$incident_description = $search->incident_description;
+				// Remove any markup, otherwise trimming below will mess things up
+				$incident_description = strip_tags($incident_description);
+				$incident_date = date('D M j Y g:i:s a', strtotime($search->incident_date));
+				
+				//needs different treatment depending on the output
+				if($this->responseType == 'json'){
+					$json_searches[] = array("search" => array(
+						"id" => $incident_id,
+						"title" => $search->incident_title,
+						"description" => $incident_description,
+						"date" => $incident_date,
+						"relevance" => $search->relevance));
+				} else { 
+				
+					//build xml file
+					$xml->startElement('search');
+					$xml->writeElement('id',$incident_id);
+					$xml->writeElement('title',$incident_title);
+					$xml->writeElement('description',$incident_description);	
+					$xml->writeElement('date',$incident_date);
+					$xml->writeElement('relevance', $search->relevance);
+					$xml->endElement(); // end searches
+				
+				}
+				
+			}
+			
+		}
+		
+		//create the json array
+		$data = array(
+			"payload" => array("searches" => $json_searches),
+			"error" => $this->_getErrorMsg(0)
+		);
+		
+		if($this->responseType == 'json'){
+			$retJsonOrXml = $this->_arrayAsJSON($data);
+			return $retJsonOrXml;
+		} else {
+			$xml->endElement(); //end searches
+			$xml->endElement(); // end payload
+			$xml->startElement('error');
+			$xml->writeElement('code',0);
+			$xml->writeElement('message','No Error');
+			$xml->endElement();//end error
+			$xml->endElement(); // end response
+			return $xml->outputMemory(true);
+		}
+		
+			
 	}
 	
 	/**

@@ -120,6 +120,7 @@ class Georss_Controller extends Controller
 							->where('reporter_id', $reporter->id)
 							->where('message_type', '1')
 							->where('parent_id', '0')
+							->where('message_trash', '0')
 							->orderby('message_date', 'desc')
 							->find();
 						if ($parent->loaded)

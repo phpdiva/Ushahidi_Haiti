@@ -173,8 +173,8 @@
 	
 			<!-- searchbox -->
 			<div id="searchbox">
-				<!--<a class="share addthis_button" href="http://www.addthis.com/bookmark.php?v=250&amp;pub=xa-4aee423643f8276e">Share</a>-->
 				
+                	
 				<!-- languages -->
 				<div class="language-box">
 					<form style="display:none;">
@@ -202,7 +202,8 @@
 					</form>
 				</div>
 				<!-- / searchform -->
-                <a id="reports-rss" href="<?php echo url::base() . 'feed/'; ?>">All Reports RSS</a>
+                <p style="float:left; margin:13px 5px 0 0;"><strong>Total Reports: <?php echo $reports_total ?></strong></p>
+                <a id="reports-rss" class="button btn_rss" href="<?php echo url::base() . 'feed/'; ?>"><span>Reports RSS</span></a>
 		
 			</div>
 			<!-- / searchbox -->
