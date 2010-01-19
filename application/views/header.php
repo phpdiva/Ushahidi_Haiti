@@ -102,12 +102,18 @@
 		}	
 		<?php echo $js . "\n"; ?>
 		
-		// Language Switcher
+		
 		$(function(){
+			// Language Switcher
 			$("#language-switch").hover(
         		function(){ $(this).addClass("on"); },
             	function(){ $(this).removeClass("on")}
         	);
+			
+			//KML Show/Hide
+			//$("#sh_KML").click(function(){
+			//	$($(this).attr("href")).slideDown("fast"); return false;
+			//});
 		});
 	</script>
 	

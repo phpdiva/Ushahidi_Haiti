@@ -75,7 +75,7 @@ div#logo span{
 /* SMS Shortcode Announcement */
 	#shortcode-header-wrap { width:100%; background:#FFF9D8; padding:9px; border:1px solid #ffed8d; }
 	#shortcode-header-info { width:960px; margin:0 auto; padding:0 0 3px 18px; background:transparent url(icons.png) 0 -97px no-repeat; }
-	#shortcode-info { background:#FFF9D8; padding:18px; margin:0 0 10px 0; border:1px solid #ffed8d; }
+	#shortcode-info { background:#FFF9D8; padding:18px; margin:0 0 10px 0; border:1px solid #ffed8d; display:none; }
 	#shortcode-info h3 { margin:0 0 10px 0; background:transparent url(icons.png) 0 -97px no-repeat; font-size:14px; padding:0 0 0 18px; }
 	#shortcode-info p {}
 	#shortcode-info p span,
@@ -84,6 +84,24 @@ div#logo span{
 /* Category Filter on Home Page */
 	ul.category-filters li a { font-size:11px; }
 
+/* KML Filters */
+	ul.cf-kml { margin:0; overflow:auto; }
+	ul.cf-kml li { float:left; width:181px; margin:0; }
+	
+	ul.cf-kml li a { border:none; }
+	ul.cf-kml li a:hover,
+	ul.cf-kml li a.active { border:none; }
+	
+	ul.cf-kml li a div.swatch { height:18px; width:18px; margin:0 10px 18px; }
+	
+	ul.cf-kml li a div.cat-title { text-transform:capitalize; line-height:11px;  }
+	ul.cf-kml li a:hover div.cat-title { }
+
+
+/* Action Taken feature */
+	/* Front-end */
+		div.action-taken { margin: 1em 0; padding: 1em; background: #fffbe0; border: solid 2px #FFF19F; line-height: 1.3em; }
+		#action-taken-badge { font-size: 1.2em; background: #009200; font-weight: bold; color: #fff; padding: 0.25em 0.5em; margin: 0 1em 0 0; float: left; }
 
 /* Categories on submit report page */
 	#reportForm .report_category ul li { padding: 2px 5px 2px 19px; min-height: 28px; }
@@ -91,3 +109,12 @@ div#logo span{
 	#reportForm .report_category ul li input.check-box { margin: 0 3px 0 -18px; }
 	#reportForm .report_category ul li.hover,
 	#reportForm .report_category ul li:hover { background: #efefef; }
+	
+/* Download Reports (front-end) */
+	.bg { padding:0 18px; margin:0 0 18px 0; overflow:auto; }
+	.download-info { background:#FFF9D8; padding:18px; margin:0 0 10px 18px; border:1px solid #ffed8d; float:left; }
+
+	table.data_points{ width: 580px; border-width: 3px 0 3px; border-color: #669eb9; border-style: solid; float:left; }
+
+	table.data_points td { padding: 10px; background-color: #f2f7fa; }
+	table.data_points td input { margin:0 10px 0 0; }

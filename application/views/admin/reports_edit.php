@@ -96,6 +96,17 @@
 								<h4>Description <span>Please include as much detail as possible.</span></h4>
 								<?php print form::textarea('incident_description', $form['incident_description'], ' rows="12" cols="40"') ?>
 							</div>
+              
+              <!-- report is acted on -->
+              <div class="row">
+                <h4 style="color: #009200;">
+                  <?php print form::checkbox('incident_action_taken', '1', ($form['incident_action_taken'] == 1)); ?> Action Taken
+                  <span>Check if action was taken and enter the action summary.</span>
+                </h4>
+                <textarea maxlength="255" name="incident_action_summary" id="incident_action_summary" style=" height: 60px;"><?php print html::specialchars($form['incident_action_summary']); ?></textarea>
+              </div>
+              <!-- / report is acted on -->
+              
 							<?php
 							if (!($id))
 							{ // Use default date for new report
@@ -511,10 +522,11 @@
 									"6"=>"I don’t know"
 									)
 									, $form['incident_information']) ?>									
-								</div>								
+								</div>                								
 							</div>
 							<div style="clear:both;"></div>
 						</div>
+            
 						<div class="btns">
 							<ul>
 								<li><a href="#" class="btn_save">SAVE REPORT</a></li>

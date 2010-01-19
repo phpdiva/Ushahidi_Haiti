@@ -40,10 +40,10 @@ class Messages_Controller extends Admin_Controller
 		{
 			if ($_POST['action'] == 'rank') 
 			{
-				$this->rankMessages($_POST['message_id'], $_POST['level']);
+				$this->_rankMessages($_POST['message_id'], $_POST['level']);
 			} else 
 			{	
-				$this->deleteMessages($_POST['message_id']);
+				$this->_deleteMessages($_POST['message_id']);
 			}
 		}
 
@@ -107,6 +107,7 @@ class Messages_Controller extends Admin_Controller
 				->join('reporter','message.reporter_id','reporter.id')
 				->where($filter)
 				->where('parent_id', 0)
+				->where('message_trash',0)
 				->where('service_id', $service_id)
 				->count_all()
 		));
@@ -116,6 +117,7 @@ class Messages_Controller extends Admin_Controller
 			->where('service_id', $service_id)
 			->where($filter)
 			->where('parent_id', 0)
+			->where('message_trash',0)
 			->orderby( array('message_reply'=>'desc', 'message_date'=>'desc'))
 			->find_all((int) Kohana::config('settings.items_per_page_admin'), $pagination->sql_offset);
 			
@@ -308,44 +310,23 @@ class Messages_Controller extends Admin_Controller
     /**
      * Delete selected messages
      */
-    function deleteMessages($ids,$dbtable='message')
+    private function _deleteMessages($ids,$dbtable='message')
     {
-        //XXX:get the current page number
-        if($dbtable=='twitter'){
-        	foreach($ids as $id)
-	        {
-	            $update = new Twitter_Model($id);
-				if ($update->loaded == true) {
-					$update->hide = '1';
-					$update->save();
-				}
-	        }
-        	$extradir = 'twitter/';
-        }else if ($dbtable == 'laconica'){
-            foreach($ids as $id)
-            {
-                $update = new Laconica_Model($id);
-                if ($update->loaded == true){
-                    $update->hide = '1';
-                    $update->save();
-                }
-            }
-            $extradir = 'laconica/';
-        }else{
-        	foreach($ids as $id)
-	        {
-	            ORM::factory($dbtable)->delete($id);
-	        }
-        	$extradir = '';
+       	foreach($ids as $id)
+        {
+            $message = ORM::factory($dbtable)->find($id);
+			if ($message->loaded)
+			{
+				$message->message_trash = 1;
+				$message->save();
+			}
         }
-        // url::redirect('admin/messages/'.$extradir);
-
     }
 
     /**
      * Rank selected messages
      */
-    function rankMessages($ids,$level,$dbtable='message')
+    private function _rankMessages($ids,$level,$dbtable='message')
     {
         //XXX:get the current page number
     	foreach($ids as $id)
@@ -371,7 +352,7 @@ class Messages_Controller extends Admin_Controller
 
 		//So far this assumes that selected 'twitter_id's are for deleting
 		if (isset($_POST['tweet_id'])) {
-			$this->deleteMessages($_POST['tweet_id'],'twitter');
+			$this->_deleteMessages($_POST['tweet_id'],'twitter');
 		}
 
 		//Set Inbox/Outbox filter for query and message tab in view
@@ -659,7 +640,7 @@ class Messages_Controller extends Admin_Controller
 
 		//So far this assumes that selected 'message_id's are for deleting
         if (isset($_POST['laconica_mesg_id']))
-            $this->deleteMessages($_POST['laconica_mesg_id'],'laconica');
+            $this->_deleteMessages($_POST['laconica_mesg_id'],'laconica');
 
 		// Is this an Inbox or Outbox Filter?
 		if (!empty($_GET['type']))
