@@ -17,19 +17,15 @@
 class Json_Controller extends Template_Controller
 {
     public $auto_render = TRUE;
+
+	// Cache this controller
+	public $is_cachable = TRUE;
 	
     // Main template
     public $template = 'json';
 	
     function index()
-    {	
-		//$profile = new Profiler;
-		
-		// Database
-		//$db = new Database();
-		// Cache
-		$cache = Cache::instance();
-		
+    {			
         $json = "";
         $json_item = "";
         $json_array = array();
@@ -61,110 +57,95 @@ class Json_Controller extends Template_Controller
 			$_GET['e'] : "0";
 			
 		
-		// Does a cache for this request exist?
-		$json_cache = $cache->get('json_'.$category_id.'_'.$incident_id.'_'.$media_type.'_'.$start_date.'_'.$end_date);
-		
-		if ($json_cache == NULL)
-		{ // We Don't
-		
-			$filter = "";
-			//$filter .= ($category_id !=0) ? " AND ( category.id=".$category_id
-			//	." OR category.parent_id=".$category_id.") " : "";
-			$filter .= ($start_date && $end_date) ? 
-				" AND UNIX_TIMESTAMP(incident.incident_date) >= '" . $start_date . "'".
-				" AND UNIX_TIMESTAMP(incident.incident_date) <= '" . $end_date . "'" : "";		
-			$filter .= ($media_type != 0) ? " AND ( media.media_type=".$media_type.") " : "";
+		$filter = "";
+		//$filter .= ($category_id !=0) ? " AND ( category.id=".$category_id
+		//	." OR category.parent_id=".$category_id.") " : "";
+		$filter .= ($start_date && $end_date) ? 
+			" AND UNIX_TIMESTAMP(incident.incident_date) >= '" . $start_date . "'".
+			" AND UNIX_TIMESTAMP(incident.incident_date) <= '" . $end_date . "'" : "";		
+		$filter .= ($media_type != 0) ? " AND ( media.media_type=".$media_type.") " : "";
 
 
-	        // Do we have a category id to filter by?
-	        if (is_numeric($category_id) && $category_id != '0')
-	        {
-				// Retrieve children categories and category color
-				$category = ORM::factory('category', $category_id);
-	            $color = $category->category_color;
-				$icon = $category->category_image;
+        // Do we have a category id to filter by?
+        if (is_numeric($category_id) && $category_id != '0')
+        {
+			// Retrieve children categories and category color
+			$category = ORM::factory('category', $category_id);
+            $color = $category->category_color;
+			$icon = $category->category_image;
 
-				$where_child = "";
-				$children = ORM::factory('category')
-					->where('parent_id', $category_id)
-					->find_all();
-				foreach ($children as $child)
-				{
-					$where_child .= " OR incident_category.category_id = ".$child->id." ";
-				}
-
-	            // Retrieve markers by category
-	            // XXX: Might need to replace magic numbers
-				$markers = ORM::factory('incident')
-					->select('DISTINCT incident.*')
-					->with('location')
-					->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
-					->join('media', 'incident.id', 'media.incident_id','LEFT')
-					->where('incident.incident_active = 1 AND (incident_category.category_id = ' . $category_id . ' ' . $where_child . ')' . $filter)
-					->find_all();
-
-
-	        }
-	        else
-	        {
-				// Retrieve all markers
-				$markers = ORM::factory('incident')
-					->select('DISTINCT incident.*')
-					->with('location')
-					->join('media', 'incident.id', 'media.incident_id','LEFT')
-					->where('incident.incident_active = 1 '.$filter)
-					->find_all();
-	        }
-
-			$json_item_first = "";	// Variable to store individual item for report detail page
-	        foreach ($markers as $marker)
-	        {	
-	            $json_item = "{";
-	            $json_item .= "\"type\":\"Feature\",";
-	            $json_item .= "\"properties\": {";
-				$json_item .= "\"id\": \"".$marker->id."\", \n";
-	            $json_item .= "\"name\":\"" . str_replace(chr(10), ' ', str_replace(chr(13), ' ', "<a href='" . url::base() . "reports/view/" . $marker->id . "'>" . htmlentities($marker->incident_title) . "</a>")) . "\",";
-
-				if (isset($category)) { 
-					$json_item .= "\"category\":[" . $category_id . "], ";
-				} else {
-					$json_item .= "\"category\":[0], ";
-				}
-
-				$json_item .= "\"color\": \"".$color."\", \n";
-				$json_item .= "\"icon\": \"".$icon."\", \n";
-	            $json_item .= "\"timestamp\": \"" . strtotime($marker->incident_date) . "\"";
-	            $json_item .= "},";
-	            $json_item .= "\"geometry\": {";
-	            $json_item .= "\"type\":\"Point\", ";
-	            $json_item .= "\"coordinates\":[" . $marker->location->longitude . ", " . $marker->location->latitude . "]";
-	            $json_item .= "}";
-	            $json_item .= "}";
-
-				if ($marker->id == $incident_id)
-				{
-					$json_item_first = $json_item;
-				}
-				else
-				{
-					array_push($json_array, $json_item);
-				}
-	            $cat_array = array();
-	        }
-			if ($json_item_first)
-			{ // Push individual marker in last so that it is layered on top when pulled into map
-				array_push($json_array, $json_item_first);
+			$where_child = "";
+			$children = ORM::factory('category')
+				->where('parent_id', $category_id)
+				->find_all();
+			foreach ($children as $child)
+			{
+				$where_child .= " OR incident_category.category_id = ".$child->id." ";
 			}
-	        $json = implode(",", $json_array);
-			
-			$cache->set('json_'.$category_id.'_'.$incident_id.'_'.$media_type.'_'.$start_date.'_'.$end_date
-				, $json, array('json'), 3600); // 1 Hour
-		}
-		else
-		{
-			$json = $json_cache;
-		}
 
+            // Retrieve markers by category
+            // XXX: Might need to replace magic numbers
+			$markers = ORM::factory('incident')
+				->select('DISTINCT incident.*')
+				->with('location')
+				->join('incident_category', 'incident.id', 'incident_category.incident_id','LEFT')
+				->join('media', 'incident.id', 'media.incident_id','LEFT')
+				->where('incident.incident_active = 1 AND (incident_category.category_id = ' . $category_id . ' ' . $where_child . ')' . $filter)
+				->find_all();
+
+
+        }
+        else
+        {
+			// Retrieve all markers
+			$markers = ORM::factory('incident')
+				->select('DISTINCT incident.*')
+				->with('location')
+				->join('media', 'incident.id', 'media.incident_id','LEFT')
+				->where('incident.incident_active = 1 '.$filter)
+				->find_all();
+        }
+
+		$json_item_first = "";	// Variable to store individual item for report detail page
+        foreach ($markers as $marker)
+        {	
+            $json_item = "{";
+            $json_item .= "\"type\":\"Feature\",";
+            $json_item .= "\"properties\": {";
+			$json_item .= "\"id\": \"".$marker->id."\", \n";
+            $json_item .= "\"name\":\"" . str_replace(chr(10), ' ', str_replace(chr(13), ' ', "<a href='" . url::base() . "reports/view/" . $marker->id . "'>" . htmlentities($marker->incident_title) . "</a>")) . "\",";
+
+			if (isset($category)) { 
+				$json_item .= "\"category\":[" . $category_id . "], ";
+			} else {
+				$json_item .= "\"category\":[0], ";
+			}
+
+			$json_item .= "\"color\": \"".$color."\", \n";
+			$json_item .= "\"icon\": \"".$icon."\", \n";
+            $json_item .= "\"timestamp\": \"" . strtotime($marker->incident_date) . "\"";
+            $json_item .= "},";
+            $json_item .= "\"geometry\": {";
+            $json_item .= "\"type\":\"Point\", ";
+            $json_item .= "\"coordinates\":[" . $marker->location->longitude . ", " . $marker->location->latitude . "]";
+            $json_item .= "}";
+            $json_item .= "}";
+
+			if ($marker->id == $incident_id)
+			{
+				$json_item_first = $json_item;
+			}
+			else
+			{
+				array_push($json_array, $json_item);
+			}
+            $cat_array = array();
+        }
+		if ($json_item_first)
+		{ // Push individual marker in last so that it is layered on top when pulled into map
+			array_push($json_array, $json_item_first);
+		}
+        $json = implode(",", $json_array);
 
 		header('Content-type: application/json');
         $this->template->json = $json;

@@ -18,6 +18,9 @@ class Json_Cluster_Controller extends Template_Controller
 {
     public $auto_render = TRUE;
 
+	// Cache this controller
+	public $is_cachable = TRUE;
+
     // Main template
     public $template = 'json';
 

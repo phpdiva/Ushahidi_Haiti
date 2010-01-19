@@ -52,7 +52,7 @@ class Reports_Controller extends Main_Controller {
 		$pagination = new Pagination(array(
 				'query_string' => 'page',
 				'items_per_page' => (int) Kohana::config('settings.items_per_page'),
-				'total_items' => $db->query('SELECT distinct incident.id  FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) JOIN `cluster_incident` ON (`incident`.`id` = `cluster_incident`.`incident_id`) WHERE `incident_active` = 1 AND '.$category_filter.' AND '.$cluster_filter)->count()
+				'total_items' => $db->query('SELECT distinct incident.id  FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) LEFT JOIN `cluster_incident` ON (`incident`.`id` = `cluster_incident`.`incident_id`) WHERE `incident_active` = 1 AND '.$category_filter.' AND '.$cluster_filter)->count()
 				));
 
 		$incidents = ORM::factory('incident')

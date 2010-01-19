@@ -18,12 +18,12 @@ class Main_Controller extends Template_Controller {
 	
     // Main template
     public $template = 'layout';
-	
-    // Cache instance
-    protected $cache;
 
 	// Session instance
 	protected $session;
+	
+	// Cache this controller
+	public $is_cachable = TRUE;
 	
     public function __construct()
     {
