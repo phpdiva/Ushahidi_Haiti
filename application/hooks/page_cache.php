@@ -40,7 +40,10 @@ class hook_page_cache
 	
 	public function save_cache()
 	{
-		$this->cache->set('page_'.$_SERVER['REQUEST_URI'], Event::$data);
+		if ( ! empty(Kohana::$instance->is_cachable))
+		{
+			$this->cache->set('page_'.$_SERVER['REQUEST_URI'], Event::$data);
+		}
 	}
 }
 
