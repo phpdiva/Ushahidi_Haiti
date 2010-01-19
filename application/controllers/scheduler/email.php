@@ -26,6 +26,21 @@ class Email_Controller extends Controller
 		
 		$messages = $check_email->get_messages();
 		
+		//Get email messages that have been marked for delete
+		$delete = ORM::factory('message')
+					->where('message_type', 2)
+					->where('message_trash', 1);
+
+		//Iterate through the list of messages and delete from mailbox and database respectively
+		foreach($delete as $email){
+		    //Delete message from mailbox
+		    $check_email->delete_message($email->service_messageid);
+		
+		    //Delete message from database
+		    ORM::factory('message')->delete($email->id);
+		}
+			
+		
 		// Close Connection
 		$check_email->close();
 		
