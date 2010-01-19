@@ -13,13 +13,16 @@
  * @license    http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License (LGPL)
  */
 
+define('ACCESS_LIMIT',200);
 class Api_Controller extends Controller {
 	
 	private $db; //Database instance for queries
 	private $list_limit; //number of records to limit response to - set in __construct
+	private $access_limit = 200; 
 	private $responseType; //type of response, either json or xml as specified, defaults to json in set in __construct
 	private $error_messages; // validation error messages
 	private $messages = array(); // form validation error messages
+	private $api_activities = array(); // activities by the API
 	
 	/**
 	 * constructor
@@ -28,6 +31,8 @@ class Api_Controller extends Controller {
 		$this->db = new Database;
 		$this->list_limit = '1000';
 		$this->responseType = 'json';
+		$this->_apiLog();
+		
 	}
 	
 	/**
@@ -1277,7 +1282,7 @@ class Api_Controller extends Controller {
 	function _doSearch( $q, $limit ) {
 		
 		/**
-		 * This is borrowed from the search functionality 
+		 * This is mostly borrowed from the search functionality 
 		 * see application/controller/search.php
 		 */
 		 
@@ -1343,16 +1348,14 @@ class Api_Controller extends Controller {
 			if( !empty($limit) && is_numeric($limit)  ) {
 				$l =  "LIMIT 0 ,".$limit;
 			} else {
-				$l =  " ";	
+				$l =  " LIMIT ,".$this->list_limit;	
 			}	
 			
 			$total_items = ORM::factory('incident')->where($where_string)->count_all();
 			
-			$db = new Database();
-			
 			$s = $search_query . $l;
 			
-			$query = $db->query($s );
+			$query = $this->db->query($s );
 			
 			// Results Bar
 			if ($total_items != 0)
@@ -1821,9 +1824,9 @@ class Api_Controller extends Controller {
 	}
 	
 	/**
- 	* Creates a XML response given an array
- 	* CREDIT TO: http://snippets.dzone.com/posts/show/3391
- 	*/
+ 	 * Creates a XML response given an array
+ 	 * CREDIT TO: http://snippets.dzone.com/posts/show/3391
+ 	 */
 	function _arrayAsXML($data, $replar = array()){
 		$xml = new XMLWriter();
 		$xml->openMemory();
@@ -1834,6 +1837,53 @@ class Api_Controller extends Controller {
 	
 		$xml->endElement();
 		return $xml->outputMemory(true);
+	}
+	
+	/**
+	 * Logs activities of the API to the activity logger 
+	 */
+	function _apiLog( $activities = array() ) {
+		//TODO write sql statement to log the activities.
+		$this->db->query();	
+	}
+	
+	/**
+	 * Check the limit status of an API call.
+	 * 
+	 * @param ipaddress - the IP address of the server doing the API call.
+	 * 
+	 * @return Boolean.
+	 */
+	function _apiLimitStatus( $ipaddress ) {
+			
+		$query = "SELECT count(*) FROM api_log WHERE api_ipaddress = $ipaddress";
+		$total_items = $this->db->query($query);
+		
+		if( $total_items == ACCESS_LIMIT) {
+			$this->_banIPAdress($ipaddress);
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	/**
+	 * Ban an IP address due  to abusive API call.
+	 * The API call for a day is limited to 200.
+	 * @param ipaddress - the IP address to be banned.
+	 */
+	function _banIPAdress($ipaddress) {
+		//TODO write sql statement
+		
+		//Make sure the ip address is not in the db.
+		$query = "SELECT count(*) FROM api_banned WHERE banned_ipaddress = $ipaddress";
+		$total_items = $this->db->query($query);
+		
+		if( $total_items == 0 ) {
+			// ban ip address
+			$query = "INSERT INTO api_banned (banned_ipaddress) values ($ipaddress)";
+			$this->db->query($query);			
+		}
 	}
 
 }
