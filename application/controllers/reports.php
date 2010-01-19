@@ -34,7 +34,7 @@ class Reports_Controller extends Main_Controller {
 	/**
 	 * Displays all reports.
 	 */
-	public function index() 
+	public function index($cluster_id = 0) 
 	{
 		$db = new Database;	
 		
