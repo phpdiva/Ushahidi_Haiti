@@ -208,6 +208,9 @@ class Main_Controller extends Template_Controller {
 			->with('location')
             ->find_all();
 		
+		// Total Reports
+		$this->template->header->reports_total = ORM::factory('incident')->count_all();
+
 		// Get Default Color
 		$this->template->content->default_map_all = Kohana::config('settings.default_map_all');
 		
