@@ -88,6 +88,7 @@ class Reports_Controller extends Admin_Controller
 	        {
 				if ($post->action == 'a')		// Approve Action
 				{
+					$reset_clusters = FALSE;
 					foreach($post->incident_id as $item)
 					{
 						$update = new Incident_Model($item);
@@ -99,6 +100,7 @@ class Reports_Controller extends Admin_Controller
 							if ($update->incident_alert_status == 0)
 							{
 								$update->incident_alert_status = '1';
+								$reset_clusters = TRUE;
 							}
 							$update->save();
 							
@@ -110,6 +112,16 @@ class Reports_Controller extends Admin_Controller
 							$verify->save();
 						}
 					}
+					
+					if ($reset_clusters)
+					{
+						// Reset Clusters Because We've Approved New Reports
+						$db = new Database;
+						$db->query("TRUNCATE TABLE `json`");	// DB cached JSON
+						$db->query("TRUNCATE TABLE `cluster`");	// Cluster Info
+						$db->query("TRUNCATE TABLE `cluster_incident`"); // Cluster/Incident Info
+					}
+						
 					$form_action = "APPROVED";
 				}
 				elseif ($post->action == 'u') 	// Unapprove Action
@@ -633,12 +645,22 @@ class Reports_Controller extends Admin_Controller
 				//Save
 				$incident->save();
 				
-				// Tag this as a report that needs to be sent out as an alert
+				/*
+				* Two actions we need to perform here if this is a new report
+				* if its being approved
+				* 1. Create Alert
+				* 2. Reset Clusters
+				*/
 				if ($incident->incident_alert_status == 0
 						&& $incident->incident_active == 1)
 				{
 					$incident->incident_alert_status = '1';
 					$incident->save($incident->id);
+					
+					$db = new Database;
+					$db->query("TRUNCATE TABLE `json`");	// DB cached JSON
+					$db->query("TRUNCATE TABLE `cluster`");	// Cluster Info
+					$db->query("TRUNCATE TABLE `cluster_incident`"); // Cluster/Incident Info
 				}
 				
 				// Record Approval/Verification Action
@@ -799,8 +821,7 @@ class Reports_Controller extends Admin_Controller
 							$form_response->save();
 						}
 					}
-				}
-				
+				}				
 				
 				// SAVE AND CLOSE?
 				if ($post->save == 1)		// Save but don't close

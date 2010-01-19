@@ -198,7 +198,7 @@ class Json_Cluster_Controller extends Template_Controller
 				$json_item = "{";
 			    $json_item .= "\"type\":\"Feature\",";
 			    $json_item .= "\"properties\": {";
-				$json_item .= "\"name\":\"" . str_replace(chr(10), ' ', str_replace(chr(13), ' ', "<a href=" . url::base() . "reports/". $save_cluster->id ."/>" . count($cluster) . " Reports</a>")) . "\",";			
+				$json_item .= "\"name\":\"" . str_replace(chr(10), ' ', str_replace(chr(13), ' ', "<a href=" . url::base() . "reports/index/". $save_cluster->id ."/>" . count($cluster) . " Reports</a>")) . "\",";			
 			    $json_item .= "\"category\":[0], ";
 				$json_item .= "\"color\": \"".$color."\", ";
 				$json_item .= "\"icon\": \"".$icon."\", \n";

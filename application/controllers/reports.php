@@ -43,20 +43,25 @@ class Reports_Controller extends Main_Controller {
 		
 		// Filter By Category
 		$category_filter = ( isset($_GET['c']) && !empty($_GET['c']) )
-			? "category_id = ".$_GET['c'] : " 1=1 ";
+			? " category_id = ".$_GET['c'] : " 1=1 ";
+			
+		// Filter By Cluster
+		$cluster_filter = ($cluster_id) ? " cluster_id = ".$cluster_id." " : " 1=1 ";
 		
 		// Pagination
 		$pagination = new Pagination(array(
 				'query_string' => 'page',
 				'items_per_page' => (int) Kohana::config('settings.items_per_page'),
-				'total_items' => $db->query('SELECT distinct incident.id  FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) WHERE `incident_active` = 1 AND '.$category_filter)->count()
+				'total_items' => $db->query('SELECT distinct incident.id  FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) JOIN `cluster_incident` ON (`incident`.`id` = `cluster_incident`.`incident_id`) WHERE `incident_active` = 1 AND '.$category_filter.' AND '.$cluster_filter)->count()
 				));
 
 		$incidents = ORM::factory('incident')
 				->select('DISTINCT incident.*')
 				->join('incident_category', 'incident.id', 'incident_category.incident_id', 'left')
+				->join('cluster_incident', 'incident.id', 'cluster_incident.incident_id', 'left')
 				->where('incident_active', '1')
 				->where($category_filter)
+				->where($cluster_filter)
 				->groupby('incident.id')
 				->orderby('incident_date', 'desc')
 				->find_all( (int) Kohana::config('settings.items_per_page'), 
