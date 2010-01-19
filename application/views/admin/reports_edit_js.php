@@ -96,8 +96,24 @@
 					}, "json");
 		        return false; 
 		    });
+        
+        toggleActionSummary();
+        $("#incident_action_taken").click(toggleActionSummary);
 		}); 
-
+		
+    // Enable / disable action summary text area if action was taken.
+    function toggleActionSummary() {
+    	var actionSummary = $("#incident_action_summary");
+      var actionTaken = $("#incident_action_taken");
+      if (actionSummary.length > 0 && actionTaken.length > 0) {
+        if (actionTaken.is(':checked') == true) {
+        	actionSummary.removeAttr("disabled");
+        }
+        else {
+        	actionSummary.attr("disabled", true);
+        }
+      }
+    }
 
 		// Date Picker JS
 		$(document).ready(function() {

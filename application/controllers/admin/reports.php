@@ -300,7 +300,9 @@ class Reports_Controller extends Admin_Controller
 			'incident_active' => '',
 			'incident_verified' => '',
 			'incident_source' => '',
-			'incident_information' => ''
+			'incident_information' => '',
+			'incident_action_taken' => '',
+			'incident_action_summary' => '',
 	    );
 		
 		//  copy the form as errors, so the errors will be stored with keys corresponding to the form field names
@@ -554,6 +556,11 @@ class Reports_Controller extends Admin_Controller
 			$post->add_rules('incident_verified','required', 'length[0,1]');
 			$post->add_rules('incident_source','alpha', 'length[1,1]');
 			$post->add_rules('incident_information','numeric', 'length[1,1]');
+			$post->add_rules('incident_action_taken', 'numeric', 'length[0,1]');
+			// if "action taken" was checked, add summary rules.
+			if ($_POST['incident_action_taken']) {
+				$post->add_rules('incident_action_summary', 'required', 'length[0, 255]');
+			}
 			
 			// Test to see if things passed the rule checks
 	        if ($post->validate())
@@ -619,6 +626,10 @@ class Reports_Controller extends Admin_Controller
 				$incident->incident_verified = $post->incident_verified;
 				$incident->incident_source = $post->incident_source;
 				$incident->incident_information = $post->incident_information;
+				$incident->incident_action_taken = $post->incident_action_taken;
+				// Only save action taken summary, if "action taken" was checked.
+				$incident->incident_action_summary = ($incident->incident_action_taken) ? $post->incident_action_summary : '';
+				
 				//Save
 				$incident->save();
 				
@@ -875,7 +886,9 @@ class Reports_Controller extends Admin_Controller
 						'incident_active' => $incident->incident_active,
 						'incident_verified' => $incident->incident_verified,
 						'incident_source' => $incident->incident_source,
-						'incident_information' => $incident->incident_information
+						'incident_information' => $incident->incident_information,
+						'incident_action_taken' => $incident->incident_action_taken,
+						'incident_action_summary' => $incident->incident_action_summary,
 				    );
 					
 					// Merge To Form Array For Display
