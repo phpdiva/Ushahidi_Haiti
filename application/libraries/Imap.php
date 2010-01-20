@@ -39,7 +39,7 @@ class Imap_Core {
 		$service = "{".Kohana::config('settings.email_host').":"
 			.Kohana::config('settings.email_port')."/"
 			.Kohana::config('settings.email_servertype')
-			.$notls.$ssl.$novalidate."}";
+			.$notls.$ssl.$novalidate."}INBOX";
 
 		$imap_stream =	imap_open($service, Kohana::config('settings.email_username')
 			,Kohana::config('settings.email_password'));
@@ -68,58 +68,63 @@ class Imap_Core {
 		for ($i = 1; $i <= $no_of_msgs; $i++) 
 		{
 			$header = imap_headerinfo($this->imap_stream, $i);
-			$message_id = $header->message_id;
-			$date = date($date_format, $header->udate);
-			$from = $header->from;
-			$fromname = "";
-			$fromaddress = "";
-			$subject = "";
-
-			foreach ($from as $id => $object) 
-			{
-				if (isset($object->personal))
-					$fromname = $object->personal;
-				$fromaddress = $object->mailbox."@".$object->host;
-				if ($fromname == "")
-				{ // In case from object doesn't have Name
-					$fromname = $fromaddress;
-				}
-			}
-
-			if (isset($header->subject))
-				$subject = $this->_mime_decode($header->subject);
 			
-			// Read the message structure
-			$structure = imap_fetchstructure($this->imap_stream, $i);
-			if (!empty($structure->parts))
-			{
-				for ($j = 0, $k= count($structure->parts); $j < $k; $j++)
-				{
-					$part = $structure->parts[$j];
+			if ( $header->Unseen == "U" && 
+				isset($header->from) && !empty($header->from) )
+			{				
+				$message_id = $header->message_id;
+				$date = date($date_format, $header->udate);
+				$from = $header->from;
+				$fromname = "";
+				$fromaddress = "";
+				$subject = "";
 
-					if ($part->subtype == 'PLAIN')
-					{
-						$body = imap_fetchbody($this->imap_stream, $i, $j+1);
+				foreach ($from as $id => $object) 
+				{
+					if (isset($object->personal))
+						$fromname = $object->personal;
+					$fromaddress = $object->mailbox."@".$object->host;
+					if ($fromname == "")
+					{ // In case from object doesn't have Name
+						$fromname = $fromaddress;
 					}
 				}
+
+				if (isset($header->subject))
+					$subject = $this->_mime_decode($header->subject);
+
+				// Read the message structure
+				$structure = imap_fetchstructure($this->imap_stream, $i);
+				if (!empty($structure->parts))
+				{
+					for ($j = 0, $k= count($structure->parts); $j < $k; $j++)
+					{
+						$part = $structure->parts[$j];
+
+						if ($part->subtype == 'PLAIN')
+						{
+							$body = imap_fetchbody($this->imap_stream, $i, $j+1);
+						}
+					}
+				}
+				else
+				{
+					$body = imap_body($this->imap_stream, $i);
+				}
+
+				// Convert quoted-printable strings (RFC2045)
+				$body = imap_qprint($body);
+
+				array_push($messages, array('message_id' => $message_id,
+											'date' => $date,
+											'from' => $fromname,
+											'email' => $fromaddress,
+											'subject' => $subject,
+											'body' => $body));
+
+				// Mark Message As Read
+				imap_setflag_full($this->imap_stream, $i, "\\Seen");
 			}
-			else
-			{
-				$body = imap_body($this->imap_stream, $i);
-			}
-			
-			// Convert quoted-printable strings (RFC2045)
-			$body = imap_qprint($body);
-			
-			array_push($messages, array('message_id' => $message_id,
-										'date' => $date,
-										'from' => $fromname,
-										'email' => $fromaddress,
-										'subject' => $subject,
-										'body' => $body));
-										
-			// Mark Message As Read
-			imap_setflag_full($this->imap_stream, $i, "\\Seen");
 		}
 		
 		return $messages;
