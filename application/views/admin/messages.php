@@ -215,7 +215,7 @@
 												}
 												?>
 												<li>
-                                                <a href="<?php echo url::base().'admin/messages/delete/'.$message_id ?>" onclick="return confirm('Delete cannot be undone. Are you sure you want to continue?')" class="del">Delete</a></li>
+                                                <a href="<?php echo url::base().'admin/messages/delete/'.$message_id."?service_id=".$service_id."&page=".$pagination->current_page; ?>" onclick="return confirm('Delete cannot be undone. Are you sure you want to continue?')" class="del">Delete</a></li>
 											</ul>
 										</td>
 									</tr>

@@ -117,7 +117,7 @@ class Alerts_Controller extends Controller
 					$clickatell->use_ssl = false;
 					$clickatell->sms();	
 
-					$message = $incident->incident_description;
+					$message = text::limit_chars($incident->incident_description, 150, "...");
 					
 					// If Clickatell Is Set Up
 					if ($clickatell->send($alertee->alert_recipient, $sms_from, $message) == "OK")
