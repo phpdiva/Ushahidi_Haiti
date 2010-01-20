@@ -43,6 +43,7 @@ class Imap_Core {
 
 		$imap_stream =	imap_open($service, Kohana::config('settings.email_username')
 			,Kohana::config('settings.email_password'));
+			
 		if (!$imap_stream)
 			throw new Kohana_Exception('imap.imap_stream_not_opened', imap_last_error());
 		
@@ -134,9 +135,19 @@ class Imap_Core {
 	 * Delete a message
 	 * @param	int	message number
 	 */
-	public function delete_message($msg_no)
+	public function delete_message($message_id)
 	{
-		imap_delete($this->imap_stream, $msg_no);
+		$count = imap_num_msg($this->imap_stream);
+		for ( $msgno = 1; $msgno <= $count; $msgno++ )
+		{
+			$header = imap_headerinfo($this->imap_stream, $msgno);
+			if ( isset($header->message_id) && !empty($header->message_id)
+			 	&& $header->message_id == $message_id )
+			{
+				imap_delete($this->imap_stream, $msgno);
+			}
+		}
+		imap_expunge($this->imap_stream);
 	}
 
 	/**
