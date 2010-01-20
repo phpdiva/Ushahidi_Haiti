@@ -76,8 +76,9 @@ class Json_Cluster_Controller extends Template_Controller
 		$filter = "";
 		$filter .= ($category_id !=0) ? " AND ( category.id=".$category_id
 			." OR category.parent_id=".$category_id.") " : "";
-		$filter .= ($start_date && $end_date) ? 
-			" AND incident.incident_date >= '" . date("Y-m-d H:i:s", $start_date) . "'".
+		$filter .= ($start_date) ? 
+			" AND incident.incident_date >= '" . date("Y-m-d H:i:s", $start_date) . "'" : "";
+		$filter .= ($end_date) ? 
 			" AND incident.incident_date <= '" . date("Y-m-d H:i:s", $end_date) . "'" : "";
 			
 		if ($southwest && $northeast)
