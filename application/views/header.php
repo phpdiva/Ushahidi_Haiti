@@ -59,7 +59,7 @@
 		}
 	}
 	
-	if ($treeview_enabled) {
+	if (isset($treeview_enabled) && $treeview_enabled == TRUE) {
 		echo html::script('media/js/jquery.treeview');
 		echo html::stylesheet('media/css/jquery.treeview');
 	}
