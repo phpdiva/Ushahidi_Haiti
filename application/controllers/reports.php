@@ -41,8 +41,9 @@ class Reports_Controller extends Main_Controller {
 		$this->template->header->this_page = 'reports';
 		$this->template->content = new View('reports');
 		
-		$filter = ( isset($_GET['c']) && !empty($_GET['c']) )
-			? " AND incident_category.category_id='".$_GET['c']."' "
+		$filter = ( isset($_GET['c']) && !empty($_GET['c']) && $_GET['c']!=0 )
+			? " AND ( category.id='".$_GET['c']."' OR 
+				category.parent_id='".$_GET['c']."' )  "
 			: " AND 1 = 1";
 		
 		if ( isset($_GET['sw']) && !empty($_GET['sw']) && 
@@ -64,10 +65,10 @@ class Reports_Controller extends Main_Controller {
 		$pagination = new Pagination(array(
 				'query_string' => 'page',
 				'items_per_page' => (int) Kohana::config('settings.items_per_page'),
-				'total_items' => $db->query("SELECT DISTINCT `incident`.* FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) JOIN `location` ON (`incident`.`location_id` = `location`.`id`) WHERE `incident_active` = '1' $filter")->count()
+				'total_items' => $db->query("SELECT DISTINCT `incident`.* FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) JOIN `category` ON (`category`.`id` = `incident_category`.`category_id`) JOIN `location` ON (`incident`.`location_id` = `location`.`id`) WHERE `incident_active` = '1' $filter")->count()
 				));
 
-		$incidents = $db->query("SELECT DISTINCT `incident`.*, `location`.`location_name` FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) JOIN `location` ON (`incident`.`location_id` = `location`.`id`) WHERE `incident_active` = '1' $filter ORDER BY incident_date DESC LIMIT ". (int) Kohana::config('settings.items_per_page') . " OFFSET ".$pagination->sql_offset);
+		$incidents = $db->query("SELECT DISTINCT `incident`.*, `location`.`location_name` FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) JOIN `category` ON (`category`.`id` = `incident_category`.`category_id`) JOIN `location` ON (`incident`.`location_id` = `location`.`id`) WHERE `incident_active` = '1' $filter ORDER BY incident_date DESC LIMIT ". (int) Kohana::config('settings.items_per_page') . " OFFSET ".$pagination->sql_offset);
 		
 		$this->template->content->incidents = $incidents;
 		

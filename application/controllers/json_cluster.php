@@ -76,8 +76,9 @@ class Json_Cluster_Controller extends Template_Controller
 		$filter = "";
 		$filter .= ($category_id !=0) ? " AND ( category.id=".$category_id
 			." OR category.parent_id=".$category_id.") " : "";
-		$filter .= ($start_date && $end_date) ? 
-			" AND incident.incident_date >= '" . date("Y-m-d H:i:s", $start_date) . "'".
+		$filter .= ($start_date) ? 
+			" AND incident.incident_date >= '" . date("Y-m-d H:i:s", $start_date) . "'" : "";
+		$filter .= ($end_date) ? 
 			" AND incident.incident_date <= '" . date("Y-m-d H:i:s", $end_date) . "'" : "";
 			
 		if ($southwest && $northeast)
@@ -180,7 +181,7 @@ class Json_Cluster_Controller extends Template_Controller
 			$json_item = "{";
 		    $json_item .= "\"type\":\"Feature\",";
 		    $json_item .= "\"properties\": {";
-			$json_item .= "\"name\":\"" . str_replace(chr(10), ' ', str_replace(chr(13), ' ', "<a href=" . url::base() . "reports/index/?sw=".$southwest."&ne=".$northeast.">" . $cluster_count . " Reports</a>")) . "\",";			
+			$json_item .= "\"name\":\"" . str_replace(chr(10), ' ', str_replace(chr(13), ' ', "<a href=" . url::base() . "reports/index/?c=".$category_id."&sw=".$southwest."&ne=".$northeast.">" . $cluster_count . " Reports</a>")) . "\",";			
 		    $json_item .= "\"category\":[0], ";
 			$json_item .= "\"color\": \"".$color."\", ";
 			$json_item .= "\"icon\": \"".$icon."\", ";

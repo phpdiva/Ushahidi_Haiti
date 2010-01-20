@@ -277,34 +277,20 @@ class Messages_Controller extends Admin_Controller
     /**
      * Delete a single message
      */
-    function delete($id = FALSE,$dbtable='message')
+    public function delete($id = FALSE,$dbtable='message')
     {
-        if($dbtable=='twitter'){
-	        if ($id){
-	            $update = ORM::factory($dbtable)->where('id',$id)->find();
-				if ($update->loaded == true) {
-					$update->hide = '1';
-					$update->save();
-				}
-	        }
-        	$extradir = 'twitter/';
-        }else if( $dbtable == 'laconica') {
-            if ( $id){
-                $udpate = ORM::factory($dbtable)->where('id',$id)->find();
-                if($update->loaded == true ){
-                    $update->hide = '1';
-                    $update->save();
-                }
-            }
-            $extradir = 'laconica/';
-        }else{
-        	if ($id){
-	            ORM::factory($dbtable)->delete($id);
-	        }
-        	$extradir = '';
-        }
-        //XXX:get the current page number
-        url::redirect('admin/messages/'.$extradir);
+        $extradir = "";
+		$extradir = ( isset($_GET['service_id']) && !empty($_GET['service_id']) )
+			? "index/".$_GET['service_id'] : "";
+		$extradir .= ( isset($_GET['page']) && !empty($_GET['page']) )
+			? "?page=".$_GET['page'] : "";
+		$message = ORM::factory($dbtable)->find($id);
+		if ($message->loaded)
+		{
+			$message->message_trash = 1;
+			$message->save($id);
+		}
+		url::redirect(url::base().'admin/messages/'.$extradir);
     }
 
     /**
@@ -312,6 +298,11 @@ class Messages_Controller extends Admin_Controller
      */
     private function _deleteMessages($ids,$dbtable='message')
     {
+		$extradir = "";
+		$extradir = ( isset($_GET['service_id']) && !empty($_GET['service_id']) )
+			? "index/".$_GET['service_id'] : "";
+		$extradir .= ( isset($_GET['page']) && !empty($_GET['page']) )
+			? "?page=".$_GET['page'] : "";
        	foreach($ids as $id)
         {
             $message = ORM::factory($dbtable)->find($id);
@@ -321,6 +312,7 @@ class Messages_Controller extends Admin_Controller
 				$message->save($id);
 			}
         }
+		url::redirect(url::base().'admin/messages/'.$extradir);
     }
 
     /**

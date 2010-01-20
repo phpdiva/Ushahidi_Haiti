@@ -18,6 +18,8 @@ class Email_Controller extends Controller
 	public function __construct()
     {
         parent::__construct();
+
+		$profiler = new Profiler;
 	}	
 	
 	public function index() 
@@ -25,6 +27,24 @@ class Email_Controller extends Controller
 		$check_email = new Imap;
 		
 		$messages = $check_email->get_messages();
+		
+		//Get email messages that have been marked for delete
+		$delete = ORM::factory('message')
+					->join('reporter','message.reporter_id','reporter.id')
+					->join('service','reporter.service_id','service.id')
+					->where('service.id', 2)
+					->where('message_trash', 1)
+					->find_all();
+
+		//Iterate through the list of messages and delete from mailbox and database respectively
+		foreach($delete as $email){
+		    //Delete message from mailbox
+		    $check_email->delete_message($email->service_messageid);
+		
+		    //Delete message from database
+		    ORM::factory('message')->delete($email->id);
+		}
+			
 		
 		// Close Connection
 		$check_email->close();
