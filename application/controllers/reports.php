@@ -34,38 +34,40 @@ class Reports_Controller extends Main_Controller {
 	/**
 	 * Displays all reports.
 	 */
-	public function index($cluster_id = 0) 
+	public function index() 
 	{
-		$db = new Database;	
+		$db = new Database;
 		
 		$this->template->header->this_page = 'reports';
 		$this->template->content = new View('reports');
 		
-		// Filter By Category
-		$category_filter = ( isset($_GET['c']) && !empty($_GET['c']) )
-			? " category_id = ".$_GET['c'] : " 1=1 ";
+		$filter = ( isset($_GET['c']) && !empty($_GET['c']) )
+			? " AND incident_category.category_id='".$_GET['c']."' "
+			: " AND 1 = 1";
+		
+		if ( isset($_GET['sw']) && !empty($_GET['sw']) && 
+				count($southwest = explode(",",$_GET['sw'])) > 1 &&
+			isset($_GET['ne']) && !empty($_GET['ne']) && 
+				count($northeast = explode(",",$_GET['ne'])) > 1
+			)
+ 		{
+			list($longitude_min, $latitude_min) = $southwest;
+			list($longitude_max, $latitude_max) = $northeast;
 			
-		// Filter By Cluster
-		$cluster_filter = ($cluster_id) ? " cluster_id = ".$cluster_id." " : " 1=1 ";
+			$filter .= " AND location.latitude >=".$latitude_min.
+				" AND location.latitude <=".$latitude_max;
+			$filter .= " AND location.longitude >=".$longitude_min.
+				" AND location.longitude <=".$longitude_max;
+		}
 		
 		// Pagination
 		$pagination = new Pagination(array(
 				'query_string' => 'page',
 				'items_per_page' => (int) Kohana::config('settings.items_per_page'),
-				'total_items' => $db->query('SELECT distinct incident.id  FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) LEFT JOIN `cluster_incident` ON (`incident`.`id` = `cluster_incident`.`incident_id`) WHERE `incident_active` = 1 AND '.$category_filter.' AND '.$cluster_filter)->count()
+				'total_items' => $db->query("SELECT DISTINCT `incident`.* FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) JOIN `location` ON (`incident`.`location_id` = `location`.`id`) WHERE `incident_active` = '1' $filter")->count()
 				));
 
-		$incidents = ORM::factory('incident')
-				->select('DISTINCT incident.*')
-				->join('incident_category', 'incident.id', 'incident_category.incident_id', 'left')
-				->join('cluster_incident', 'incident.id', 'cluster_incident.incident_id', 'left')
-				->where('incident_active', '1')
-				->where($category_filter)
-				->where($cluster_filter)
-				->groupby('incident.id')
-				->orderby('incident_date', 'desc')
-				->find_all( (int) Kohana::config('settings.items_per_page'), 
-					$pagination->sql_offset);
+		$incidents = $db->query("SELECT DISTINCT `incident`.*, `location`.`location_name` FROM `incident` JOIN `incident_category` ON (`incident`.`id` = `incident_category`.`incident_id`) JOIN `location` ON (`incident`.`location_id` = `location`.`id`) WHERE `incident_active` = '1' $filter ORDER BY incident_date DESC LIMIT ". (int) Kohana::config('settings.items_per_page') . " OFFSET ".$pagination->sql_offset);
 		
 		$this->template->content->incidents = $incidents;
 		

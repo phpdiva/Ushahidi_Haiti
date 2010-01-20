@@ -42,7 +42,7 @@
 				projection: proj_900913,
 				'displayProjection': proj_4326,
 				eventListeners: {
-						"moveend": mapMove
+						"zoomend": mapMove
 				    }
 				};
 			map = new OpenLayers.Map('map', options);
@@ -529,10 +529,11 @@
 				params.push('e=' + endDate);
 			}
 			if (typeof(mediaType) != 'undefined'){
-				params.push('m=' + mediaType);
+				//params.push('m=' + mediaType);
 			}
 			
-			markers = new OpenLayers.Layer.GML(thisLayer, protocolUrl + '?z='+ myZoom +'&sw='+ southwest +'&ne='+ northeast +'&' + params.join('&'), 
+			//markers = new OpenLayers.Layer.GML(thisLayer, protocolUrl + '?z='+ myZoom +'&sw='+ southwest +'&ne='+ northeast +'&' + params.join('&'), 
+			markers = new OpenLayers.Layer.GML(thisLayer, protocolUrl + '?z='+ myZoom + '&' + params.join('&'), 
 			{
 				preFeatureInsert:preFeatureInsert,
 				format: protocolFormat,					

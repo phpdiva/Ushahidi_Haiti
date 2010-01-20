@@ -26,8 +26,12 @@ class hook_page_cache
 		// Account for Gzip compression
 		$this->gzip = Kohana::config('settings.gz');
 		
-		Event::add_before( 'system.routing', 
-			array('Router', 'setup'), array($this, 'load_cache') );
+		// If this is a POST, disable cache
+		if (empty($_POST))
+		{
+			Event::add_before( 'system.routing', 
+				array('Router', 'setup'), array($this, 'load_cache') );
+		}
 	}
 	
 	public function load_cache()
@@ -45,7 +49,9 @@ class hook_page_cache
 	
 	public function save_cache()
 	{
-		if ( ! empty(Kohana::$instance->is_cachable))
+		// If controller is cachable - cache
+		// If this is an error page - DO NOT cache
+		if ( !empty(Kohana::$instance->is_cachable) && Kohana::$has_error == false )
 		{
 			$this->cache->set('page_'.$this->gzip.'_'.$_SERVER['REQUEST_URI'], Event::$data);
 		}
