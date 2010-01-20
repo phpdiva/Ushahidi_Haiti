@@ -45,7 +45,7 @@ class hook_page_cache
 	
 	public function save_cache()
 	{
-		if ( ! empty(Kohana::$instance->is_cachable))
+		if ( !empty(Kohana::$instance->is_cachable) && Kohana::$has_error == false )
 		{
 			$this->cache->set('page_'.$this->gzip.'_'.$_SERVER['REQUEST_URI'], Event::$data);
 		}
