@@ -17,9 +17,14 @@ class hook_page_cache
 {
 	private $cache;
 	
+	private $gzip = "";
+	
 	public function __construct()
-	{
+	{	
 		$this->cache = new Cache;
+		
+		// Account for Gzip compression
+		$this->gzip = Kohana::config('settings.gz');
 		
 		Event::add_before( 'system.routing', 
 			array('Router', 'setup'), array($this, 'load_cache') );
@@ -27,7 +32,7 @@ class hook_page_cache
 	
 	public function load_cache()
 	{
-		if ($cache = $this->cache->get('page_'.Router::$complete_uri))
+		if ($cache = $this->cache->get('page_'.$this->gzip.'_'.$_SERVER['REQUEST_URI']))
 		{
 			Kohana::render($cache);
 			exit;
@@ -40,7 +45,10 @@ class hook_page_cache
 	
 	public function save_cache()
 	{
-		$this->cache->set('page_'.Router::$complete_uri, Event::$data);
+		if ( ! empty(Kohana::$instance->is_cachable))
+		{
+			$this->cache->set('page_'.$this->gzip.'_'.$_SERVER['REQUEST_URI'], Event::$data);
+		}
 	}
 }
 

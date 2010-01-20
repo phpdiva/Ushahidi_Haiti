@@ -100,7 +100,9 @@
 		
 							</div>
 							<!-- / additional content -->
-					
+							<div class="additional-content download-reports">
+								<p><a class="button btn_download" href="<?php echo url::base() . 'download/'; ?>"><span>Download reports (csv)</span></a></p>
+                            </div>
 						</div>
 						<!-- / right column -->
 					
@@ -149,6 +151,7 @@
 								<?php if($map_container === 'map') { ?>
 								<div class="slider-holder">
 									<form action="">
+										<input type="hidden" value="0" name="currentCat" id="currentCat">
 										<fieldset>
 											<div class="play"><a href="#" id="playTimeline">PLAY</a></div>
 											<label for="startDate">From:</label>

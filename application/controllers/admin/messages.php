@@ -318,7 +318,7 @@ class Messages_Controller extends Admin_Controller
 			if ($message->loaded)
 			{
 				$message->message_trash = 1;
-				$message->save();
+				$message->save($id);
 			}
         }
     }

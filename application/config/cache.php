@@ -25,6 +25,6 @@ if (@!is_writable(APPPATH.'cache')) {
 $config['default'] = array(
 	'driver' => 'file',
 	'params' => APPPATH.'cache',
-	'lifetime' => 1800,
+	'lifetime' => 3600,
 	'requests' => 1000
 );

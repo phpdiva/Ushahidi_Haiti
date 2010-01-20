@@ -18,12 +18,12 @@ class Main_Controller extends Template_Controller {
 	
     // Main template
     public $template = 'layout';
-	
-    // Cache instance
-    protected $cache;
 
 	// Session instance
 	protected $session;
+	
+	// Cache this controller
+	public $is_cachable = TRUE;
 	
     public function __construct()
     {
@@ -89,6 +89,10 @@ class Main_Controller extends Template_Controller {
 		$this->template->header->videoslider_enabled = FALSE;
 		$this->template->header->protochart_enabled = FALSE;
 		$this->template->header->main_page = FALSE;
+		
+		// Total Reports
+		$this->template->header->reports_total = ORM::factory('incident')->count_all();
+		
 		
 		$footerjs = new View('footer_form_js');
 		
@@ -208,6 +212,8 @@ class Main_Controller extends Template_Controller {
 			->with('location')
             ->find_all();
 		
+		
+
 		// Get Default Color
 		$this->template->content->default_map_all = Kohana::config('settings.default_map_all');
 		
@@ -377,7 +383,8 @@ class Main_Controller extends Template_Controller {
 			$marker_opacity = Kohana::config('map.marker_opacity');
 			$marker_stroke_width = Kohana::config('map.marker_stroke_width');
 			$marker_stroke_opacity = Kohana::config('map.marker_stroke_opacity');
-			$this->template->header->js = new View('main_cluster_js');
+			$this->template->header->js = ($clustering) ? 
+				new View('main_cluster_js') : new View('main_js');
 			$this->template->header->js->cluster = ($clustering == 1) ? "true" : "false";
 			$this->template->header->js->marker_radius =
 				($marker_radius >=1 && $marker_radius <= 10 ) ? $marker_radius : 5;
