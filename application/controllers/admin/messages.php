@@ -279,6 +279,9 @@ class Messages_Controller extends Admin_Controller
      */
     public function delete($id = FALSE,$dbtable='message')
     {
+    	// get the service to return to
+    	$s_id = $_GET['service_id'];
+		
         $extradir = "";
 		$extradir = ( isset($_GET['service_id']) && !empty($_GET['service_id']) )
 			? "index/".$_GET['service_id'] : "";
@@ -290,7 +293,7 @@ class Messages_Controller extends Admin_Controller
 			$message->message_trash = 1;
 			$message->save($id);
 		}
-		url::redirect(url::base().'admin/messages/'.$extradir);
+		url::redirect(url::base().'admin/messages/index/'.$s_id );
     }
 
     /**
@@ -298,6 +301,9 @@ class Messages_Controller extends Admin_Controller
      */
     private function _deleteMessages($ids,$dbtable='message')
     {
+    	// get the service to return to
+    	$s_id = $_GET['service_id'];
+		
 		$extradir = "";
 		$extradir = ( isset($_GET['service_id']) && !empty($_GET['service_id']) )
 			? "index/".$_GET['service_id'] : "";
@@ -312,7 +318,7 @@ class Messages_Controller extends Admin_Controller
 				$message->save($id);
 			}
         }
-		url::redirect(url::base().'admin/messages/'.$extradir);
+		url::redirect(url::base().'admin/messages/index/'.$s_id);
     }
 
     /**
