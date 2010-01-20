@@ -491,6 +491,7 @@ class Reports_Controller extends Main_Controller {
 		// Javascript Header
 		$this->template->header->map_enabled = TRUE;
 		$this->template->header->datepicker_enabled = TRUE;
+		$this->template->header->treeview_enabled = TRUE;
 		$this->template->header->js = new View('reports_submit_js');
 		$this->template->header->js->default_map = Kohana::config('settings.default_map');
 		$this->template->header->js->default_zoom = Kohana::config('settings.default_zoom');
