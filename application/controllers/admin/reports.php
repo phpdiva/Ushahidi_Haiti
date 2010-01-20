@@ -380,9 +380,13 @@ class Reports_Controller extends Admin_Controller
 		//XXX: fix _get_thumbnails
 		$this->template->content->incident = $this->_get_thumbnails($id);
 		
+		$smet = FALSE; // whether we are from the SMS/Email or Twitter views
+		
 		// Are we creating this report from SMS/Email/Twitter?
 		// If so retrieve message
 		if ( isset($_GET['mid']) && !empty($_GET['mid']) ) {
+			
+			$smet = TRUE;
 			
 			$message_id = $_GET['mid'];
 			$service_id = "";
@@ -830,7 +834,14 @@ class Reports_Controller extends Admin_Controller
 				}
 				else 						// Save and close
 				{
-					url::redirect('admin/reports/');
+					if ($smet) // return to messages view
+					{
+						url::redirect('admin/messages/');
+					}
+					else // return to reports view
+					{
+						url::redirect('admin/reports/');
+					}
 				}
 	        }
 	
@@ -918,7 +929,14 @@ class Reports_Controller extends Admin_Controller
 				else
 				{
 					// Redirect
-					url::redirect('admin/reports/');
+					if ($smet) // return to messages view
+					{
+						url::redirect('admin/messages/');
+					}
+					else // return to reports view
+					{
+						url::redirect('admin/reports/');
+					}
 				}		
 				
 			}
