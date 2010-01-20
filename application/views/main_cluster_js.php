@@ -698,7 +698,7 @@
 			var graphData = dailyGraphData[0][currentCat];
 
 			// plot hourly incidents when period is within 2 days
-			if ((endTime - startTime) / (1000 * 60 * 60 * 24) <= 2) {
+			if ((endTime - startTime) / (1000 * 60 * 60 * 24) <= 3) {
 			    graphData = hourlyGraphData[0][currentCat];
 			} else if ((endTime - startTime) / (1000 * 60 * 60 * 24) <= 124) { 
 			    // weekly if period > 2 months

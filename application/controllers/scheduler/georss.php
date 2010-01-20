@@ -15,7 +15,7 @@
 
 class Georss_Controller extends Controller
 {
-	var $items = 50;	// Size of RSS Feed
+	var $items = 100;	// Size of RSS Feed
 	
 	
 	
@@ -41,7 +41,8 @@ class Georss_Controller extends Controller
 		
 		//echo $last_message_date;
 		$settings = ORM::factory('settings', 1);		
-		$sms_rss = $settings->georss_feed."&only_phone=1&limit=50,".$this->items;	//."&uptots=".$last_message_date;
+		$sms_rss = $settings->georss_feed."&only_phone=1&limit=0,".$this->items;	//."&uptots=".$last_message_date;
+		echo $sms_rss;
 		$curl_handle = curl_init();
 		curl_setopt($curl_handle,CURLOPT_URL,$sms_rss);
 		curl_setopt($curl_handle,CURLOPT_CONNECTTIMEOUT,2); // Timeout
