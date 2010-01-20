@@ -177,27 +177,6 @@ $("#incident_ampm option[value='"+ampm+"']").attr("selected","true");
 												$this_col++;
 											}
 										}
-										/*
-									
-											
-											$li_class = (is_numeric($category_title[0]) AND ctype_alpha($category_title[1])) ? 'sub_category' : '';
-											echo "\n".'<li class="'.$li_class.'"><label>';
-											echo form::checkbox('incident_category[]', $category, $category_checked, ' class="check-box"');
-											echo "$category_title";
-											echo "</label></li>";
-											if ($this_col == $maxper_col || $i == count($categories)) 
-												print "</ul>\n";
-											if ($this_col < $maxper_col)
-											{
-												$this_col++;
-											} 
-											else 
-											{
-												$this_col = 1;
-											}
-											$i++;
-										}
-										*/
 										?>
 									</div>
 								</div>
