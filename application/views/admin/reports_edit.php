@@ -103,7 +103,7 @@
                   <?php print form::checkbox('incident_action_taken', '1', ($form['incident_action_taken'] == 1)); ?> Action Taken
                   <span>Check if action was taken and enter the action summary.</span>
                 </h4>
-                <textarea maxlength="255" name="incident_action_summary" id="incident_action_summary" style=" height: 60px;"><?php print html::specialchars($form['incident_action_summary']); ?></textarea>
+                <textarea name="incident_action_summary" id="incident_action_summary" style=" height: 60px;"><?php print html::specialchars($form['incident_action_summary']); ?></textarea>
               </div>
               <!-- / report is acted on -->
               

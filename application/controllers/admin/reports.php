@@ -575,7 +575,7 @@ class Reports_Controller extends Admin_Controller
 			$post->add_rules('incident_action_taken', 'numeric', 'length[0,1]');
 			// if "action taken" was checked, add summary rules.
 			if (isset($_POST['incident_action_taken']) && $_POST['incident_action_taken'] == true) {
-				$post->add_rules('incident_action_summary', 'required', 'length[0, 255]');
+				$post->add_rules('incident_action_summary', 'required');
 			}
 			
 			// Test to see if things passed the rule checks
