@@ -202,7 +202,7 @@
 					</form>
 				</div>
 				<!-- / searchform -->
-                <p style="float:left; margin:13px 5px 0 0;"><strong>Total Reports: <?php echo $reports_total ?></strong></p>
+                <p style="float:left; margin:5px 5px 0 0;"><a class="button btn_download" href="<?php echo url::base() . 'download/'; ?>"><span>Download reports (<?php echo $reports_total ?>)</span></a></p>
                 <a id="reports-rss" class="button btn_rss" href="<?php echo url::base() . 'feed/'; ?>"><span>Reports RSS</span></a>
 		
 			</div>
