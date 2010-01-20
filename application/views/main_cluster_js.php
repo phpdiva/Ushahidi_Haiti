@@ -71,7 +71,7 @@
 				maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 				});
 				
-			map.addLayers([google_st, google_sat, osm_sat]);
+			map.addLayers([osm_sat, google_st, google_sat]);
 			
 			
 			// Add Controls
