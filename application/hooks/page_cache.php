@@ -32,7 +32,9 @@ class hook_page_cache
 	
 	public function load_cache()
 	{
-		if ($cache = $this->cache->get('page_'.$this->gzip.'_'.$_SERVER['REQUEST_URI']))
+		// If this is a POST, disable cache
+		if ($cache = $this->cache->get('page_'.$this->gzip.'_'.$_SERVER['REQUEST_URI'])
+		 && !$_POST)
 		{
 			Kohana::render($cache);
 			exit;
@@ -45,6 +47,8 @@ class hook_page_cache
 	
 	public function save_cache()
 	{
+		// If controller is cachable - cache
+		// If this is an error page - DO NOT cache
 		if ( !empty(Kohana::$instance->is_cachable) && Kohana::$has_error == false )
 		{
 			$this->cache->set('page_'.$this->gzip.'_'.$_SERVER['REQUEST_URI'], Event::$data);

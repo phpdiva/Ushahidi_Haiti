@@ -21,6 +21,9 @@ class Api_Controller extends Controller {
 	private $error_messages; // validation error messages
 	private $messages = array(); // form validation error messages
 	
+	// Cache this controller
+	public $is_cachable = TRUE;
+	
 	/**
 	 * constructor
 	*/

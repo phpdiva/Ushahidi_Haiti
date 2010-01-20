@@ -115,7 +115,7 @@
 			});
 			
 			// Create the single marker layer
-			var markers = new OpenLayers.Layer.GML("single report", "<?php echo url::base() . 'json/?i=' . $incident_id; ?>", 
+			var markers = new OpenLayers.Layer.GML("single report", "<?php echo url::base() . 'json_cluster/single/' . $incident_id; ?>",
 			{
 				format: OpenLayers.Format.GeoJSON,
 				projection: map.displayProjection,
@@ -135,7 +135,7 @@
 			myPoint.transform(proj_4326, map.getProjectionObject());
 			
 			// display the map centered on a latitude and longitude (Google zoom levels)
-			map.setCenter(myPoint, 8);
+			map.setCenter(myPoint, 14);
 			
 			
 			function onPopupClose(evt) {
