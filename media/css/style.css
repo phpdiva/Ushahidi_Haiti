@@ -1632,7 +1632,7 @@ ul.pager li a.active {background:#f2f7fa;}
 /*-gallery-*/
 .gallery {
 	overflow:hidden;
-	width:100%;
+	width:93%;
 	padding:0 0 10px;
 }
 .gallery .gal-nav {

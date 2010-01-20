@@ -23,6 +23,9 @@ class Api_Controller extends Controller {
 	private $cache_ttl; // API request cache TTL. @todo: move this into config somewhere?
 	private $cache; // Instance of cache
 	
+	// Cache this controller
+	public $is_cachable = TRUE;
+	
 	/**
 	 * constructor
 	*/
