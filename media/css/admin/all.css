@@ -1451,6 +1451,18 @@ table.p_replace td.special{
 }
 .new_reply{
 	background-color:#FDD0C7;
+	padding:5px;
+}
+.new_lock{
+	background-color:#FFFFCC;
+	padding:5px;
+}
+.new_lock_user{
+	margin-top:5px;
+	padding:5px;
+	background-color:#FDFB77;
+	font-size:90%;
+	font-weight:bold;
 }
 .replies{
 	display:none;

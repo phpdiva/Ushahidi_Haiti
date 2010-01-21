@@ -42,9 +42,63 @@
 		
 		function showReplies(id)
 		{
-			if (id) {
-				$.get("<?php echo url::base() . 'admin/messages/read/' ?>"+id);
+			if (id)
+			{
 				$('#replies_' + id).toggle(400);
+			}
+		}
+		
+		function showRead(id)
+		{
+			if (id)
+			{
+				$.get("<?php echo url::base() . 'admin/messages/read/' ?>"+id);
+				$('#post_' + id).effect("highlight", {}, 2000);
+				$('#post_' + id).removeClass("new_reply");
+			}
+		}
+		
+		function showLock(id)
+		{
+			if (id)
+			{
+				$.post("<?php echo url::base() . 'admin/messages/lock/' ?>"+id, { },
+					function(data)
+					{
+						if (data.status == 'success')
+						{
+							alert(data.message);
+							$('#post_' + id).addClass("new_lock");
+							$('#lock_message_' + id).html('<a href="javascript:showUnlock('+id+')">+UNLock</a>');
+						}
+						else
+						{
+							alert(data.message);
+						}
+					}, "json");
+			}
+		}
+		
+		function showUnlock(id)
+		{
+			if (id)
+			{
+				$.post("<?php echo url::base() . 'admin/messages/unlock/' ?>"+id, { },
+					function(data)
+					{
+						if (data.status == 'success')
+						{
+							alert(data.message);
+							$('#post_' + id).effect("highlight", {}, 2000);
+							$('#post_' + id).removeClass("new_lock");
+							$('#lock_message_' + id).html('<a href="javascript:showLock('+id+')">+Lock</a>');
+							$('#lock_' + id).remove();
+						}
+						else
+						{
+							alert(data.message);
+						}
+					}, "json");
 			}
 		}
 		

@@ -73,7 +73,7 @@ class Georss_Controller extends Controller
 			$category = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'categorization');
 				$category = trim($category[0]['data']);
 			$message_sms = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'sms');
-				$message_sms = $date.": ".trim($message_sms[0]['data']);	
+				$message_sms = trim($message_sms[0]['data'])."\n\nTime:".$date;	
 			$message_notes = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'notes');
 				$message_notes = trim($message_notes[0]['data']);
 			$message_detail = $message_notes."\n~~~~~~~~~~~~~~~~~\n";

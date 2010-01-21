@@ -1,7 +1,7 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
 /**
-* Model for Messages
+* Model for Messages Locks
  *
  * PHP version 5
  * LICENSE: This source file is subject to LGPL license 
@@ -9,16 +9,15 @@
  * http://www.gnu.org/copyleft/lesser.html
  * @author     Ushahidi Team <team@ushahidi.com> 
  * @package    Ushahidi - http://source.ushahididev.com
- * @module     Message Model  
+ * @module     Message_Lock Model  
  * @copyright  Ushahidi - http://www.ushahidi.com
  * @license    http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License (LGPL) 
  */
 
-class Message_Model extends ORM
+class Message_Lock_Model extends ORM
 {
-	protected $has_many = array('message_lock');
-	protected $belongs_to = array('incident','reporter','location');
+	protected $belongs_to = array('message', 'user');
 	
 	// Database table name
-	protected $table_name = 'message';
+	protected $table_name = 'message_lock';
 }

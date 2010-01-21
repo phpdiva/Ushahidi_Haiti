@@ -14,13 +14,18 @@
  * @license    http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License (LGPL)
  */
 
+define("LOCK_PERIOD", 1800); // 30 MINUTES
+
 class Messages_Controller extends Admin_Controller
-{
+{	
 	function __construct()
 	{
 		parent::__construct();
 
 		$this->template->this_page = 'messages';
+		
+		// REMOVE ALL LOCKS
+		$this->_remove_locks();
 	}
 
 	/**
@@ -268,10 +273,101 @@ class Messages_Controller extends Admin_Controller
 			$message = ORM::factory('message')->find($message_id);
 			if ($message->loaded)
 			{
-				$message->message_reply = 0;
+				$message->message_read = 0;
 				$message->save($message_id);
 			}
 		}
+	}
+	
+	/**
+	* Lock a message while editing
+    */
+	function lock($message_id = 0)
+	{		
+		$this->template = "";
+		$this->auto_render = FALSE;
+		
+		// Is the Admin Logged In? Just Double Check
+		$user_id = Auth::instance()->logged_in()
+		     ? $_SESSION['auth_user']->id
+		     : 0;
+		
+		// Current Time Timestamp
+		$timestamp = time();
+		
+		if ($message_id && $user_id)
+		{
+			$message = ORM::factory('message')->find($message_id);
+			if ($message->loaded)
+			{
+				$messagelock = ORM::factory('message_lock')
+					->where('message_id', $message_id)
+					->where('user_id', $user_id)
+					->where(' ( ('.$timestamp.' - lock_date) < '.LOCK_PERIOD.' ) ')
+					->find();
+				if (!$messagelock->loaded)
+				{ // Lock Doesn't Exist - Create New One
+					$messagelock->message_id = $message_id;
+					$messagelock->user_id = $user_id;
+					$messagelock->lock_date = $timestamp;
+					$messagelock->save();
+					
+					echo json_encode(array("status"=>"success", "message"=>"Lock Created. This Lock Will be held for 30 minutes or until you release it"));
+				}
+				else
+				{ // Lock Exists - return Error
+					echo json_encode(array("status"=>"error", "message"=>"Lock Already Exists For This Message"));
+				}
+			}
+		}
+		else
+		{
+			echo json_encode(array("status"=>"error", "message"=>"Message Doesn't Exist!"));
+		}
+	}
+	
+	/**
+	* Unlock a message
+    */
+	function unlock($message_id = 0)
+	{
+		$this->template = "";
+		$this->auto_render = FALSE;
+		
+		// Is the Admin Logged In? Just Double Check
+		$user_id = Auth::instance()->logged_in()
+		     ? $_SESSION['auth_user']->id
+		     : 0;
+		
+		if ($message_id && $user_id)
+		{
+			$message = ORM::factory('message')->find($message_id);
+			if ($message->loaded)
+			{
+				$messagelock = ORM::factory('message_lock')
+					->where('message_id', $message_id)
+					->where('user_id', $user_id)
+					->delete_all();
+				
+				echo json_encode(array("status"=>"success", "message"=>"Message Unlocked!"));
+			}
+		}
+		else
+		{
+			echo json_encode(array("status"=>"error", "message"=>"Message Doesn't Exist!"));
+		}
+	}
+	
+	/**
+	* Delete Old Lock
+    */
+	private function _remove_locks()
+	{
+		// Current Time Timestamp
+		$timestamp = time();
+		ORM::factory('message_lock')
+			->where(' ( ('.$timestamp.' - lock_date) > '.LOCK_PERIOD.' ) ')
+			->delete_all();
 	}
 
     /**
@@ -279,10 +375,8 @@ class Messages_Controller extends Admin_Controller
      */
     public function delete($id = FALSE,$dbtable='message')
     {
-    	// get the service to return to
-    	$s_id = $_GET['service_id'];
-		
-        $extradir = "";
+		// Get the Service ID and Page to Return To
+		$extradir = "";
 		$extradir = ( isset($_GET['service_id']) && !empty($_GET['service_id']) )
 			? "index/".$_GET['service_id'] : "";
 		$extradir .= ( isset($_GET['page']) && !empty($_GET['page']) )
@@ -293,7 +387,7 @@ class Messages_Controller extends Admin_Controller
 			$message->message_trash = 1;
 			$message->save($id);
 		}
-		url::redirect(url::base().'admin/messages/index/'.$s_id );
+		url::redirect(url::base().'admin/messages/index/'.$extradir );
     }
 
     /**
@@ -301,9 +395,7 @@ class Messages_Controller extends Admin_Controller
      */
     private function _deleteMessages($ids,$dbtable='message')
     {
-    	// get the service to return to
-    	$s_id = $_GET['service_id'];
-		
+		// Get the Service ID and Page to Return To
 		$extradir = "";
 		$extradir = ( isset($_GET['service_id']) && !empty($_GET['service_id']) )
 			? "index/".$_GET['service_id'] : "";
@@ -318,7 +410,7 @@ class Messages_Controller extends Admin_Controller
 				$message->save($id);
 			}
         }
-		url::redirect(url::base().'admin/messages/index/'.$s_id);
+		url::redirect(url::base().'admin/messages/index/'.$extradir);
     }
 
     /**

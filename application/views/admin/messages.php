@@ -112,76 +112,126 @@
 									$message_date = date('Y-m-d', strtotime($message->message_date));
 									$message_type = $message->message_type;
 									$location_id = $message->location_id;
+									$message_read = $message->message_read;
 									$message_reply = $message->message_reply;
+									
+									// Any Replies?
 									$reply_count = $replies->where('parent_id', $message_id)
 										->count_all();
+										
+									// Any Locks?
+									$username = "";
+									$user_id = "";
+									if ( count($message->message_lock) > 0 )
+									{
+										$locked = TRUE;
+										foreach ($message->message_lock as $message_lock)
+										{
+											$username = $message_lock->user->name;
+											$user_id = $message_lock->user_id;
+										}
+									}
+									else
+									{
+										$locked = FALSE;
+									}
 									?>
 									<tr>
 										<td class="col-1"><input name="message_id[]" value="<?php echo $message_id; ?>" type="checkbox" class="check-box"/></td>
 										<td class="col-2">
 											<div class="post">
-												<p <?php
-												if ($message_reply)
+												<div id="post_<?php echo $message_id; ?>" <?php
+												echo " class =\" ";
+												if ($locked)
 												{
-													echo " class=\"new_reply\" ";
+													echo "new_lock ";
 												}
-												?>><?php echo $message_description; ?></p>
-												<p><?php
-												if ($message_detail)
-												{?><a href="javascript:preview('message_preview_<?php echo $message_id?>')">+Read More...</a>&nbsp;&nbsp;|&nbsp;&nbsp;<?php
+												elseif (!$message_read)
+												{
+													echo "new_reply ";
 												}
-												
-												if ($service_id == 1 && $message_type == 1) {
-												?><a href="javascript:showReply('reply_<?php echo $message_id; ?>')" class="more">+Send Reply</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:showReplies('<?php echo $message_id; ?>')" class="more">+View Replies</a> (<?php echo $reply_count; ?>)<?php } ?></p>
+												echo "\"";
+												?>><?php echo $message_description; ?>
 												<?php
-												if ($message_detail)
+												if ($locked)
 												{
-													?>
-													<div id="message_preview_<?php echo $message_id?>" class="message_more">
-														<?php echo $message_detail; ?>
-													</div>
-													<?php
+													echo "<div id=\"lock_".$message_id."\" class=\"new_lock_user\">Locked By ".$username."</div>";
 												}
 												?>
+												</div>
 												<?php
-												if ($service_id == 1 && $message_type == 1)
+												if ($locked && $user_id != $_SESSION['auth_user']->id)
 												{
-													?>
-													<div id="replies_<?php echo $message_id; ?>" class="replies">
-														<?php
-														$message_replies = $replies->where('parent_id', $message_id)
-															->orderby('message_date', 'desc')
-															->find_all();
-														
-														foreach ($message_replies as $reply)
-														{
-															$reply_type = $reply->message_type;
-															$reply_message = $reply->message;
-															$reply_detail = $reply->message_detail;
-															echo "<div class=\"reply_message";
-															if ($reply_type == 2)
-																echo " reply_message_out";
-															echo "\">&middot;&nbsp;".$reply_message;
-															if ($reply_detail)
-																echo "<BR>~~~<BR>".$reply_detail;
-															echo "</div>";
-														}
-														?>
-													</div>
-													<div id="reply_<?php echo $message_id; ?>" class="reply">
-														<?php print form::open(url::base() . 'admin/messages/send/',array('id' => 'newreply_' . $message_id,
-														 	'name' => 'newreply_' . $message_id)); ?>
-														<div class="reply_can">
-															<a href="javascript:cannedReply('1', 'message_<?php echo $message_id; ?>')">+Location (EN)</a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('2', 'message_<?php echo $message_id; ?>')">+More Information(EN)</a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('3', 'message_<?php echo $message_id; ?>')">+Location (KY)</a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('4', 'message_<?php echo $message_id; ?>')">+More Information (KY)</a></div>
-														<div id="replyerror_<?php echo $message_id; ?>" class="reply_error"></div>
-														<div class="reply_input"><?php print form::input('message_' .  $message_id, '', ' class="text long2" onkeyup="limitChars(this.id, \'160\', \'replyleft_' . $message_id . '\')" '); ?></div>
-														<div class="reply_input"><a href="javascript:sendMessage('<?php echo $message_id; ?>' , 'sending_<?php echo $message_id; ?>')" title="Submit Message"><img src="<?php echo url::base() ?>media/img/admin/btn-send.gif" alt="Submit" border="0" /></a></div>
-														<div class="reply_input" id="sending_<?php echo $message_id; ?>"></div>
-														<div style="clear:both"></div>
-														<?php print form::close(); ?>
-														<div id="replyleft_<?php echo $message_id; ?>" class="replychars"></div>
-													</div>
+													echo "";
+												}
+												else
+												{
+													echo "<p>";
+													if ($message_detail)
+													{?><a href="javascript:preview('message_preview_<?php echo $message_id?>')">+Read More...</a><?php
+													}
+
+													if ($service_id == 1 && $message_type == 1) {
+													?>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:showReply('reply_<?php echo $message_id; ?>')" class="more">+Send Reply</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:showReplies('<?php echo $message_id; ?>')" class="more">+View Replies</a> (<?php echo $reply_count; ?>)<?php } ?>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="javascript:showRead('<?php echo $message_id; ?>')" class="more">+Mark As Read</a>&nbsp;&nbsp;<?php
+													if ($locked)
+													{
+														?>|&nbsp;&nbsp;<span id="lock_message_<?php echo $message_id; ?>"><a href="javascript:showUnlock('<?php echo $message_id; ?>')">+UNLock<?php
+													}
+													else
+													{
+														?>|&nbsp;&nbsp;<span id="lock_message_<?php echo $message_id; ?>"><a href="javascript:showLock('<?php echo $message_id; ?>')">+Lock<?php
+													}
+													?></a></span></p>
 													<?php
+													if ($message_detail)
+													{
+														?>
+														<div id="message_preview_<?php echo $message_id?>" class="message_more">
+															<?php echo $message_detail; ?>
+														</div>
+														<?php
+													}
+													?>
+													<?php
+													if ($service_id == 1 && $message_type == 1)
+													{
+														?>
+														<div id="replies_<?php echo $message_id; ?>" class="replies">
+															<?php
+															$message_replies = $replies->where('parent_id', $message_id)
+																->orderby('message_date', 'desc')
+																->find_all();
+
+															foreach ($message_replies as $reply)
+															{
+																$reply_type = $reply->message_type;
+																$reply_message = $reply->message;
+																$reply_detail = $reply->message_detail;
+																echo "<div class=\"reply_message";
+																if ($reply_type == 2)
+																	echo " reply_message_out";
+																echo "\">&middot;&nbsp;".$reply_message;
+																if ($reply_detail)
+																	echo "<BR>~~~<BR>".$reply_detail;
+																echo "</div>";
+															}
+															?>
+														</div>
+														<div id="reply_<?php echo $message_id; ?>" class="reply">
+															<?php print form::open(url::base() . 'admin/messages/send/',array('id' => 'newreply_' . $message_id,
+															 	'name' => 'newreply_' . $message_id)); ?>
+															<div class="reply_can">
+																<a href="javascript:cannedReply('1', 'message_<?php echo $message_id; ?>')">+Location (EN)</a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('2', 'message_<?php echo $message_id; ?>')">+More Information(EN)</a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('3', 'message_<?php echo $message_id; ?>')">+Location (KY)</a>&nbsp;&nbsp;&nbsp;<a href="javascript:cannedReply('4', 'message_<?php echo $message_id; ?>')">+More Information (KY)</a></div>
+															<div id="replyerror_<?php echo $message_id; ?>" class="reply_error"></div>
+															<div class="reply_input"><?php print form::input('message_' .  $message_id, '', ' class="text long2" onkeyup="limitChars(this.id, \'160\', \'replyleft_' . $message_id . '\')" '); ?></div>
+															<div class="reply_input"><a href="javascript:sendMessage('<?php echo $message_id; ?>' , 'sending_<?php echo $message_id; ?>')" title="Submit Message"><img src="<?php echo url::base() ?>media/img/admin/btn-send.gif" alt="Submit" border="0" /></a></div>
+															<div class="reply_input" id="sending_<?php echo $message_id; ?>"></div>
+															<div style="clear:both"></div>
+															<?php print form::close(); ?>
+															<div id="replyleft_<?php echo $message_id; ?>" class="replychars"></div>
+														</div>
+														<?php
+													}
 												}
 												?>
 											</div>
@@ -206,12 +256,19 @@
 										<td class="col-4">
 											<ul>
 												<?php
-												if ($incident_id != 0 && $message_type != 2) {
-													echo "<li class=\"none-separator\"><a href=\"". url::base() . 'admin/reports/edit/' . $incident_id ."\" class=\"status_yes\"><strong>View Report</strong></a></li>";
-												}
-												elseif ($message_type != 2)
+												if ($locked)
 												{
-													echo "<li class=\"none-separator\"><a href=\"". url::base() . 'admin/reports/edit?mid=' . $message_id ."\">Create Report?</a></li>";
+													echo "<li class=\"none-separator\"><a href=\"#\">Locked</a></li>";
+												}
+												else
+												{
+													if ($incident_id != 0 && $message_type != 2) {
+														echo "<li class=\"none-separator\"><a href=\"". url::base() . 'admin/reports/edit/' . $incident_id ."\" class=\"status_yes\"><strong>View Report</strong></a></li>";
+													}
+													elseif ($message_type != 2)
+													{
+														echo "<li class=\"none-separator\"><a href=\"". url::base() . 'admin/reports/edit?mid=' . $message_id ."\">Create Report?</a></li>";
+													}
 												}
 												?>
 												<li>
