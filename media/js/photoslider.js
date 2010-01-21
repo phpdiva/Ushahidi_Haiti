@@ -78,7 +78,7 @@ FOTO.Slider = {
 			img.src = this.getUrlFromId(key,i,true);
 
 			//attach the image to the div
-			div.append(img);
+			div.append(img).append('&nbsp;');
 
 			//attach the div to our thumbnail bar
 			$(bar).append(div);

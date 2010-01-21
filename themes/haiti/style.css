@@ -103,6 +103,12 @@ Author Email: david@ushahidi.com
 		div.action-taken { margin: 1em 0; padding: 1em; background: #fffbe0; border: solid 2px #FFF19F; line-height: 1.3em; }
 		#action-taken-badge { font-size: 1.2em; background: #009200; font-weight: bold; color: #fff; padding: 0.25em 0.5em; margin: 0 1em 0 0; float: left; }
 
+/* Images / Videos slideshow on reports page */
+	.photoslider_thumb { border-width: 1px; background: #efefef; line-height: 45px; height: 45px; text-align: center; width: 55px; vertical-align: middle; font-size: 0px; }
+	.photoslider_thumb img { vertical-align: middle; }
+	.gallery .gal-nav a.btn-prev, .gallery .gal-nav a.btn-next { margin-top: 23px; cursor: pointer; }
+
+
 /* Categories on submit report page */
 	#reportForm .report_category ul ul { width: auto; }
 	#reportForm .report_category ul li.sub_category { padding-left: 47px; }
