@@ -315,6 +315,8 @@ class Reports_Controller extends Admin_Controller
 			'incident_information' => '',
 			'incident_action_taken' => '',
 			'incident_action_summary' => '',
+			'incident_actionable' => '',
+			'incident_custom_phone' => '',
 	    );
 		
 		//  copy the form as errors, so the errors will be stored with keys corresponding to the form field names
@@ -577,6 +579,8 @@ class Reports_Controller extends Admin_Controller
 			if (isset($_POST['incident_action_taken']) && $_POST['incident_action_taken'] == true) {
 				$post->add_rules('incident_action_summary', 'required');
 			}
+			$post->add_rules('incident_actionable', 'numeric', 'length[0,1]');
+			$post->add_rules('incident_custom_phone', 'numeric', 'length[0,50]');
 			
 			// Test to see if things passed the rule checks
 	        if ($post->validate())
@@ -645,6 +649,8 @@ class Reports_Controller extends Admin_Controller
 				$incident->incident_action_taken = $post->incident_action_taken;
 				// Only save action taken summary, if "action taken" was checked.
 				$incident->incident_action_summary = ($incident->incident_action_taken) ? $post->incident_action_summary : '';
+				$incident->incident_actionable = $post->incident_actionable;
+				$incident->incident_custom_phone = $post->incident_custom_phone;
 				
 				//Save
 				$incident->save();
@@ -921,6 +927,8 @@ class Reports_Controller extends Admin_Controller
 						'incident_information' => $incident->incident_information,
 						'incident_action_taken' => $incident->incident_action_taken,
 						'incident_action_summary' => $incident->incident_action_summary,
+						'incident_actionable' => $incident->incident_actionable,
+						'incident_custom_phone' => $incident->incident_custom_phone,
 				    );
 					
 					// Merge To Form Array For Display
