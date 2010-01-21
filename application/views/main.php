@@ -75,27 +75,41 @@
 							
 							<br />
 						
-							<!-- additional content -->
+                        <!-- 
+                        SMS/Text Local: 4636  
+                        SMS/Text International: +44 762 480 2524
+                        
+                        Email: Haiti@Ushahidi.com
+                        
+                        Twittter: #Haiti or #HaitiQuake
+                        
+                        Web Form: Submit Report -->
+						
+                        	<!-- additional content -->
 							<div class="additional-content">
 								<h5><?php echo Kohana::lang('ui_main.how_to_report'); ?></h5>
 								<ol>
 									<?php if (!empty($phone_array)) 
-									{ ?><li>
+									{ ?><li class="report r-sms">
 									
 										<?php echo Kohana::lang('ui_main.report_option_1-local').' '.$sms_no2."."; ?> <br />
 										<?php echo Kohana::lang('ui_main.report_option_1-international').' '.$sms_no1."."; ?>
                                         
                                     </li><?php } ?>
+									
 									<?php if (!empty($report_email)) 
-									{ ?><li><?php echo Kohana::lang('ui_main.report_option_2'); ?> <a href="mailto:<?php echo $report_email?>"><?php echo $report_email?></a></li><?php } ?>
+									{ ?><li class="report r-email"><?php echo Kohana::lang('ui_main.report_option_2'); ?> <a href="mailto:<?php echo $report_email?>"><?php echo $report_email?></a></li><?php } ?>
+									
 									<?php if (!empty($twitter_hashtag_array)) 
-												{ ?><li><?php echo Kohana::lang('ui_main.report_option_3'); ?> <?php foreach ($twitter_hashtag_array as $twitter_hashtag) {
+									{ ?><li class="report r-twitter"><?php echo Kohana::lang('ui_main.report_option_3'); ?> <?php foreach ($twitter_hashtag_array as $twitter_hashtag) {
 									echo "<strong>". $twitter_hashtag ."</strong>";
 									if ($twitter_hashtag != end($twitter_hashtag_array)) {
 										echo " or ";
 									}
 									} ?></li><?php } ?>
-									<li><a href="<?php echo url::base() . 'reports/submit/'; ?>"><?php echo Kohana::lang('ui_main.report_option_4'); ?></a></li>
+									
+                                    <li class="report r-online"><?php echo Kohana::lang('ui_main.report_option_4'); ?> <a href="<?php echo url::base() . 'reports/submit/'; ?>">Submit Report
+                                    </a></li>
 								</ol>					
 		
 							</div>
