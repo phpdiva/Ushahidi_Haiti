@@ -257,10 +257,13 @@
 						}
 						
 						// Custom Pages
+						// CB: I am going to hack this because it's a special case.  
+						// PM wants the page name to be shorter and change based on the language.
 						foreach ($pages as $page)
 						{
 							$this_active = ($this_page == 'page_'.$page->id) ? 'class="active"' : '';
-							echo "<li><a href=\"".url::base()."page/index/".$page->id."\" ".$this_active.">".$page->page_tab."</a></li>";
+							echo "<li><a href=\"".url::base()."page/index/".$page->id."\" ".$this_active.">".Kohana::lang('ui_main.about')."</a></li>";
+							//old: echo "<li><a href=\"".url::base()."page/index/".$page->id."\" ".$this_active.">".$page->page_tab."</a></li>";
 						}
 						?>
 					</ul>
