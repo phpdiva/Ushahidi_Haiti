@@ -832,7 +832,7 @@ ul.pager li a.active {background:#f2f7fa;}
 }
 .report-form textarea{
 	width:368px;
-	height:260px;
+	height:175px;
 	margin:0;
 	padding:4px 0 4px 5px;
 	border:2px solid #d9d9d9;
@@ -930,24 +930,17 @@ a.new-cat:hover, a.show-messages:hover;{ text-decoration:none;}
 	overflow:hidden;
 	padding:0 0 18px;
 }
-.category ul{
-	width:167px;
+.category ul {
+	width:186px;
 	float:left;
 	margin:0;
-	padding:11px 0 0;
+	padding:0;
 }
-.category ul li{
-	padding:0 0 7px 18px;
-	width:149px;
-	float:left;
-	overflow:hidden;
-	list-style:none;
-}
-.category ul li label{
-	color:#555;
-	font-size:11px;
-}
-.check-box {
+
+.category ul li { font-size:11px; }
+
+.category ul ul { background-color:transparent; }
+/*.check-box {
 	margin:0;
 	padding:0;
 	width:15px;
@@ -957,7 +950,7 @@ a.new-cat:hover, a.show-messages:hover;{ text-decoration:none;}
 .category ul li label span{
 	padding:0 0 0 5px;
 	float:left;
-}
+}*/
 .category_add {
 	background:#f5f5f5;
 	width:377px;

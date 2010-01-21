@@ -99,6 +99,14 @@
         
         toggleActionSummary();
         $("#incident_action_taken").click(toggleActionSummary);
+        
+        // Category treeview
+          $("#category-column-1,#category-column-2").treeview({
+            persist: "location",
+            collapsed: true,
+            unique: false
+          });
+        
 		}); 
 		
     // Enable / disable action summary text area if action was taken.

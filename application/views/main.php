@@ -266,7 +266,7 @@
                                 </td>
                                 
                                 <td class="mm-flickr">
-                                	<h3>On Flickr</h3>
+                                	<h3 style="margin-bottom:10px">On Flickr</h3>
                                     <?php 
 										foreach( (array)$haiti_photos['photo'] as $photo ) {
 											print '<a href="http://www.flickr.com/photos/'. $photo['owner'] . '/' . $photo['id'] . '/" ><img src="'.$flickr->buildPhotoURL($photo,'Square').'" alt="'.$photo['title'].'"/></a>';
@@ -276,77 +276,9 @@
                                 
                                 
 								<td class="mm-youtube">
-                                <h3>Person Finder</h3>
-                                <iframe src="http://haiticrisis.appspot.com/?small=yes" width="300" height="300" frameborder="0" style="border: dashed 2px #77c; background:#fff;"></iframe>
-								
-								<?php /*
-								<h3>On Youtube</h3>
-                                	 <!-- ++Begin Video Search Control Wizard Generated Code++ -->
-                      <!--
-                      // Created with a Google AJAX Search Wizard
-                      // http://code.google.com/apis/ajaxsearch/wizards.html
-                      -->
-                    
-                      <!--
-                      // The Following div element will end up holding the Video Search Control.
-                      // You can place this anywhere on your page.
-                      -->
-                      <div id="videoControl">
-                        <span style="color:#676767;font-size:11px;margin:10px;padding:4px;">Loading...</span>
-                      </div>
-                    
-                      <!-- Ajax Search Api and Stylesheet
-                      // Note: If you are already using the AJAX Search API, then do not include it
-                      //       or its stylesheet again
-                      //
-                      // The Key Embedded in the following script tag is designed to work with
-                      // the following site:
-                      // http://expedition206.ushahidi.com
-                      -->
-                      <script src="http://www.google.com/uds/api?file=uds.js&v=1.0&source=uds-vsw&key=ABQIAAAAEpUYLv4t-brwwu8rDAymgxTWjTLT3zdWGXXwZvlBnEfZOenXThRCxtv_jeRs-mzMvG9xlM-FWWj7bA"
-                        type="text/javascript"></script>
-                      <style type="text/css">
-                        @import url("http://www.google.com/uds/css/gsearch.css");
-						.searchForm_gsvsc,.footerBox_gsvsc,.tagStackBox_gsvsc { display:none; } 
-						.results_gsvsc div.video-result_gsvsc { border:2px solid #0924c2; }
-                      </style>
-                    
-                      <!-- Video Search Control and Stylesheet -->
-                      <script type="text/javascript">
-                        window._uds_vsw_donotrepair = true;
-                      </script>
-                      <script src="http://www.google.com/uds/solutions/videosearch/gsvideosearch.js?mode=new"
-                        type="text/javascript"></script>
-                      <style type="text/css">
-                        @import url("http://www.google.com/uds/solutions/videosearch/gsvideosearch.css");
-						.results_gsvsc div.video-result_gsvsc { border:2px solid #0924c2; margin:8px; height:75px; overflow:hidden; }
-						.results_gsvsc table.video-result-table_gsvsc-2 { border-collapse:collapse; }
-						.results_gsvsc table.video-result-table_gsvsc-2 td { padding:0; }
-						.results_gsvsc table.video-result-table_gsvsc-2 td.video-result-cell_gsvsc-0 div { float:none; }
-						
-                      </style>
-                    
-                      <script type="text/javascript">
-                        function LoadVideoSearchControl() {
-                          var options = {
-                            twoRowMode : false,
-                            largeResultSet: true
-                          };
-                          var videoSearch = new GSvideoSearchControl(
-                                                  document.getElementById("videoControl"),
-                                                  [{ query : "earthquake in haiti"}], null, null, options);
-						  	
-							// Hide Google Video Widget Search Box
-            				$('.searchForm_gsvsc').hide();
-                        }
-                        // arrange for this function to be called during body.onload
-                        // event processing
-                        GSearch.setOnLoadCallback(LoadVideoSearchControl);
-                      </script>
-                    <!-- --End Video Search Control Wizard Generated Code-- -->
-                                
-								*/ ?>
-                                </td>
+                                    <h3>Person Finder</h3>
+                                    <iframe src="http://haiticrisis.appspot.com/?small=yes" width="300" height="368" frameborder="0" style="border: dashed 2px #77c; background:#fff;"></iframe>
+								</td>
                             </tr>
                         </table>
                     </div>
