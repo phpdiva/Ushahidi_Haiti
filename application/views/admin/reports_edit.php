@@ -96,6 +96,15 @@
 								<h4>Description <span>Please include as much detail as possible.</span></h4>
 								<?php print form::textarea('incident_description', $form['incident_description'], ' rows="12" cols="40"') ?>
 							</div>
+							
+				<!-- report is actionable -->
+				<div class="row">
+					<h4 style="color: #009200;">
+						<?php print form::checkbox('incident_actionable', '1', ($form['incident_actionable'] == 1)); ?> Actionable
+						<span>Check if responders can act on this information.</span>
+					</h4>
+				</div>
+				<!-- / report is actionable -->
               
               <!-- report is acted on -->
               <div class="row">
@@ -106,6 +115,16 @@
                 <textarea name="incident_action_summary" id="incident_action_summary" style=" height: 60px;"><?php print html::specialchars($form['incident_action_summary']); ?></textarea>
               </div>
               <!-- / report is acted on -->
+              
+				<!-- enter an override custom phone number -->
+				<div class="row">
+					<h4>
+						Custom Phone Number
+						<span>Only use if not creating directly via SMS.</span>
+					</h4>
+					<?php print form::input('incident_custom_phone', $form['incident_custom_phone'], ' class="text"'); ?>
+				</div>
+				<!-- / enter an override custom phone number -->
               
 							<?php
 							if (!($id))
@@ -290,6 +309,8 @@
 									<?php print form::input('location_name', $form['location_name'], ' class="text long"'); ?>
 								</div>
 							</div>
+							
+							
 				
 				
 							<!-- News Fields -->
