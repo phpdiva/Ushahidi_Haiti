@@ -609,7 +609,7 @@ class Reports_Controller extends Admin_Controller
 					$incident_date=$incident_date[2]."-".$incident_date[0]."-".$incident_date[1];
 					
 				$incident_time = $post->incident_hour . ":" . $post->incident_minute . ":00 " . $post->incident_ampm;
-				$incident->incident_date = $incident_date . " " . $incident_time;
+				$incident->incident_date = date( "m/d/y H:i:s", strtotime($incident_date . " " . $incident_time) );
 				// Is this new or edit?
 				if ($id)	// edit
 				{
@@ -908,7 +908,7 @@ class Reports_Controller extends Admin_Controller
 						'incident_date' => date('m/d/Y', strtotime($incident->incident_date)),
 						'incident_hour' => date('h', strtotime($incident->incident_date)),
 						'incident_minute' => date('i', strtotime($incident->incident_date)),
-						'incident_ampm' => date('A', strtotime($incident->incident_date)),
+						'incident_ampm' => date('a', strtotime($incident->incident_date)),
 						'latitude' => $incident->location->latitude,
 						'longitude' => $incident->location->longitude,
 						'location_name' => $incident->location->location_name,

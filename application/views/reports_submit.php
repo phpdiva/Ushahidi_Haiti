@@ -144,7 +144,14 @@ $("#incident_ampm option[value='"+ampm+"']").attr("selected","true");
 											$category_color = $category['category'][1];
 											
 											// Sategory is selected.
-											$category_checked = (!empty($selected_categories) && in_array($category, $selected_categories));
+											if (!empty($form['incident_category']) 
+												&& in_array($cid, $form['incident_category'])) {
+													$category_checked = TRUE;
+											}
+											else
+											{
+												$category_checked = FALSE;
+											}
 											
 											echo '<li>';
 											echo form::checkbox('incident_category[]', $cid, $category_checked, ' class="check-box"');
@@ -158,7 +165,14 @@ $("#incident_ampm option[value='"+ampm+"']").attr("selected","true");
 													$category_color = $child_category['category'][1];
 													
 													// Sategory is selected.
-													$category_checked = (!empty($selected_categories) && in_array($child_category, $selected_categories));
+													if (!empty($form['incident_category']) 
+														&& in_array($cid, $form['incident_category'])) {
+															$category_checked = TRUE;
+													}
+													else
+													{
+														$category_checked = FALSE;
+													}
 													
 													echo '<li>';
 													echo form::checkbox('incident_category[]', $cid, $category_checked, ' class="check-box"');

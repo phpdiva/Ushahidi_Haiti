@@ -371,7 +371,7 @@ class Reports_Controller extends Main_Controller {
                                   .":".$post->incident_minute
                                   .":00 ".$post->incident_ampm;
 
-				$incident->incident_date = $incident_date." ".$incident_time;
+				$incident->incident_date = date( "m/d/y H:i:s", strtotime($incident_date . " " . $incident_time) );
 				$incident->incident_dateadd = date("Y-m-d H:i:s",time());
 				$incident->save();
 				

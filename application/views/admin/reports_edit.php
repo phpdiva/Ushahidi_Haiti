@@ -224,7 +224,8 @@
 										// Format categories for 2 column display.
 										$this_col = 1; // column number
 										$maxper_col = round($categories_total/2); // Maximum number of elements per column
-										$i = 1;  // Element Count	
+										$i = 1;  // Element Count
+										
 										foreach ($sorted_categories as $category) {
 											
 											// If this is the first element of a column, start a new UL
@@ -237,7 +238,14 @@
 											$category_color = $category['category'][1];
 											
 											// Sategory is selected.
-											$category_checked = (!empty($selected_categories) && in_array($category, $selected_categories));
+											if (!empty($form['incident_category']) 
+												&& in_array($cid, $form['incident_category'])) {
+													$category_checked = TRUE;
+											}
+											else
+											{
+												$category_checked = FALSE;
+											}
 											
 											echo '<li>';
 											echo form::checkbox('incident_category[]', $cid, $category_checked, ' class="check-box"');
@@ -251,7 +259,14 @@
 													$category_color = $child_category['category'][1];
 													
 													// Sategory is selected.
-													$category_checked = (!empty($selected_categories) && in_array($child_category, $selected_categories));
+													if (!empty($form['incident_category']) 
+														&& in_array($cid, $form['incident_category'])) {
+															$category_checked = TRUE;
+													}
+													else
+													{
+														$category_checked = FALSE;
+													}
 													
 													echo '<li>';
 													echo form::checkbox('incident_category[]', $cid, $category_checked, ' class="check-box"');
