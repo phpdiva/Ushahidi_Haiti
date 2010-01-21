@@ -146,7 +146,7 @@
 												{
 													echo "new_lock ";
 												}
-												elseif (!$message_read)
+												elseif ($message_read)
 												{
 													echo "new_reply ";
 												}
