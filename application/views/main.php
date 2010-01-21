@@ -266,12 +266,15 @@
                                 </td>
                                 
                                 <td class="mm-flickr">
-                                	<h3 style="margin-bottom:10px">On Flickr</h3>
-                                    <?php 
+                                	<h3 style="margin-bottom:10px">Help Tag Photos</h3>
+                                    
+									<iframe src="http://app.beextra.org/appflickr/embed/collectionid/haiti/missionid/605/count/12/title/1/bg/white" width="270" height="400" scrolling="no" frameborder="0"></iframe>
+									
+                                    <div style="display:none"><?php 
 										foreach( (array)$haiti_photos['photo'] as $photo ) {
 											print '<a href="http://www.flickr.com/photos/'. $photo['owner'] . '/' . $photo['id'] . '/" ><img src="'.$flickr->buildPhotoURL($photo,'Square').'" alt="'.$photo['title'].'"/></a>';
 										}
-									?>
+									?></div>
                                 </td>
                                 
                                 
