@@ -74,6 +74,6 @@ $lang = array(
 	'layers_filter' => 'Other Layers',
 	'shortcode_announcement_title' => 'Rapport par téléphone mobile',
 	'shortcode_announcement_1' => 'En Haiti?  Envoyez un texte a ',
-	'shortcode_announcement_2' => ' sur Digicel avec <strong>votre lieu et vos besoins</strong>. Rapportez emergences et personnes disparues.',
+	'shortcode_announcement_2' => ' sur Digicel ou Comcel avec <strong>votre lieu et vos besoins</strong>. Rapportez emergences et personnes disparues.',
 	'shortcode_announcement_3' => 'International:'
 );

@@ -197,14 +197,14 @@
 			}
 			else if (default_map == 4)
 			{
-				map_layer = new OpenLayers.Layer.OSM.Mapnik("openstreetmap", {
+				map_layer = new OpenLayers.Layer.Google("google", {
 					sphericalMercator: true,
 					maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 					});
 			}
 			else
 			{
-				map_layer = new OpenLayers.Layer.Google("google", {
+				map_layer = new OpenLayers.Layer.OSM.Mapnik("openstreetmap", {
 					sphericalMercator: true,
 					maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 					});
