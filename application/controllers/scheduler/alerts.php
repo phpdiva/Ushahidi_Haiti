@@ -118,16 +118,16 @@ class Alerts_Controller extends Controller
 						$clickatell->sms();	
 
 						$message = text::limit_chars($incident->incident_description, 150, "...");
-
-						// If Clickatell Is Set Up
-						if ($clickatell->send($alertee->alert_recipient, $sms_from, $message) == "OK")
-						{
-							$alert = ORM::factory('alert_sent');
-							$alert->alert_id = $alertee->id;
-							$alert->incident_id = $incident->id;
-							$alert->alert_date = date("Y-m-d H:i:s");
-							$alert->save();
-						}
+						
+						$alert = ORM::factory('alert_sent');
+						$alert->alert_id = $alertee->id;
+						$alert->incident_id = $incident->id;
+						$alert->alert_date = date("Y-m-d H:i:s");
+						$alert->save();
+						
+						//++ We won't verify for now if sms was sent
+						// Leaves too much room for duplicates to be sent out
+						$clickatell->send($alertee->alert_recipient, $sms_from, $message);
 					}
 
 					elseif ($alert_type == 2) // Email alertee
@@ -154,7 +154,7 @@ class Alerts_Controller extends Controller
 						
 						//++ We won't verify for now if email was sent
 						// Leaves too much room for duplicates to be sent out
-						$sent_email = email::send($to, $from, $subject, $message, TRUE);
+						email::send($to, $from, $subject, $message, TRUE);
 					}
 					
 					$i++;
