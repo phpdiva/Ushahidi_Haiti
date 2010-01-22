@@ -22,7 +22,6 @@ class Api_Controller extends Controller {
 	private $responseType; //type of response, either json or xml as specified, defaults to json in set in __construct
 	private $error_messages; // validation error messages
 	private $messages = array(); // form validation error messages
-	private $api_activities = array(); // activities by the API
 	
 	/**
 	 * constructor
@@ -31,8 +30,7 @@ class Api_Controller extends Controller {
 		$this->db = new Database;
 		$this->list_limit = '1000';
 		$this->responseType = 'json';
-		$this->_apiLog();
-		
+		//$this->_apiLog();
 	}
 	
 	/**
@@ -69,7 +67,16 @@ class Api_Controller extends Controller {
 		
 		switch($task){
 			case "report": //report/add an incident
-				$ret = $this->_report();
+				//check if an API call has reached its limit.
+				if( _apiLimitStatus( $_SERVER['REMOTE_ADDR'] )) { 
+					$ret = $this->_report();
+					
+					$this->_apiLog($request); // log api activities
+					
+				} else {
+					$error = array("error" => $this->_getErrorMsg(006, 'task'));
+				}
+				
 			break;
 			
 			case "3dkml": //report/add an incident
@@ -116,14 +123,17 @@ class Api_Controller extends Controller {
 				switch($by) {
 					case "google":
 						$ret = $this->_apiKey('api_google');
+						$this->_apiLog($request); // log api activities
 						break;
 
 					case "yahoo":
 						$ret = $this->_apiKey('api_yahoo');
+						$this->_apiLog($request); // log api activities
 						break;
 
 					case "microsoft":
 						$ret = $this->_apiKey('api_live');
+						$this->_apiLog($request); // log api activities
 						break;
 					
 					default:
@@ -133,6 +143,7 @@ class Api_Controller extends Controller {
 					
 			case "categories": //retrieve all categories
 				$ret = $this->_categories();
+				$this->_apiLog($request); // log api activities
 				break;
 			
 			case "version": //retrieve an ushahidi instance version number
@@ -156,6 +167,7 @@ class Api_Controller extends Controller {
 					}
 					
 					$ret = $this->_getSearchResults($q,$limit);
+					$this->_apiLog($request); // log api activities
 					break;
 				}
 				
@@ -171,10 +183,12 @@ class Api_Controller extends Controller {
 				}
 				
 				$ret = $this->_category($id);
+				$this->_apiLog($request); // log api activities
 				break;
 				
 			case "locations": //retrieve locations
 				$ret = $this->_locations();
+				$this->_apiLog($request); // log api activities
 				break;		
 		
 			case "location": //retrieve locations
@@ -195,6 +209,7 @@ class Api_Controller extends Controller {
 					case "locid": //id
 						if(($this->_verifyArrayIndex($request, 'id'))){
 							$ret = $this->_locationById($request['id']);
+							$this->_apiLog($request); // log api activities
 						} else {
 							$error = array("error" => $this->_getErrorMsg(001, 'id'));
 						}
@@ -203,6 +218,7 @@ class Api_Controller extends Controller {
 					case "country": //id
 						if(($this->_verifyArrayIndex($request, 'id'))){
 							$ret = $this->_locationByCountryId($request['id']);
+							$this->_apiLog($request); // log api activities
 						} else {
 							$error = array("error" => $this->_getErrorMsg(001, 'id'));
 						}
@@ -216,6 +232,7 @@ class Api_Controller extends Controller {
 				
 			case "countries": //retrieve countries
 				$ret = $this->_countries();
+				$this->_apiLog($request); // log api activities
 				break;
 				
 			case "country": //retrieve countries
@@ -232,6 +249,7 @@ class Api_Controller extends Controller {
 					case "countryid": //id
 						if(($this->_verifyArrayIndex($request, 'id'))){
 							$ret = $this->_countryById($request['id']);
+							$this->_apiLog($request); // log api activities
 						} else {
 							$error = array("error" => $this->_getErrorMsg(001, 'id'));
 						}
@@ -240,6 +258,7 @@ class Api_Controller extends Controller {
 					case "countryname": //name
 						if(($this->_verifyArrayIndex($request, 'name'))){
 							$ret = $this->_countryByName($request['name']);
+							$this->_apiLog($request); // log api activities
 						} else {
 							$error = array("error" => $this->_getErrorMsg(001, 'name'));
 						}
@@ -248,6 +267,7 @@ class Api_Controller extends Controller {
 					case "countryiso": //name
 						if(($this->_verifyArrayIndex($request, 'iso'))){
 							$ret = $this->_countryByIso($request['iso']);
+							$this->_apiLog($request); // log api activities
 						} else {
 							$error = array("error" => $this->_getErrorMsg(001, 'iso'));
 						}
@@ -307,6 +327,7 @@ class Api_Controller extends Controller {
 					case "latlon": //latitude and longitude
 						if(($this->_verifyArrayIndex($request, 'latitude')) && ($this->_verifyArrayIndex($request, 'longitude'))){
 							$ret = $this->_incidentsByLatLon($request['latitude'],$orderfield,$request['longitude'],$sort);
+							$this->_apiLog($request); // log api activities
 						} else {
 							$error = array("error" => $this->_getErrorMsg(001,'latitude or longitude'));
 						}
@@ -315,6 +336,7 @@ class Api_Controller extends Controller {
 					case "locid": //Location Id
 						if(($this->_verifyArrayIndex($request, 'id'))){
 							$ret = $this->_incidentsByLocitionId($request['id'], $orderfield, $sort);
+							$this->_apiLog($request); // log api activities
 						} else {
 							$error = array("error" => $this->_getErrorMsg(001, 'id'));
 						}
@@ -323,6 +345,7 @@ class Api_Controller extends Controller {
 					case "locname": //Location Name
 						if(($this->_verifyArrayIndex($request, 'name'))){
 							$ret = $this->_incidentsByLocationName($request['name'], $orderfield, $sort);
+							$this->_apiLog($request); // log api activities
 						} else {
 							$error = array("error" => $this->_getErrorMsg(001, 'name'));
 						}
@@ -331,6 +354,7 @@ class Api_Controller extends Controller {
 					case "catid": //Category Id
 						if(($this->_verifyArrayIndex($request, 'id'))){
 							$ret = $this->_incidentsByCategoryId($request['id'], $orderfield, $sort);
+							$this->_apiLog($request); // log api activities
 						} else {
 							$error = array("error" => $this->_getErrorMsg(001, 'id'));
 						}
@@ -339,17 +363,19 @@ class Api_Controller extends Controller {
 					case "catname": //Category Name
 						if(($this->_verifyArrayIndex($request, 'name'))){
 							$ret = $this->_incidentsByCategoryName($request['name'], $orderfield, $sort);
+							$this->_apiLog($request); // log api activities
 						} else {
 							$error = array("error" => $this->_getErrorMsg(001, 'name'));
 						}
-                                                break;
-                                        case "sinceid": //Since Id
-                                                if(($this->_verifyArrayIndex($request,'id'))){
-                                                        $ret = $this->_incidentsBySinceId($request['id'], $orderfield, $sort);
-                                                } else {
-                                                        $error = array("error" => $this->_getErrorMsg(001,'id'));
-                                                }
-                                                break;
+                       	break;
+                    case "sinceid": //Since Id
+                   		if(($this->_verifyArrayIndex($request,'id'))){
+                       		$ret = $this->_incidentsBySinceId($request['id'], $orderfield, $sort);
+                            $this->_apiLog($request); // log api activities                    		
+                       	} else {
+                        	$error = array("error" => $this->_getErrorMsg(001,'id'));
+                       	}
+                       	break;
 
 					default:
 						$error = array("error" => $this->_getErrorMsg(002));
@@ -377,6 +403,7 @@ class Api_Controller extends Controller {
 					$error = array("error" => $this->_getErrorMsg(006, 'session'));
 				} else {
 					$ret = $this->_validate($request['session']);
+					$this->_apiLog($request); // log api activities
 				}
 				break;
 				
@@ -385,6 +412,7 @@ class Api_Controller extends Controller {
 					$error = array("error" => $this->_getErrorMsg(005));
 				} else {
 					$ret = $this->_statistics();
+					$this->_apiLog($request); // log api activities
 				}
 				break;
 			
@@ -1840,11 +1868,26 @@ class Api_Controller extends Controller {
 	}
 	
 	/**
-	 * Logs activities of the API to the activity logger 
+	 * Logs activities of the API to the activity logger. 
 	 */
-	function _apiLog( $activities = array() ) {
-		//TODO write sql statement to log the activities.
-		$this->db->query();	
+	function _apiLog( $request ) {
+		
+		$task = $request['task'];
+		
+		$params = array_keys($request);
+		
+		$params = serialize($params); //serialize array 
+		
+		$reports = "10";
+		
+		$ipaddress = $_SERVER['REMOTE_ADDR'];
+		
+		$date = date("Y-m-d H:i:s");
+		
+		$query = "INSERT INTO api_log (api_task,api_parameters,api_records,api_ipaddress,api_date) " .
+				 "values ('$task','$params',10,'$ipaddress','$date')";
+				
+		$this->db->query($query);	
 	}
 	
 	/**
@@ -1865,6 +1908,7 @@ class Api_Controller extends Controller {
 		} else {
 			return false;
 		}
+		
 	}
 	
 	/**
@@ -1876,7 +1920,7 @@ class Api_Controller extends Controller {
 		//TODO write sql statement
 		
 		//Make sure the ip address is not in the db.
-		$query = "SELECT count(*) FROM api_banned WHERE banned_ipaddress = $ipaddress";
+		$query = "SELECT count(*) FROM api_banned WHERE banned_ipaddress = $ipaddress AND ";
 		$total_items = $this->db->query($query);
 		
 		if( $total_items == 0 ) {
