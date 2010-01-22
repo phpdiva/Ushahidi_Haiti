@@ -517,6 +517,9 @@ class Reports_Controller extends Main_Controller {
 	 */
 	public function view($id = false)
 	{
+		// Prevent caching of individual reports
+		$this->is_cachable = FALSE;
+		
 		$this->template->header->this_page = 'reports';
 		$this->template->content = new View('reports_view');
 		
