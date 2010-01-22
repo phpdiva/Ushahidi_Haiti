@@ -226,6 +226,9 @@ class Reports_Controller extends Main_Controller {
 	 */
 	public function submit()
 	{
+		// Prevent caching of reports submit page
+		$this->is_cachable = FALSE;
+		
 		$this->template->header->this_page = 'reports_submit';
 		$this->template->content = new View('reports_submit');
 		
