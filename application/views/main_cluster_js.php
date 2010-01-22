@@ -77,8 +77,15 @@
 			// Add Controls
 			map.addControl(new OpenLayers.Control.Navigation());
 			map.addControl(new OpenLayers.Control.PanZoomBar());
-			map.addControl(new OpenLayers.Control.MousePosition());
-			map.addControl(new OpenLayers.Control.LayerSwitcher());		
+			map.addControl(new OpenLayers.Control.MousePosition(
+					{ div: 	document.getElementById('mapMousePosition'), numdigits: 5 
+				}));    
+			map.addControl(new OpenLayers.Control.Scale('mapScale'));
+            map.addControl(new OpenLayers.Control.ScaleLine());
+			map.addControl(new OpenLayers.Control.LayerSwitcher());
+			
+			// display the map projection
+			document.getElementById('mapProjection').innerHTML = map.projection;
 				
 			gMap = map;
 			

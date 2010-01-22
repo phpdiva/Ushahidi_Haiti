@@ -69,7 +69,11 @@
 	
 			map.addControl(new OpenLayers.Control.Navigation());
 			map.addControl(new OpenLayers.Control.PanZoomBar());
-			map.addControl(new OpenLayers.Control.MousePosition());
+			map.addControl(new OpenLayers.Control.MousePosition(
+					{ div: 	document.getElementById('mapMousePosition'), numdigits: 5 
+				}));    
+			map.addControl(new OpenLayers.Control.Scale('mapScale'));
+            map.addControl(new OpenLayers.Control.ScaleLine());
 			map.addControl(new OpenLayers.Control.LayerSwitcher());
 			
 			
@@ -121,7 +125,7 @@
 			myPoint.transform(proj_4326, map.getProjectionObject());
 			
 			// display the map centered on a latitude and longitude (Google zoom levels)
-			map.setCenter(myPoint, 14);
+			map.setCenter(myPoint, 15);
 			
 			
 			function onPopupClose(evt) {
