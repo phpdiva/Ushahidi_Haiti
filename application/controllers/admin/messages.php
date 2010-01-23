@@ -453,7 +453,7 @@ class Messages_Controller extends Admin_Controller
 			}
 			else
 			{
-				$message_csv .= '"NO"'."\n";
+				$message_csv .= '"--"'."\n";
 			}
 			
 		}
