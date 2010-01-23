@@ -129,7 +129,7 @@ class Messages_Controller extends Admin_Controller
 			->where($filter)
 			->where('parent_id', 0)
 			->where('message_trash',0)
-			->orderby( array('message_read'=>'desc', 'message_date'=>'desc'))
+			->orderby('message_date','desc')
 			->find_all((int) Kohana::config('settings.items_per_page_admin'), $pagination->sql_offset);
 			
 		$replies = ORM::factory('message');
