@@ -81,7 +81,9 @@ class Georss_Controller extends Controller
 			$latitude = $feed_data_item->get_latitude();
 			$longitude = $feed_data_item->get_longitude();
 			$location_name = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'city');
-				$location_name = trim($location_name[0]['data']);
+				$location_name = trim($location_name[0]['data']);				
+			$actionable = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'actionable');
+				$actionable = trim($actionable[0]['data']);
 			
 			// Okay now we have everything we need
 			
@@ -175,6 +177,7 @@ class Georss_Controller extends Controller
 					$message->message_detail = $message_detail;
 					$message->message_type = 1; // Inbox
 					$message->message_date = $date;
+					$message->message_actionable = $actionable;
 					$message->service_messageid = $service_messageid;
 					$message->save();
 					

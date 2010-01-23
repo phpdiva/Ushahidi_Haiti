@@ -22,6 +22,10 @@ class Alerts_Controller extends Controller
 		set_time_limit(60);
 		
 		// $profiler = new Profiler;
+		
+		
+		// PREVENT EXECUTION UNTIL WE FIX THE DUPLICATE ISSUE
+		exit;
 	}
 	
 	public function index() 
@@ -34,7 +38,7 @@ class Alerts_Controller extends Controller
 		$sms_from = NULL;
 		$clickatell = NULL;
 		$miles = FALSE; // Change to True to calculate distances in Miles
-		$max_recipients = 50; // Limit each script execution to 50 recipients
+		$max_recipients = 20; // Limit each script execution to 50 recipients
 		
 		if ($settings->email_smtp == 1)
 		{
@@ -93,13 +97,20 @@ class Alerts_Controller extends Controller
 					->where('incident_id', $incident->id)
 					->find();
 				
-				if (!$alert_sent->loaded)
+				if ($alert_sent->loaded == FALSE)
 				{
 					// 4 - Get Alert Type. 1=SMS, 2=EMAIL
 					$alert_type = (int) $alertee->alert_type;
 
 					if ($alert_type == 1) // SMS alertee
 					{
+						// Save this first
+						$alert = ORM::factory('alert_sent');
+						$alert->alert_id = $alertee->id;
+						$alert->incident_id = $incident->id;
+						$alert->alert_date = date("Y-m-d H:i:s");
+						$alert->save();
+						
 						// Get SMS Numbers
 						if (!empty($settings->sms_no3))
 							$sms_from = $settings->sms_no3;
@@ -119,19 +130,21 @@ class Alerts_Controller extends Controller
 
 						$message = text::limit_chars($incident->incident_description, 150, "...");
 						
-						$alert = ORM::factory('alert_sent');
-						$alert->alert_id = $alertee->id;
-						$alert->incident_id = $incident->id;
-						$alert->alert_date = date("Y-m-d H:i:s");
-						$alert->save();
-						
 						//++ We won't verify for now if sms was sent
 						// Leaves too much room for duplicates to be sent out
 						$clickatell->send($alertee->alert_recipient, $sms_from, $message);
 					}
 
 					elseif ($alert_type == 2) // Email alertee
-					{	
+					
+					{
+						// Save this first
+						$alert = ORM::factory('alert_sent');
+						$alert->alert_id = $alertee->id;
+						$alert->incident_id = $incident->id;
+						$alert->alert_date = date("Y-m-d H:i:s");
+						$alert->save();
+							
 	                   	//for some reason, mail function complains about bad parameters 
 	                   	// in the function so i'm disallowing these characters in the 
 	                   	// subject field to allow the mail function to work.
@@ -146,16 +159,12 @@ class Alerts_Controller extends Controller
 									."<p>".$unsubscribe_message
 	                                                                       ."?c=".$alertee->alert_code."</p>";
 						
-						$alert = ORM::factory('alert_sent');
-						$alert->alert_id = $alertee->id;
-						$alert->incident_id = $incident->id;
-						$alert->alert_date = date("Y-m-d H:i:s");
-						$alert->save();
-						
 						//++ We won't verify for now if email was sent
 						// Leaves too much room for duplicates to be sent out
 						email::send($to, $from, $subject, $message, TRUE);
 					}
+					
+					sleep(1);
 					
 					$i++;
 				}

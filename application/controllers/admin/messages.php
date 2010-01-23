@@ -35,7 +35,9 @@ class Messages_Controller extends Admin_Controller
 	function index($service_id = 1)
 	{
 		$this->template->content = new View('admin/messages');
-
+		
+		$filter = "";
+		
 		// Get Title
 		$service = ORM::factory('service', $service_id);
 		$this->template->content->title = $service->service_name;
@@ -59,18 +61,22 @@ class Messages_Controller extends Admin_Controller
 
 			if ($type == '2')
 			{
-				$filter = 'message_type = 2';
+				$filter .= ' message.incident_id = 0 ';
+			}
+			elseif ($type == '3')
+			{
+				$filter .= ' message.incident_id > 0 ';
 			}
 			else
 			{
 				$type = "1";
-				$filter = 'message_type = 1';
+				$filter .= ' 1=1 ';
 			}
 		}
 		else
 		{
 			$type = "1";
-			$filter = 'message_type = 1';
+			$filter .= ' 1=1 ';
 		}
 		
 		// Any time period filter?
@@ -123,7 +129,7 @@ class Messages_Controller extends Admin_Controller
 			->where($filter)
 			->where('parent_id', 0)
 			->where('message_trash',0)
-			->orderby( array('message_read'=>'desc', 'message_date'=>'desc'))
+			->orderby('message_date','desc')
 			->find_all((int) Kohana::config('settings.items_per_page_admin'), $pagination->sql_offset);
 			
 		$replies = ORM::factory('message');
@@ -389,6 +395,77 @@ class Messages_Controller extends Admin_Controller
 		}
 		url::redirect(url::base().'admin/messages/index/'.$extradir );
     }
+
+	
+	/**
+     * Delete a single message
+     */
+    public function download($service_id = 1, $message_type = 1)
+    {
+		set_time_limit(60);
+		$this->template = "";
+		$this->auto_render = FALSE;
+		
+		if ($message_type == '2')
+		{
+			$filter = ' message.incident_id = 0 ';
+		}
+		elseif ($message_type == '3')
+		{
+			$filter = ' message.incident_id > 0 ';
+		}
+		else
+		{
+			$filter = ' 1=1 ';
+		}
+		
+		$filter .= " AND ( CONVERT(message.service_messageid, SIGNED INTEGER) IS NOT NULL AND message.service_messageid > 0 )";
+		
+		$messages = ORM::factory('message')
+			->join('reporter','message.reporter_id','reporter.id')
+			->where('service_id', $service_id)
+			->where($filter)
+			->where('message_trash',0)
+			->orderby('message.id', 'ASC')
+			->find_all();
+			
+		$message_csv = "\"ID\",\"PHONE NUMBER\",\"TIME RECEIVED\",\"ORIGINAL MESSAGE (CREOLE)\",\"ORIGINAL MESSAGE (ENGLISH)\",\"GPS COORDINATES (LON/LAT)\",\"ACTIONABLE\"\n";
+		foreach ($messages as $message)
+		{
+			$message_csv .= '"'.$message->service_messageid.'",';
+			$message_csv .= '"'.htmlspecialchars($message->message_from).'",';
+			$message_csv .= '"'.$message->message_date.'",';
+			$message_csv .= '"'.htmlspecialchars(
+				str_replace("\r", " ", str_replace("\n", " ", $message->message))).'",';
+			$message_csv .= '"'.htmlspecialchars(str_replace("~~~~~~~~~~~~~~~~~", " -- ", 
+				str_replace("\r", " ", str_replace("\n", " ", $message->message_detail)))).'",';
+			if ($message->location_id !=0 )
+			{
+				$message_csv .= '"'.$message->location->longitude.','.$message->location->latitude.'",';
+			}
+			else
+			{
+				$message_csv .= '"0,0",';
+			}
+			if ($message->message_actionable)
+			{
+				$message_csv .= '"YES"'."\n";
+			}
+			else
+			{
+				$message_csv .= '"--"'."\n";
+			}
+			
+		}
+		
+		// Output to browser
+		header("Content-type: text/x-csv");
+		header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+		header("Content-Disposition: attachment; filename=" . time() . ".csv");
+		header("Content-Length: " . strlen($message_csv));
+		echo $message_csv;
+		exit;
+	}
 
     /**
      * Delete selected messages
