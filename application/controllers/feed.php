@@ -70,9 +70,9 @@ class Feed_Controller extends Controller
 			foreach($incidents as $incident)
 			{
 				$item = array();
-				$item['title'] = htmlspecialchars($incident->incident_title);
+				$item['title'] = htmlentities($incident->incident_title);
 				$item['link'] = $site_url.'reports/view/'.$incident->id;
-				$item['description'] = htmlspecialchars($incident->incident_description);
+				$item['description'] = htmlentities($incident->incident_description);
 				$item['date'] = $incident->incident_date;
 				$item['phone'] = $incident->incident_custom_phone;
 				if($item['phone'] == NULL || $item['phone'] == ''){
