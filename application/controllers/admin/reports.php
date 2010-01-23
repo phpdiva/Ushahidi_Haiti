@@ -29,7 +29,7 @@ class Reports_Controller extends Admin_Controller
     * @param int $page
     */
 	function index($page = 1)
-	{
+	{		
 		$this->template->content = new View('admin/reports');
 		$this->template->content->title = 'Reports';
 		
@@ -240,7 +240,7 @@ class Reports_Controller extends Admin_Controller
 		));
 
 		$incidents = ORM::factory('incident')
-			->where($filter)->orderby('incident_dateadd', 'desc')
+			->where($filter)->orderby('incident_date', 'desc')
 			->join('location', 'incident.location_id', 'location.id','INNER')
 			->find_all((int) Kohana::config('settings.items_per_page_admin'), $pagination->sql_offset);
 		
