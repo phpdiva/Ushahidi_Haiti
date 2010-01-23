@@ -547,6 +547,10 @@ ul.tabset li a:hover{
 	border:1px solid #d1d1d1;
 }
 .tab ul li a:hover{ text-decoration:underline;}
+.tab ul li a.download{
+	background:#AED5F1;
+	font-weight:bold;
+}
 .tab .tab_form_item{
 	float:left;
 	margin:10px 10px 0 10px;

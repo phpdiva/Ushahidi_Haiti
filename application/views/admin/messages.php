@@ -26,17 +26,9 @@
 				<div class="tabs">
 					<!-- tabset -->
 					<ul class="tabset">
-						<li><a href="?type=1" <?php if ($type == '1') echo "class=\"active\""; ?>>Inbox</a></li>
-						<?php
-						if ($service_id == 1)
-						{
-							?><li><a href="?type=2" <?php if ($type == '2') echo "class=\"active\""; ?>>Outbox</a></li><?php
-						}
-						?>
-						<li><a href="?type=<?php echo $type ?>&period=a" <?php if ($period == 'a') echo "class=\"active\""; ?>>All</a></li>
-						<li><a href="?type=<?php echo $type ?>&period=d" <?php if ($period == 'd') echo "class=\"active\""; ?>>Yesterday</a></li>
-						<li><a href="?type=<?php echo $type ?>&period=m" <?php if ($period == 'm') echo "class=\"active\""; ?>>Last Month</a></li>
-						<li><a href="?type=<?php echo $type ?>&period=y" <?php if ($period == 'y') echo "class=\"active\""; ?>>Last Year</a></li>
+						<li><a href="?type=1" <?php if ($type == '1') echo "class=\"active\""; ?>>ALL</a></li>
+						<li><a href="?type=2" <?php if ($type == '2') echo "class=\"active\""; ?>>Pending</a></li>
+						<li><a href="?type=3" <?php if ($type == '3') echo "class=\"active\""; ?>>Active</a></li>
 					</ul>
 					<!-- tab -->
 					<div class="tab">
@@ -45,6 +37,7 @@
 							<?php foreach($levels as $level) { ?>
 								<li><a href="#" onClick="itemAction('rank', 'Mark As <?php echo $level->level_title?>', '', <?php echo $level->id?>)"><?php echo $level->level_title?></a></li>
 							<?php } ?>
+							<li><a href="<?php echo url::base(); ?>admin/messages/download/<?php echo $service_id."/".$type."/";?>" class="download">DOWNLOAD THESE MESSAGES</a></li>
 						</ul>
 					</div>
 				</div>
@@ -104,6 +97,7 @@
 								foreach ($messages as $message)
 								{
 									$message_id = $message->id;
+									$sms_id = $message->service_messageid;
 									$message_from = $message->message_from;
 									$message_to = $message->message_to;
 									$incident_id = $message->incident_id;
@@ -151,7 +145,7 @@
 													echo "new_reply ";
 												}
 												echo "\"";
-												?>><?php echo $message_description; ?>
+												?>><?php if ($service_id == 1) { ?>[<strong><?php echo $sms_id; ?></strong>]<?php } ?>&nbsp;&nbsp;<?php echo $message_description; ?>
 												<?php
 												if ($locked)
 												{
@@ -206,11 +200,14 @@
 															{
 																$reply_type = $reply->message_type;
 																$reply_message = $reply->message;
-																$reply_detail = $reply->message_detail;
+																$reply_detail = nl2br($reply->message_detail);
 																echo "<div class=\"reply_message";
 																if ($reply_type == 2)
 																	echo " reply_message_out";
-																echo "\">&middot;&nbsp;".$reply_message;
+																echo "\">";
+																if ($reply_type == 1)
+																	echo "[<strong>".$reply->service_messageid."</strong>]&nbsp;";
+																echo "&middot;&nbsp;".$reply_message;
 																if ($reply_detail)
 																	echo "<BR>~~~<BR>".$reply_detail;
 																echo "</div>";
