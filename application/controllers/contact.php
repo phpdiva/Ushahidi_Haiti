@@ -18,6 +18,8 @@ class Contact_Controller extends Main_Controller
 	function __construct()
     {
         parent::__construct();
+
+		$this->is_cachable = FALSE;
     }
 
     public function index()

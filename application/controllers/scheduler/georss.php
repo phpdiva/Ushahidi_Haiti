@@ -15,7 +15,7 @@
 
 class Georss_Controller extends Controller
 {
-	var $items = 50;	// Size of RSS Feed
+	var $items = 100;	// Size of RSS Feed
 	
 	
 	
@@ -41,7 +41,8 @@ class Georss_Controller extends Controller
 		
 		//echo $last_message_date;
 		$settings = ORM::factory('settings', 1);		
-		$sms_rss = $settings->georss_feed."&only_phone=1&limit=50,".$this->items;	//."&uptots=".$last_message_date;
+		$sms_rss = $settings->georss_feed."&only_phone=1&limit=0,".$this->items;	//."&uptots=".$last_message_date;
+		echo $sms_rss;
 		$curl_handle = curl_init();
 		curl_setopt($curl_handle,CURLOPT_URL,$sms_rss);
 		curl_setopt($curl_handle,CURLOPT_CONNECTTIMEOUT,2); // Timeout
@@ -72,7 +73,7 @@ class Georss_Controller extends Controller
 			$category = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'categorization');
 				$category = trim($category[0]['data']);
 			$message_sms = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'sms');
-				$message_sms = trim($message_sms[0]['data']);	
+				$message_sms = trim($message_sms[0]['data'])."\n\nTime:".$date;	
 			$message_notes = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'notes');
 				$message_notes = trim($message_notes[0]['data']);
 			$message_detail = $message_notes."\n~~~~~~~~~~~~~~~~~\n";
@@ -126,6 +127,7 @@ class Georss_Controller extends Controller
 						if ($parent->loaded)
 						{
 							$parent_id = $parent->id;
+							$parent->message_read = 0;
 							$parent->message_reply = 1;
 							$parent->save($parent->id);
 						}

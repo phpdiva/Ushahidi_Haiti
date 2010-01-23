@@ -226,6 +226,9 @@ class Reports_Controller extends Main_Controller {
 	 */
 	public function submit()
 	{
+		// Prevent caching of reports submit page
+		$this->is_cachable = FALSE;
+		
 		$this->template->header->this_page = 'reports_submit';
 		$this->template->content = new View('reports_submit');
 		
@@ -371,7 +374,7 @@ class Reports_Controller extends Main_Controller {
                                   .":".$post->incident_minute
                                   .":00 ".$post->incident_ampm;
 
-				$incident->incident_date = $incident_date." ".$incident_time;
+				$incident->incident_date = date( "Y-m-d H:i:s", strtotime($incident_date . " " . $incident_time) );
 				$incident->incident_dateadd = date("Y-m-d H:i:s",time());
 				$incident->save();
 				
@@ -494,6 +497,7 @@ class Reports_Controller extends Main_Controller {
 		// Javascript Header
 		$this->template->header->map_enabled = TRUE;
 		$this->template->header->datepicker_enabled = TRUE;
+		$this->template->header->treeview_enabled = TRUE;
 		$this->template->header->js = new View('reports_submit_js');
 		$this->template->header->js->default_map = Kohana::config('settings.default_map');
 		$this->template->header->js->default_zoom = Kohana::config('settings.default_zoom');
@@ -516,6 +520,9 @@ class Reports_Controller extends Main_Controller {
 	 */
 	public function view($id = false)
 	{
+		// Prevent caching of individual reports
+		$this->is_cachable = FALSE;
+		
 		$this->template->header->this_page = 'reports';
 		$this->template->content = new View('reports_view');
 		

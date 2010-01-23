@@ -28,7 +28,11 @@ class Feed_Controller extends Controller
 		}
 		if($feedtype!='atom' AND $feedtype!= 'rss2') {
 			throw new Kohana_404_Exception();
-		}		
+		}
+		
+		// Set actionable flag
+		$actionable = 0;
+		if(isset($_GET['actionable'])) $actionable = 1;
 		
 		// How Many Items Should We Retrieve?
 		$limit = ( isset($_GET['l']) && !empty($_GET['l'])
@@ -46,13 +50,21 @@ class Feed_Controller extends Controller
 			
 		// Cache the Feed
 		$cache = Cache::instance();
-		$feed_items = $cache->get('feed_'.$limit.'_'.$page);
+		$feed_items = $cache->get('feed_'.$limit.'_'.$page.'_'.$actionable);
 		if ($feed_items == NULL)
 		{ // Cache is Empty so Re-Cache
-			$incidents = ORM::factory('incident')
-							->where('incident_active', '1')
-							->orderby('incident_date', 'desc')
-							->limit($limit, $page_position)->find_all();
+			if($actionable == 1){
+				$incidents = ORM::factory('incident')
+								->where('incident_active', '1')
+								->where('incident_actionable', '1')
+								->orderby('incident_date', 'desc')
+								->limit($limit, $page_position)->find_all();
+			}else{
+				$incidents = ORM::factory('incident')
+								->where('incident_active', '1')
+								->orderby('incident_date', 'desc')
+								->limit($limit, $page_position)->find_all();
+			}
 			$items = array();
 			
 			foreach($incidents as $incident)
@@ -62,6 +74,15 @@ class Feed_Controller extends Controller
 				$item['link'] = $site_url.'reports/view/'.$incident->id;
 				$item['description'] = $incident->incident_description;
 				$item['date'] = $incident->incident_date;
+				$item['phone'] = $incident->incident_custom_phone;
+				if($item['phone'] == NULL || $item['phone'] == ''){
+					$get_phone = ORM::factory('message')
+									->where('incident_id',$incident->id)
+									->find_all();
+					foreach($get_phone as $phone){ //How do I do this to get one record without doing a foreach???
+						$item['phone'] = $phone->message_from;
+					}
+				}
 
 				if($incident->location_id != 0 
 					AND $incident->location->longitude 
@@ -73,7 +94,10 @@ class Feed_Controller extends Controller
 				}
 			}
 			
-			$cache->set('feed_'.$limit.'_'.$page, $items, array('feed'), 3600); // 1 Hour
+			$cache_time = 3600; // 1 hour
+			if($actionable == 1) $cache_time = 30; // 30 seconds (This is critical stuff!)
+			
+			$cache->set('feed_'.$limit.'_'.$page.'_'.$actionable, $items, array('feed'), $cache_time);
 			$feed_items = $items;
 		}
 		

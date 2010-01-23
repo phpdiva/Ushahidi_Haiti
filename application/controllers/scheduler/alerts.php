@@ -21,7 +21,7 @@ class Alerts_Controller extends Controller
 		
 		set_time_limit(60);
 		
-		//$profiler = new Profiler;
+		// $profiler = new Profiler;
 	}
 	
 	public function index() 
@@ -91,72 +91,74 @@ class Alerts_Controller extends Controller
 				$alert_sent = ORM::factory('alert_sent')
 					->where('alert_id', $alertee->id)
 					->where('incident_id', $incident->id)
-					->count_all();
-				if ($alert_sent > 0) // A record Exists
-					continue;
+					->find();
 				
-				// 4 - Get Alert Type. 1=SMS, 2=EMAIL
-				$alert_type = (int) $alertee->alert_type;
-				
-				if ($alert_type == 1) // SMS alertee
+				if (!$alert_sent->loaded)
 				{
-					// Get SMS Numbers
-					if (!empty($settings->sms_no3))
-						$sms_from = $settings->sms_no3;
-					elseif (!empty($settings->sms_no2))
-						$sms_from = $settings->sms_no2;
-					elseif (!empty($settings->sms_no1))
-						$sms_from = $settings->sms_no1;
-					else
-						$sms_from = "000";      // Admin needs to set up an SMS number
+					// 4 - Get Alert Type. 1=SMS, 2=EMAIL
+					$alert_type = (int) $alertee->alert_type;
 
-					$clickatell = new Clickatell();
-					$clickatell->api_id = $settings->clickatell_api;
-					$clickatell->user = $settings->clickatell_username;
-					$clickatell->password = $settings->clickatell_password;
-					$clickatell->use_ssl = false;
-					$clickatell->sms();	
-
-					$message = text::limit_chars($incident->incident_description, 150, "...");
-					
-					// If Clickatell Is Set Up
-					if ($clickatell->send($alertee->alert_recipient, $sms_from, $message) == "OK")
+					if ($alert_type == 1) // SMS alertee
 					{
+						// Get SMS Numbers
+						if (!empty($settings->sms_no3))
+							$sms_from = $settings->sms_no3;
+						elseif (!empty($settings->sms_no2))
+							$sms_from = $settings->sms_no2;
+						elseif (!empty($settings->sms_no1))
+							$sms_from = $settings->sms_no1;
+						else
+							$sms_from = "000";      // Admin needs to set up an SMS number
+
+						$clickatell = new Clickatell();
+						$clickatell->api_id = $settings->clickatell_api;
+						$clickatell->user = $settings->clickatell_username;
+						$clickatell->password = $settings->clickatell_password;
+						$clickatell->use_ssl = false;
+						$clickatell->sms();	
+
+						$message = text::limit_chars($incident->incident_description, 150, "...");
+						
 						$alert = ORM::factory('alert_sent');
 						$alert->alert_id = $alertee->id;
 						$alert->incident_id = $incident->id;
 						$alert->alert_date = date("Y-m-d H:i:s");
 						$alert->save();
+						
+						//++ We won't verify for now if sms was sent
+						// Leaves too much room for duplicates to be sent out
+						$clickatell->send($alertee->alert_recipient, $sms_from, $message);
 					}
-				}
 
-				elseif ($alert_type == 2) // Email alertee
-				{	
-                   	//for some reason, mail function complains about bad parameters 
-                   	// in the function so i'm disallowing these characters in the 
-                   	// subject field to allow the mail function to work.
-                   	$disallowed_chars = array("(",")","[","]","-");
+					elseif ($alert_type == 2) // Email alertee
+					{	
+	                   	//for some reason, mail function complains about bad parameters 
+	                   	// in the function so i'm disallowing these characters in the 
+	                   	// subject field to allow the mail function to work.
+	                   	$disallowed_chars = array("(",")","[","]","-");
 
-					$to = $alertee->alert_recipient;
-					$from = $alerts_email;
-					$subject = trim(str_replace($disallowed_chars,"",$site_name).": ".str_replace($disallowed_chars,"",$incident->incident_title));
-					
-					$message = $incident->incident_description
-                                                                       ."<p>".url::base()."reports/view/".$incident->id."</p>"
-								."<p>".$unsubscribe_message
-                                                                       ."?c=".$alertee->alert_code."</p>";
-					
-					if (email::send($to, $from, $subject, $message, TRUE) == 1)
-					{
+						$to = $alertee->alert_recipient;
+						$from = $alerts_email;
+						$subject = trim(str_replace($disallowed_chars,"",$site_name).": ".str_replace($disallowed_chars,"",$incident->incident_title));
+
+						$message = $incident->incident_description
+	                                                                       ."<p>".url::base()."reports/view/".$incident->id."</p>"
+									."<p>".$unsubscribe_message
+	                                                                       ."?c=".$alertee->alert_code."</p>";
+						
 						$alert = ORM::factory('alert_sent');
 						$alert->alert_id = $alertee->id;
 						$alert->incident_id = $incident->id;
 						$alert->alert_date = date("Y-m-d H:i:s");
 						$alert->save();
+						
+						//++ We won't verify for now if email was sent
+						// Leaves too much room for duplicates to be sent out
+						email::send($to, $from, $subject, $message, TRUE);
 					}
+					
+					$i++;
 				}
-				
-				$i++;
 				
 				if ($i == $max_recipients)
 				{	

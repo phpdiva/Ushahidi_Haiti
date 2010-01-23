@@ -75,27 +75,41 @@
 							
 							<br />
 						
-							<!-- additional content -->
+                        <!-- 
+                        SMS/Text Local: 4636  
+                        SMS/Text International: +44 762 480 2524
+                        
+                        Email: Haiti@Ushahidi.com
+                        
+                        Twittter: #Haiti or #HaitiQuake
+                        
+                        Web Form: Submit Report -->
+						
+                        	<!-- additional content -->
 							<div class="additional-content">
 								<h5><?php echo Kohana::lang('ui_main.how_to_report'); ?></h5>
 								<ol>
 									<?php if (!empty($phone_array)) 
-									{ ?><li>
+									{ ?><li class="report r-sms">
 									
 										<?php echo Kohana::lang('ui_main.report_option_1-local').' '.$sms_no2."."; ?> <br />
 										<?php echo Kohana::lang('ui_main.report_option_1-international').' '.$sms_no1."."; ?>
                                         
                                     </li><?php } ?>
+									
 									<?php if (!empty($report_email)) 
-									{ ?><li><?php echo Kohana::lang('ui_main.report_option_2'); ?> <a href="mailto:<?php echo $report_email?>"><?php echo $report_email?></a></li><?php } ?>
+									{ ?><li class="report r-email"><?php echo Kohana::lang('ui_main.report_option_2'); ?> <a href="mailto:<?php echo $report_email?>"><?php echo $report_email?></a></li><?php } ?>
+									
 									<?php if (!empty($twitter_hashtag_array)) 
-												{ ?><li><?php echo Kohana::lang('ui_main.report_option_3'); ?> <?php foreach ($twitter_hashtag_array as $twitter_hashtag) {
+									{ ?><li class="report r-twitter"><?php echo Kohana::lang('ui_main.report_option_3'); ?> <?php foreach ($twitter_hashtag_array as $twitter_hashtag) {
 									echo "<strong>". $twitter_hashtag ."</strong>";
 									if ($twitter_hashtag != end($twitter_hashtag_array)) {
 										echo " or ";
 									}
 									} ?></li><?php } ?>
-									<li><a href="<?php echo url::base() . 'reports/submit/'; ?>"><?php echo Kohana::lang('ui_main.report_option_4'); ?></a></li>
+									
+                                    <li class="report r-online"><?php echo Kohana::lang('ui_main.report_option_4'); ?> <a href="<?php echo url::base() . 'reports/submit/'; ?>">Submit Report
+                                    </a></li>
 								</ol>					
 		
 							</div>
@@ -147,7 +161,15 @@
 								<?php
 									// My apologies for the inline CSS. Seems a little wonky when styles added to stylesheet, not sure why.
 								?>
-								<div class="<?php echo $map_container; ?>" id="<?php echo $map_container; ?>" <?php if($map_container === 'map3d') { echo 'style="width:573px; height:573px;"'; } ?>></div> 
+								<div class="<?php echo $map_container; ?>" id="<?php echo $map_container; ?>" <?php if($map_container === 'map3d') { echo 'style="width:573px; height:573px;"'; } ?>></div>
+								<div style="clear:both;"></div>
+								<div id="mapStatus">
+									<div id="mapScale" style="border-right: solid 1px #999"></div>
+									<div id="mapMousePosition" style="min-width: 135px;border-right: solid 1px #999;text-align: center"></div>
+									<div id="mapProjection" style="border-right: solid 1px #999"></div>
+									<div id="mapOutput"></div>
+								</div>
+								<div style="clear:both;"></div>
 								<?php if($map_container === 'map') { ?>
 								<div class="slider-holder">
 									<form action="">
@@ -252,87 +274,17 @@
                                 </td>
                                 
                                 <td class="mm-flickr">
-                                	<h3>On Flickr</h3>
-                                    <?php 
-										foreach( (array)$haiti_photos['photo'] as $photo ) {
-											print '<a href="http://www.flickr.com/photos/'. $photo['owner'] . '/' . $photo['id'] . '/" ><img src="'.$flickr->buildPhotoURL($photo,'Square').'" alt="'.$photo['title'].'"/></a>';
-										}
-									?>
+                                	<h3 style="margin-bottom:10px">Help Tag Photos</h3>
+                                    
+									<iframe src="http://app.beextra.org/appflickr/embed/collectionid/haiti/missionid/605/count/12/title/1/bg/%23E2E2E2" width="270" height="420" scrolling="no" frameborder="0"></iframe>
+                                    
                                 </td>
                                 
                                 
 								<td class="mm-youtube">
-                                <h3>Person Finder</h3>
-                                <iframe src="http://haiticrisis.appspot.com/?small=yes" width="300" height="300" frameborder="0" style="border: dashed 2px #77c; background:#fff;"></iframe>
-								
-								<?php /*
-								<h3>On Youtube</h3>
-                                	 <!-- ++Begin Video Search Control Wizard Generated Code++ -->
-                      <!--
-                      // Created with a Google AJAX Search Wizard
-                      // http://code.google.com/apis/ajaxsearch/wizards.html
-                      -->
-                    
-                      <!--
-                      // The Following div element will end up holding the Video Search Control.
-                      // You can place this anywhere on your page.
-                      -->
-                      <div id="videoControl">
-                        <span style="color:#676767;font-size:11px;margin:10px;padding:4px;">Loading...</span>
-                      </div>
-                    
-                      <!-- Ajax Search Api and Stylesheet
-                      // Note: If you are already using the AJAX Search API, then do not include it
-                      //       or its stylesheet again
-                      //
-                      // The Key Embedded in the following script tag is designed to work with
-                      // the following site:
-                      // http://expedition206.ushahidi.com
-                      -->
-                      <script src="http://www.google.com/uds/api?file=uds.js&v=1.0&source=uds-vsw&key=ABQIAAAAEpUYLv4t-brwwu8rDAymgxTWjTLT3zdWGXXwZvlBnEfZOenXThRCxtv_jeRs-mzMvG9xlM-FWWj7bA"
-                        type="text/javascript"></script>
-                      <style type="text/css">
-                        @import url("http://www.google.com/uds/css/gsearch.css");
-						.searchForm_gsvsc,.footerBox_gsvsc,.tagStackBox_gsvsc { display:none; } 
-						.results_gsvsc div.video-result_gsvsc { border:2px solid #0924c2; }
-                      </style>
-                    
-                      <!-- Video Search Control and Stylesheet -->
-                      <script type="text/javascript">
-                        window._uds_vsw_donotrepair = true;
-                      </script>
-                      <script src="http://www.google.com/uds/solutions/videosearch/gsvideosearch.js?mode=new"
-                        type="text/javascript"></script>
-                      <style type="text/css">
-                        @import url("http://www.google.com/uds/solutions/videosearch/gsvideosearch.css");
-						.results_gsvsc div.video-result_gsvsc { border:2px solid #0924c2; margin:8px; height:75px; overflow:hidden; }
-						.results_gsvsc table.video-result-table_gsvsc-2 { border-collapse:collapse; }
-						.results_gsvsc table.video-result-table_gsvsc-2 td { padding:0; }
-						.results_gsvsc table.video-result-table_gsvsc-2 td.video-result-cell_gsvsc-0 div { float:none; }
-						
-                      </style>
-                    
-                      <script type="text/javascript">
-                        function LoadVideoSearchControl() {
-                          var options = {
-                            twoRowMode : false,
-                            largeResultSet: true
-                          };
-                          var videoSearch = new GSvideoSearchControl(
-                                                  document.getElementById("videoControl"),
-                                                  [{ query : "earthquake in haiti"}], null, null, options);
-						  	
-							// Hide Google Video Widget Search Box
-            				$('.searchForm_gsvsc').hide();
-                        }
-                        // arrange for this function to be called during body.onload
-                        // event processing
-                        GSearch.setOnLoadCallback(LoadVideoSearchControl);
-                      </script>
-                    <!-- --End Video Search Control Wizard Generated Code-- -->
-                                
-								*/ ?>
-                                </td>
+                                    <h3>Person Finder</h3>
+                                    <iframe src="http://haiticrisis.appspot.com/?small=yes" width="300" height="368" frameborder="0" style="border: dashed 2px #77c; background:#fff;"></iframe>
+								</td>
                             </tr>
                         </table>
                     </div>

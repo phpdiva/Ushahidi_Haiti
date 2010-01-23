@@ -315,6 +315,8 @@ class Reports_Controller extends Admin_Controller
 			'incident_information' => '',
 			'incident_action_taken' => '',
 			'incident_action_summary' => '',
+			'incident_actionable' => '',
+			'incident_custom_phone' => '',
 	    );
 		
 		//  copy the form as errors, so the errors will be stored with keys corresponding to the form field names
@@ -380,9 +382,13 @@ class Reports_Controller extends Admin_Controller
 		//XXX: fix _get_thumbnails
 		$this->template->content->incident = $this->_get_thumbnails($id);
 		
+		$smet = FALSE; // whether we are from the SMS/Email or Twitter views
+		
 		// Are we creating this report from SMS/Email/Twitter?
 		// If so retrieve message
 		if ( isset($_GET['mid']) && !empty($_GET['mid']) ) {
+			
+			$smet = TRUE;
 			
 			$message_id = $_GET['mid'];
 			$service_id = "";
@@ -571,8 +577,10 @@ class Reports_Controller extends Admin_Controller
 			$post->add_rules('incident_action_taken', 'numeric', 'length[0,1]');
 			// if "action taken" was checked, add summary rules.
 			if (isset($_POST['incident_action_taken']) && $_POST['incident_action_taken'] == true) {
-				$post->add_rules('incident_action_summary', 'required', 'length[0, 255]');
+				$post->add_rules('incident_action_summary', 'required');
 			}
+			$post->add_rules('incident_actionable', 'numeric', 'length[0,1]');
+			$post->add_rules('incident_custom_phone', 'numeric', 'length[0,50]');
 			
 			// Test to see if things passed the rule checks
 	        if ($post->validate())
@@ -601,7 +609,7 @@ class Reports_Controller extends Admin_Controller
 					$incident_date=$incident_date[2]."-".$incident_date[0]."-".$incident_date[1];
 					
 				$incident_time = $post->incident_hour . ":" . $post->incident_minute . ":00 " . $post->incident_ampm;
-				$incident->incident_date = $incident_date . " " . $incident_time;
+				$incident->incident_date = date( "Y-m-d H:i:s", strtotime($incident_date . " " . $incident_time) );
 				// Is this new or edit?
 				if ($id)	// edit
 				{
@@ -641,6 +649,8 @@ class Reports_Controller extends Admin_Controller
 				$incident->incident_action_taken = $post->incident_action_taken;
 				// Only save action taken summary, if "action taken" was checked.
 				$incident->incident_action_summary = ($incident->incident_action_taken) ? $post->incident_action_summary : '';
+				$incident->incident_actionable = $post->incident_actionable;
+				$incident->incident_custom_phone = $post->incident_custom_phone;
 				
 				//Save
 				$incident->save();
@@ -830,7 +840,14 @@ class Reports_Controller extends Admin_Controller
 				}
 				else 						// Save and close
 				{
-					url::redirect('admin/reports/');
+					if ($smet) // return to messages view
+					{
+						url::redirect('admin/messages/');
+					}
+					else // return to reports view
+					{
+						url::redirect('admin/reports/');
+					}
 				}
 	        }
 	
@@ -891,7 +908,7 @@ class Reports_Controller extends Admin_Controller
 						'incident_date' => date('m/d/Y', strtotime($incident->incident_date)),
 						'incident_hour' => date('h', strtotime($incident->incident_date)),
 						'incident_minute' => date('i', strtotime($incident->incident_date)),
-						'incident_ampm' => date('A', strtotime($incident->incident_date)),
+						'incident_ampm' => date('a', strtotime($incident->incident_date)),
 						'latitude' => $incident->location->latitude,
 						'longitude' => $incident->location->longitude,
 						'location_name' => $incident->location->location_name,
@@ -910,6 +927,8 @@ class Reports_Controller extends Admin_Controller
 						'incident_information' => $incident->incident_information,
 						'incident_action_taken' => $incident->incident_action_taken,
 						'incident_action_summary' => $incident->incident_action_summary,
+						'incident_actionable' => $incident->incident_actionable,
+						'incident_custom_phone' => $incident->incident_custom_phone,
 				    );
 					
 					// Merge To Form Array For Display
@@ -918,7 +937,14 @@ class Reports_Controller extends Admin_Controller
 				else
 				{
 					// Redirect
-					url::redirect('admin/reports/');
+					if ($smet) // return to messages view
+					{
+						url::redirect('admin/messages/');
+					}
+					else // return to reports view
+					{
+						url::redirect('admin/reports/');
+					}
 				}		
 				
 			}

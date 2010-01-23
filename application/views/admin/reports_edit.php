@@ -96,6 +96,15 @@
 								<h4>Description <span>Please include as much detail as possible.</span></h4>
 								<?php print form::textarea('incident_description', $form['incident_description'], ' rows="12" cols="40"') ?>
 							</div>
+							
+				<!-- report is actionable -->
+				<div class="row">
+					<h4 style="color: #009200;">
+						<?php print form::checkbox('incident_actionable', '1', ($form['incident_actionable'] == 1)); ?> Actionable
+						<span>Check if responders can act on this information.</span>
+					</h4>
+				</div>
+				<!-- / report is actionable -->
               
               <!-- report is acted on -->
               <div class="row">
@@ -103,9 +112,19 @@
                   <?php print form::checkbox('incident_action_taken', '1', ($form['incident_action_taken'] == 1)); ?> Action Taken
                   <span>Check if action was taken and enter the action summary.</span>
                 </h4>
-                <textarea maxlength="255" name="incident_action_summary" id="incident_action_summary" style=" height: 60px;"><?php print html::specialchars($form['incident_action_summary']); ?></textarea>
+                <textarea name="incident_action_summary" id="incident_action_summary" style=" height: 60px;"><?php print html::specialchars($form['incident_action_summary']); ?></textarea>
               </div>
               <!-- / report is acted on -->
+              
+				<!-- enter an override custom phone number -->
+				<div class="row">
+					<h4>
+						Custom Phone Number
+						<span>Only use if not creating directly via SMS.</span>
+					</h4>
+					<?php print form::input('incident_custom_phone', $form['incident_custom_phone'], ' class="text"'); ?>
+				</div>
+				<!-- / enter an override custom phone number -->
               
 							<?php
 							if (!($id))
@@ -179,45 +198,93 @@
 
 			                    <div class="category">
                         	    <?php
-                        		//format categories for 2 column display
-                                $this_col = 1; // First column
-                                $maxper_col = round($categories_total/2); // Maximum number of elements per column
-                                
-								$i = 1; // Element Count
-                                foreach ($categories as $category => $category_extra)
-                                {
-                                    $category_title = $category_extra[0];
-                                    $category_color = $category_extra[1];
-                                    if ($this_col == 1) 
-                                        print "<ul>";
-                                
-                                    if (!empty($form['incident_category']) 
-                                        && in_array($category, $form['incident_category'])) {
-                                        $category_checked = TRUE;
-                                    }
-                                    else
-                                    {
-                                        $category_checked = FALSE;
-                                    }
-                                                                                                    
-                                    print "<li><label>";
-                                    print form::checkbox('incident_category[]', $category, $category_checked, ' class="check-box"');
-                                    print "$category_title";
-                                    print "</label></li>";
-
-                                    if ($this_col == $maxper_col || $i == count($categories)) 
-                                        print "</ul>\n";
-                              
-                                    if ($this_col < $maxper_col)
-                                    {
-                                        $this_col++;
-                                    } 
-                                    else 
-                                    {
-                                        $this_col = 1;
-                                    }
-									$i++;
-                                }
+                        		// Organize categories into a hierarchical array.
+										$sorted_categories = array();
+									 	foreach ($categories as $cid => $category) {
+											// Indent categories of type 1a., 2e., etc.
+											$category_title = $category[0];
+											$category_array = array(
+												'cid' => $cid,
+												'category' => $category,
+											);
+											if (is_numeric($category_title[0])) {
+												if (ctype_alpha($category_title[1]) && array_key_exists('parent_'.$category_title[0], $sorted_categories)) {
+													$sorted_categories['parent_'.$category_title[0]]['children'][] = $category_array;
+												}
+												else {
+													$sorted_categories['parent_'.$category_title[0]] = $category_array;
+													$sorted_categories['parent_'.$category_title[0]]['children'] = array();
+												}
+											}
+											else {
+												$sorted_categories[] = $category_array;
+											}
+										}
+										
+										// Format categories for 2 column display.
+										$this_col = 1; // column number
+										$maxper_col = round($categories_total/2); // Maximum number of elements per column
+										$i = 1;  // Element Count
+										
+										foreach ($sorted_categories as $category) {
+											
+											// If this is the first element of a column, start a new UL
+											if ($i == 1) {
+												echo '<ul id="category-column-'.$this_col.'">';
+											}
+											
+											$cid = $category['cid'];
+											$category_title = $category['category'][0];
+											$category_color = $category['category'][1];
+											
+											// Sategory is selected.
+											if (!empty($form['incident_category']) 
+												&& in_array($cid, $form['incident_category'])) {
+													$category_checked = TRUE;
+											}
+											else
+											{
+												$category_checked = FALSE;
+											}
+											
+											echo '<li>';
+											echo form::checkbox('incident_category[]', $cid, $category_checked, ' class="check-box"');
+											echo "$category_title";
+											
+											if (is_array($category['children']) && !empty($category['children'])) {
+												echo '<ul>';
+												foreach ($category['children'] as $child_category) {
+													$cid = $child_category['cid'];
+													$category_title = $child_category['category'][0];
+													$category_color = $child_category['category'][1];
+													
+													// Sategory is selected.
+													if (!empty($form['incident_category']) 
+														&& in_array($cid, $form['incident_category'])) {
+															$category_checked = TRUE;
+													}
+													else
+													{
+														$category_checked = FALSE;
+													}
+													
+													echo '<li>';
+													echo form::checkbox('incident_category[]', $cid, $category_checked, ' class="check-box"');
+													echo $category_title;
+													
+													$i++;
+												}
+												echo '</ul>';
+											}
+											$i++;
+											
+											// If this is the last element of a column, close the UL
+											if ($i >= $maxper_col || $i == $categories_total) {
+												echo '</ul>';
+												$i = 1;
+												$this_col++;
+											}
+										}
                                 
                                 ?>
 			                        <ul id="user_categories">
@@ -290,6 +357,8 @@
 									<?php print form::input('location_name', $form['location_name'], ' class="text long"'); ?>
 								</div>
 							</div>
+							
+							
 				
 				
 							<!-- News Fields -->

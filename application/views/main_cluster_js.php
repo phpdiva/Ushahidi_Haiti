@@ -22,6 +22,7 @@
 		var proj_4326 = new OpenLayers.Projection('EPSG:4326');
 		var proj_900913 = new OpenLayers.Projection('EPSG:900913');
 		var mapLoad = 0;
+		var json_url = "json_cluster";
 		
 		jQuery(function() {
 			var map_layer;
@@ -54,42 +55,37 @@
 			- Live/Yahoo/OSM/Google
 			- Set Bounds					
 			*/
-			var default_map = <?php echo $default_map; ?>;
-			if (default_map == 2)
-			{
-				map_layer = new OpenLayers.Layer.VirtualEarth("virtualearth", {
-					sphericalMercator: true,
-					maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-					});
-			}
-			else if (default_map == 3)
-			{
-				map_layer = new OpenLayers.Layer.Yahoo("yahoo", {
-					sphericalMercator: true,
-					maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-					});
-			}
-			else if (default_map == 4)
-			{
-				map_layer = new OpenLayers.Layer.OSM.Mapnik("openstreetmap", {
-					sphericalMercator: true,
-					maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-					});
-			}
-			else
-			{
-				map_layer = new OpenLayers.Layer.Google("google", {
-					sphericalMercator: true,
-					maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-					});
-			}
-			map.addLayer(map_layer);
+			google_st = new OpenLayers.Layer.Google("Google Streets", {
+				sphericalMercator: true,
+				maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+				});
+				
+			google_sat = new OpenLayers.Layer.Google("Google Satellite", {
+				type: G_SATELLITE_MAP,
+				sphericalMercator: true,
+				maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+				});
+				
+			osm_sat = new OpenLayers.Layer.OSM.Mapnik("Open Street Maps Satellite", {
+				sphericalMercator: true,
+				maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+				});
+				
+			map.addLayers([osm_sat, google_st, google_sat]);
+			
 			
 			// Add Controls
 			map.addControl(new OpenLayers.Control.Navigation());
 			map.addControl(new OpenLayers.Control.PanZoomBar());
-			map.addControl(new OpenLayers.Control.MousePosition());
-			map.addControl(new OpenLayers.Control.LayerSwitcher());		
+			map.addControl(new OpenLayers.Control.MousePosition(
+					{ div: 	document.getElementById('mapMousePosition'), numdigits: 5 
+				}));    
+			map.addControl(new OpenLayers.Control.Scale('mapScale'));
+            map.addControl(new OpenLayers.Control.ScaleLine());
+			map.addControl(new OpenLayers.Control.LayerSwitcher());
+			
+			// display the map projection
+			document.getElementById('mapProjection').innerHTML = map.projection;
 				
 			gMap = map;
 			
@@ -106,7 +102,7 @@
 				currentCat = catID;
 				$("#currentCat").val(catID);
 				// setUrl not supported with Cluster Strategy
-				//markers.setUrl("<?php echo url::base() . 'json_cluster/?c=' ?>" + catID);
+				//markers.setUrl("<?php echo url::base(); ?>" json_url + '/?c=' + catID);
 				
 				// Destroy any open popups
 				onPopupClose();
@@ -125,7 +121,7 @@
 				var endTime = new Date($("#endDate").val() * 1000);
 				gTimeline = $.timeline({categoryId: catID, startTime: startTime, endTime: endTime,
 					graphData: graphData,
-					//url: "<?php echo url::base() . 'json_cluster/timeline/' ?>",
+					//url: "<?php echo url::base(); ?>json_url + '/timeline/'",
 					mediaType: gMediaType
 				});
 				gTimeline.plot();
@@ -184,6 +180,16 @@
 						
 						// Get Current Center
 						currCenter = map.getCenter();
+						
+						// If we're in a two day date range, switch to 
+						// non-clustered mode
+						var startTime = new Date(startDate * 1000);
+						var endTime = new Date(endDate * 1000);
+						if ((endTime - startTime) / (1000 * 60 * 60 * 24) <= 3){
+							json_url = "json"
+						} else {
+							json_url = "json_cluster"
+						}
 						
 						// Refresh Map
 						addMarkers(currCat, startDate, endDate, '', '', gMediaType);
@@ -247,7 +253,7 @@
 				$(this).addClass('active');
 				gTimeline = $.timeline({categoryId: gCategoryId, startTime: startTime, 
 				    endTime: endTime, mediaType: gMediaType,
-					url: "<?php echo url::base() . 'json_cluster/timeline/' ?>"
+					url: "<?php echo url::base(); ?>json_url+'/timeline/'"
 				});
 				gTimeline.plot();
 			});
@@ -265,18 +271,18 @@
 		function addMarkers(catID,startDate,endDate, currZoom, currCenter,
 			mediaType, thisLayerID, thisLayerType, thisLayerUrl, thisLayerColor){
 			
-			var	protocolUrl = "<?php echo url::base(); ?>" + "json_cluster/"; // Default Json
+			var	protocolUrl = "<?php echo url::base(); ?>" + json_url + "/"; // Default Json
 			var thisLayer = "Reports"; // Default Layer Name
 			var protocolFormat = OpenLayers.Format.GeoJSON;
 			newlayer = false;
 			
 			if (thisLayer && thisLayerType == 'shares')
 			{				
-				protocolUrl = "<?php echo url::base(); ?>" + "json_cluster/share/"+thisLayer+"/";
+				protocolUrl = "<?php echo url::base(); ?>" + json_url + "/share/"+thisLayer+"/";
 				thisLayer = "Share_"+thisLayerID;
 				newlayer = true;
 			} else if (thisLayer && thisLayerType == 'layers') {
-				protocolUrl = "<?php echo url::base(); ?>" + "json_cluster/layer/"+thisLayerID+"/";
+				protocolUrl = "<?php echo url::base(); ?>" + json_url + "/layer/"+thisLayerID+"/";
 				thisLayer = "Layer_"+thisLayerID;
 				
 				//var protocolFormat = OpenLayers.Format.KML;
@@ -698,7 +704,7 @@
 			var graphData = dailyGraphData[0][currentCat];
 
 			// plot hourly incidents when period is within 2 days
-			if ((endTime - startTime) / (1000 * 60 * 60 * 24) <= 2) {
+			if ((endTime - startTime) / (1000 * 60 * 60 * 24) <= 3) {
 			    graphData = hourlyGraphData[0][currentCat];
 			} else if ((endTime - startTime) / (1000 * 60 * 60 * 24) <= 124) { 
 			    // weekly if period > 2 months
@@ -711,7 +717,7 @@
 			gTimeline = $.timeline({categoryId: currentCat, startTime: new Date(startDate * 1000), 
 			    endTime: new Date(endDate * 1000), mediaType: gMediaType,
 				graphData: graphData //allGraphData[0][currentCat], 
-				//url: "<?php echo url::base() . 'json_cluster/timeline/' ?>"
+				//url: "<?php echo url::base(); ?>json_url+'/timeline/'"
 			});
 			gTimeline.plot();
 		}

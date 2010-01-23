@@ -204,41 +204,33 @@
 			'displayProjection': proj_4326
 			};
 			map = new OpenLayers.Map('divMap', options);
-			var default_map = <?php echo $default_map; ?>;
-			if (default_map == 2)
-			{
-				map_layer = new OpenLayers.Layer.VirtualEarth("virtualearth", {
-					sphericalMercator: true,
-					maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-					});
-			}
-			else if (default_map == 3)
-			{
-				map_layer = new OpenLayers.Layer.Yahoo("yahoo", {
-					sphericalMercator: true,
-					maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-					});
-			}
-			else if (default_map == 4)
-			{
-				map_layer = new OpenLayers.Layer.OSM.Mapnik("openstreetmap", {
-					sphericalMercator: true,
-					maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-					});
-			}
-			else
-			{
-				map_layer = new OpenLayers.Layer.Google("google", {
-					sphericalMercator: true,
-					maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
-					});
-			}
 			
-			map.addLayer(map_layer);
+			google_st = new OpenLayers.Layer.Google("Google Streets", {
+				sphericalMercator: true,
+				maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+				});
+				
+			google_sat = new OpenLayers.Layer.Google("Google Satellite", {
+				type: G_SATELLITE_MAP,
+				sphericalMercator: true,
+				maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+				});
+				
+			osm_sat = new OpenLayers.Layer.OSM.Mapnik("Open Street Maps Satellite", {
+				sphericalMercator: true,
+				maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
+				});
+				
+			map.addLayers([osm_sat, google_st, google_sat]);
 			
 			map.addControl(new OpenLayers.Control.Navigation());
-			map.addControl(new OpenLayers.Control.PanZoomBar());
-			map.addControl(new OpenLayers.Control.MousePosition());
+			map.addControl(new OpenLayers.Control.PanZoom());
+			map.addControl(new OpenLayers.Control.MousePosition(
+					{ div: 	document.getElementById('mapMousePosition'), numdigits: 5 
+				}));    
+			map.addControl(new OpenLayers.Control.Scale('mapScale'));
+            map.addControl(new OpenLayers.Control.ScaleLine());
+			map.addControl(new OpenLayers.Control.LayerSwitcher());
 			
 			// Create the markers layer
 			var markers = new OpenLayers.Layer.Markers("Markers");
@@ -353,4 +345,12 @@
 				$('#datetime_default').hide();
 		    	return false;
 			});
+      
+      // Category treeview
+      $("#category-column-1,#category-column-2").treeview({
+        persist: "location",
+        collapsed: true,
+        unique: false
+      });
+
 		});

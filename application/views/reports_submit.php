@@ -105,41 +105,91 @@ $("#incident_ampm option[value='"+ampm+"']").attr("selected","true");
 									<h4><?php echo Kohana::lang('ui_main.reports_categories'); ?></h4>
 									<div class="report_category" id="categories">
 										<?php
-										//format categories for 2 column display
-										$this_col = 1; // First column
+										// Organize categories into a hierarchical array.
+										$sorted_categories = array();
+									 	foreach ($categories as $cid => $category) {
+											// Indent categories of type 1a., 2e., etc.
+											$category_title = $category[0];
+											$category_array = array(
+												'cid' => $cid,
+												'category' => $category,
+											);
+											if (is_numeric($category_title[0])) {
+												if (ctype_alpha($category_title[1]) && array_key_exists('parent_'.$category_title[0], $sorted_categories)) {
+													$sorted_categories['parent_'.$category_title[0]]['children'][] = $category_array;
+												}
+												else {
+													$sorted_categories['parent_'.$category_title[0]] = $category_array;
+													$sorted_categories['parent_'.$category_title[0]]['children'] = array();
+												}
+											}
+											else {
+												$sorted_categories[] = $category_array;
+											}
+										}
+										
+										// Format categories for 2 column display.
+										$this_col = 1; // column number
 										$maxper_col = round($categories_total/2); // Maximum number of elements per column
-										$i = 1; // Element Count
-										foreach ($categories as $category => $category_extra)
-										{
-											$category_title = $category_extra[0];
-											$category_color = $category_extra[1];
-											if ($this_col == 1) 
-												echo "<ul>";
-											if (!empty($selected_categories) && in_array($category, $selected_categories))
-											{
-												$category_checked = TRUE;
+										$i = 1;  // Element Count	
+										foreach ($sorted_categories as $category) {
+											
+											// If this is the first element of a column, start a new UL
+											if ($i == 1) {
+												echo '<ul id="category-column-'.$this_col.'">';
+											}
+											
+											$cid = $category['cid'];
+											$category_title = $category['category'][0];
+											$category_color = $category['category'][1];
+											
+											// Sategory is selected.
+											if (!empty($form['incident_category']) 
+												&& in_array($cid, $form['incident_category'])) {
+													$category_checked = TRUE;
 											}
 											else
 											{
 												$category_checked = FALSE;
 											}
-											// Indent categories of type 1a., 2e., etc.
-											$li_class = (is_numeric($category_title[0]) AND ctype_alpha($category_title[1])) ? 'sub_category' : '';
-											echo "\n".'<li class="'.$li_class.'"><label>';
-											echo form::checkbox('incident_category[]', $category, $category_checked, ' class="check-box"');
+											
+											echo '<li>';
+											echo form::checkbox('incident_category[]', $cid, $category_checked, ' class="check-box"');
 											echo "$category_title";
-											echo "</label></li>";
-											if ($this_col == $maxper_col || $i == count($categories)) 
-												print "</ul>\n";
-											if ($this_col < $maxper_col)
-											{
-												$this_col++;
-											} 
-											else 
-											{
-												$this_col = 1;
+											
+											if (is_array($category['children']) && !empty($category['children'])) {
+												echo '<ul>';
+												foreach ($category['children'] as $child_category) {
+													$cid = $child_category['cid'];
+													$category_title = $child_category['category'][0];
+													$category_color = $child_category['category'][1];
+													
+													// Sategory is selected.
+													if (!empty($form['incident_category']) 
+														&& in_array($cid, $form['incident_category'])) {
+															$category_checked = TRUE;
+													}
+													else
+													{
+														$category_checked = FALSE;
+													}
+													
+													echo '<li>';
+													echo form::checkbox('incident_category[]', $cid, $category_checked, ' class="check-box"');
+													echo $category_title;
+													
+													$i++;
+												}
+												echo '</ul>';
 											}
 											$i++;
+											
+											// If this is the last element of a column, close the UL
+											if ($i >= $maxper_col || $i == $categories_total) {
+												echo '</ul>';
+												$i = 1;
+												$this_col++;
+											}
 										}
 										?>
 									</div>

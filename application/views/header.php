@@ -30,7 +30,7 @@
 	// Load OpenLayers before jQuery!
 	if ($map_enabled == 'streetmap') {
 		//echo html::script('media/js/OpenLayers', true);
-		echo html::script('http://assets.ushahidi.com/media/js/OpenLayers'.$gz, true);
+		echo html::script('http://assets.ushahidi.com/media/js/OpenLayers_2'.$gz, true);
 		echo "<script type=\"text/javascript\">OpenLayers.ImgPath = '".url::base().'media/img/openlayers/'."';</script>";
 		//echo 'STREET!';
 	}
@@ -57,6 +57,11 @@
 				html::script('media/js/excanvas.pack', true)
 				."<![endif]-->";
 		}
+	}
+	
+	if (isset($treeview_enabled) && $treeview_enabled == TRUE) {
+		echo html::script('media/js/jquery.treeview');
+		echo html::stylesheet('media/css/jquery.treeview');
 	}
 	
 	if ($validator_enabled) {
@@ -202,7 +207,7 @@
 					</form>
 				</div>
 				<!-- / searchform -->
-                <p style="float:left; margin:13px 5px 0 0;"><strong>Total Reports: <?php echo $reports_total ?></strong></p>
+                <p style="float:left; margin:5px 5px 0 0;"><a class="button btn_download" href="<?php echo url::base() . 'download/'; ?>"><span>Download reports (<?php echo $reports_total ?>)</span></a></p>
                 <a id="reports-rss" class="button btn_rss" href="<?php echo url::base() . 'feed/'; ?>"><span>Reports RSS</span></a>
 		
 			</div>
@@ -252,10 +257,13 @@
 						}
 						
 						// Custom Pages
+						// CB: I am going to hack this because it's a special case.  
+						// PM wants the page name to be shorter and change based on the language.
 						foreach ($pages as $page)
 						{
 							$this_active = ($this_page == 'page_'.$page->id) ? 'class="active"' : '';
-							echo "<li><a href=\"".url::base()."page/index/".$page->id."\" ".$this_active.">".$page->page_tab."</a></li>";
+							echo "<li><a href=\"".url::base()."page/index/".$page->id."\" ".$this_active.">".Kohana::lang('ui_main.about')."</a></li>";
+							//old: echo "<li><a href=\"".url::base()."page/index/".$page->id."\" ".$this_active.">".$page->page_tab."</a></li>";
 						}
 						?>
 					</ul>

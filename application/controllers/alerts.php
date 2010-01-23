@@ -17,13 +17,13 @@ class Alerts_Controller extends Main_Controller
 {
     const MOBILE_ALERT = 1;
 	const EMAIL_ALERT = 2;
-    
-    
 
 	function __construct()
     {
         parent::__construct();
         $this->session = Session::instance();
+
+		$this->is_cachable = FALSE;
     }
 
     public function index()
