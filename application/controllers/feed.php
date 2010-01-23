@@ -70,9 +70,9 @@ class Feed_Controller extends Controller
 			foreach($incidents as $incident)
 			{
 				$item = array();
-				$item['title'] = $incident->incident_title;
+				$item['title'] = htmlspecialchars($incident->incident_title);
 				$item['link'] = $site_url.'reports/view/'.$incident->id;
-				$item['description'] = $incident->incident_description;
+				$item['description'] = htmlspecialchars($incident->incident_description);
 				$item['date'] = $incident->incident_date;
 				$item['phone'] = $incident->incident_custom_phone;
 				if($item['phone'] == NULL || $item['phone'] == ''){
@@ -101,7 +101,7 @@ class Feed_Controller extends Controller
 			$feed_items = $items;
 		}
 		
-		$feedpath = $feedtype == 'atom' ? 'feed/atom/' : 'feed/';
+		$feedpath = $feedtype == 'atom' ? 'feed/atom/' : 'feed';
 		
 		//header("Content-Type: text/xml; charset=utf-8");
 		$view = new View('feed_'.$feedtype);
