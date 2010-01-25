@@ -535,9 +535,11 @@ class Reports_Controller extends Main_Controller {
 		}
 		else
 		{
-			$incident = ORM::factory('incident', $id);
+			$incident = ORM::factory('incident')
+				->where('incident_active', '1')
+				->find($id);
 			
-			if ( $incident->id == 0 )	// Not Found
+			if ( !$incident->loaded )	// Not Found
 			{
 				url::redirect('main');
 			}
