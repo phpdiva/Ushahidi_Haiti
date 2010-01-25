@@ -45,23 +45,29 @@ class Feed_Controller extends Controller
 			? (int) $_GET['p'] : 1;
 		$page_position = ( $page == 1 ) ? 0 : 
 			( $page * $limit ) ; // Query position
+			
+		$search = '';
+		if(isset($_GET['search']) && !empty($_GET['search'])) $search = $_GET['search'];
+		$search_for_cache = str_replace(' ','_',$search);
 		
 		$site_url = url::base();
 			
 		// Cache the Feed
 		$cache = Cache::instance();
-		$feed_items = $cache->get('feed_'.$limit.'_'.$page.'_'.$actionable);
+		$feed_items = $cache->get('feed_'.$limit.'_'.$page.'_'.$actionable.'_'.$search_for_cache);
 		if ($feed_items == NULL)
 		{ // Cache is Empty so Re-Cache
 			if($actionable == 1){
 				$incidents = ORM::factory('incident')
 								->where('incident_active', '1')
 								->where('incident_actionable', '1')
+								->like('incident_description',$search)
 								->orderby('incident_date', 'desc')
 								->limit($limit, $page_position)->find_all();
 			}else{
 				$incidents = ORM::factory('incident')
 								->where('incident_active', '1')
+								->like('incident_description',$search)
 								->orderby('incident_date', 'desc')
 								->limit($limit, $page_position)->find_all();
 			}
@@ -70,9 +76,9 @@ class Feed_Controller extends Controller
 			foreach($incidents as $incident)
 			{
 				$item = array();
-				$item['title'] = $incident->incident_title;
+				$item['title'] = htmlentities($incident->incident_title);
 				$item['link'] = $site_url.'reports/view/'.$incident->id;
-				$item['description'] = $incident->incident_description;
+				$item['description'] = htmlentities($incident->incident_description);
 				$item['date'] = $incident->incident_date;
 				$item['phone'] = $incident->incident_custom_phone;
 				if($item['phone'] == NULL || $item['phone'] == ''){
@@ -97,11 +103,11 @@ class Feed_Controller extends Controller
 			$cache_time = 3600; // 1 hour
 			if($actionable == 1) $cache_time = 30; // 30 seconds (This is critical stuff!)
 			
-			$cache->set('feed_'.$limit.'_'.$page.'_'.$actionable, $items, array('feed'), $cache_time);
+			$cache->set('feed_'.$limit.'_'.$page.'_'.$actionable.'_'.$search_for_cache, $items, array('feed'), $cache_time);
 			$feed_items = $items;
 		}
 		
-		$feedpath = $feedtype == 'atom' ? 'feed/atom/' : 'feed/';
+		$feedpath = $feedtype == 'atom' ? 'feed/atom/' : 'feed';
 		
 		//header("Content-Type: text/xml; charset=utf-8");
 		$view = new View('feed_'.$feedtype);
