@@ -184,6 +184,43 @@ class Json_Controller extends Template_Controller
    	}
 
 
+	/* Read the Layer IN via file_get_contents */
+	public function layer($layer_id = 0)
+	{
+		$this->template = "";
+		$this->auto_render = FALSE;
+		
+		$layer = ORM::factory('layer')
+			->where('layer_visible', 1)
+			->find($layer_id);
+		
+		if ($layer->loaded)
+		{
+			$layer_url = $layer->layer_url;
+			$layer_file = $layer->layer_file;
+			
+			$layer_link = (!$layer_url) ?
+				url::base().'media/uploads/'.$layer_file :
+				$layer_url;
+			
+			$content = file_get_contents($layer_link);
+			
+			if ($content !== false)
+			{
+				echo $content;
+			}
+			else
+			{
+				echo "";
+			}
+		}
+		else
+		{
+			echo "";
+		}
+	}
+	
+
 	public function share( $share_id = false)
 	{
 		$this->template = "";

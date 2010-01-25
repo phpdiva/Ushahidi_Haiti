@@ -285,8 +285,8 @@
 				protocolUrl = "<?php echo url::base(); ?>" + json_url + "/layer/"+thisLayerID+"/";
 				thisLayer = "Layer_"+thisLayerID;
 				
-				//var protocolFormat = OpenLayers.Format.KML;
-				var protocolFormat = OpenLayers.Format.GeoJSON;
+				var protocolFormat = OpenLayers.Format.KML;
+				//var protocolFormat = OpenLayers.Format.GeoJSON;
 				
 				newlayer = true;
 			}
