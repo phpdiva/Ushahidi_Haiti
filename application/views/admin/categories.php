@@ -103,6 +103,7 @@
 												<div class="post">
 													<h4><?php echo $category_title; ?></h4>
 													<p><?php echo $category_description; ?>...</p>
+                          <p><em><?php echo (int) $category->incident_count; ?> incident<?php echo ((int) $category->incident_count == 1) ? '' : 's'; ?></em></p>
 												</div>
 											</td>
 											<td class="col-3">
