@@ -223,8 +223,23 @@
 			<!-- submit incident -->
 			<div class="submit-incident clearingfix">
 				<a href="<?php echo url::base() . "reports/submit" ?>"><?php echo Kohana::lang('ui_main.submit'); ?></a>
+                
 			</div>
 			<!-- / submit incident -->
+            
+            <!-- Announcement Box -->
+            <div id="announcement-box">
+                <div class="announcement" id="diaspora-info">
+                    <h3>Haitian Diaspora Community: </h3>
+                    <p><strong>We need your help! <a href="<?php echo url::base() . "diaspora"; ?>">Help Us Help Haiti &raquo;</a></strong></p>
+                </div>
+                
+                <div  class="announcement" id="clickatel-info">
+                    <h3>Announcement</h3>
+                    <p>Clickatell has donated free messaging through the remainder of January. <a href="http://www.clickatell.com/press/press_article.php/154">Read More &raquo;</a></p>
+                </div>
+            </div>
+            <!-- / announcement Box -->
 		</div>
 		<!-- / header -->
 

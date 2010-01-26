@@ -15,7 +15,7 @@ Author Email: david@ushahidi.com
 	}
 	
 	div#header{
-		height:110px;
+		height:150px;
 	}
 
 /* Logo Box */
@@ -37,14 +37,11 @@ Author Email: david@ushahidi.com
 
 
 /* Submit Button */
-	div.submit-incident{
-		margin-top:58px;
-	}
-	div.submit-incident a{
-		background-color: #E0DC52;
-		color: #000;
-	}
+	div.submit-incident{ margin:0; position:absolute; right:0; top:79px; }
+	div.submit-incident a{ background-color: #E0DC52; color: #000; }
 	
+	
+
 /* Multimedia Integration */
 	.multimedia-integration { padding-bottom:18px; }
 	.mm-twitter { padding:0 0 0 10px;  vertical-align:top; }
@@ -72,14 +69,29 @@ Author Email: david@ushahidi.com
 	
 	div.language-box { margin-top:12px; }
 	
-/* SMS Shortcode Announcement */
+/* Announcements */
+
+	/* Shortcode */
 	#shortcode-header-wrap { width:100%; background:#FFF9D8; padding:9px; border:1px solid #ffed8d; }
 	#shortcode-header-info { width:960px; margin:0 auto; padding:0 0 3px 18px; background:transparent url(icons.png) 0 -97px no-repeat; }
-	#shortcode-info { background:#FFF9D8; padding:18px; margin:0 0 10px 0; border:1px solid #ffed8d; display:none; }
-	#shortcode-info h3 { margin:0 0 10px 0; background:transparent url(icons.png) 0 -97px no-repeat; font-size:14px; padding:0 0 0 18px; }
-	#shortcode-info p {}
-	#shortcode-info p span,
-	#shortcode-header-info span { padding:5px; background:#fff; font-weight:bold; color:#F00; } 
+	#shortcode-header-info span { padding:5px; background:#fff; font-weight:bold; color:#F00; }
+	
+	#announcement-box { position:absolute; top:61px; left:229px; }
+	
+	/* Generic */
+	.announcement { background:#FFF9D8; padding:10px; margin:0 18px 10px 0; border:1px solid #ffed8d; float:left; width:236px;   }
+	.announcement h3 { margin:0 0 5px 0; background:transparent url(icons.png) 0 -205px no-repeat; font-size:14px; padding:0 0 0 23px; }
+		
+		/* Diaspora */
+		#diaspora-info { height:51px}
+		#diaspora-info h3 { background:transparent url(icons.png) 0 -236px no-repeat; }
+		
+		/* Clickatel */
+		#clickatel-info { width:247px; margin-right:0;}
+		#clickatel-info h3 { }
+		.announcement p { }
+	
+	 
 	
 /* Category Filter on Home Page */
 	ul.category-filters li a { font-size:11px; }

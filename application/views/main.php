@@ -118,17 +118,7 @@
 					
 						<!-- content column -->
 						<div id="content" class="clearingfix">
-                        	<div id="shortcode-info">
-                            	<h3><?php echo Kohana::lang('ui_main.shortcode_announcement_title'); ?></h3>
-                                <p>
-								   <?php echo Kohana::lang('ui_main.shortcode_announcement_1'); ?> 
-                                    <span> <?php echo $sms_no2; ?> </span>  
-                                    <?php 
-                                        echo '&nbsp;('.Kohana::lang('ui_main.shortcode_announcement_3').'<span>'.$sms_no1.'</span>'.')&nbsp;';
-                                        echo Kohana::lang('ui_main.shortcode_announcement_2'); 
-                                    ?>
-                                </p>
-                            </div>
+                        	
 							<div class="floatbox">
 							
 								<!-- filters -->
