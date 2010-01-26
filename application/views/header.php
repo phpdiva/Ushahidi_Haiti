@@ -230,8 +230,8 @@
             <!-- Announcement Box -->
             <div id="announcement-box">
                 <div class="announcement" id="diaspora-info">
-                    <h3>Haitian Diaspora Community: </h3>
-                    <p><strong>We need your help! <a href="<?php echo url::base() . "diaspora"; ?>">Help Us Help Haiti &raquo;</a></strong></p>
+                    <h3><?php echo Kohana::lang('ui_main.diaspora_announcement_title'); ?> </h3>
+                    <p><strong><?php echo Kohana::lang('ui_main.diaspora_announcement_1'); ?> <a href="<?php echo url::base() . "diaspora"; ?>"><?php echo Kohana::lang('ui_main.diaspora_announcement_2'); ?></a></strong></p>
                 </div>
                 
                 <div  class="announcement" id="clickatel-info">

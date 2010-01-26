@@ -75,5 +75,8 @@ $lang = array(
 	'shortcode_announcement_title' => 'Rapport par téléphone mobile',
 	'shortcode_announcement_1' => 'En Haiti?  Envoyez un texte a ',
 	'shortcode_announcement_2' => ' sur Digicel ou Comcel avec <strong>votre lieu et vos besoins</strong>. Rapportez emergences et personnes disparues.',
-	'shortcode_announcement_3' => 'International:'
+	'shortcode_announcement_3' => 'International:',
+	'diaspora_announcement_title' => 'Diaspora Communauté d\'Haïti',
+	'diaspora_announcement_1' => 'Nous avons besoin de votre aide!',
+	'diaspora_announcement_2' => 'Aide-nous Aide Haïti &raquo;'
 );
