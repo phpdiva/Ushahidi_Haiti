@@ -113,10 +113,6 @@
 								</ol>					
 		
 							</div>
-							<!-- / additional content -->
-							<div class="additional-content download-reports">
-								<p><a class="button btn_download" href="<?php echo url::base() . 'download/'; ?>"><span>Download reports (csv)</span></a></p>
-                            </div>
 						</div>
 						<!-- / right column -->
 					
@@ -187,42 +183,41 @@
 								<!-- / map -->
 								<div id="graph" class="graph-holder"></div>
                              
-                                
-                                <?php
-								if ($layers)
-								{
-									?>
-									<!-- Layers (KML/KMZ) -->
-									<div class="cat-filters clearingfix" style="margin-top:20px;">
-										<strong><?php echo Kohana::lang('ui_main.layers_filter');?></strong>
-									</div>
-									<ul id="kml-layers" class="category-filters cf-kml">
-										<?php
-										foreach ($layers as $layer => $layer_info)
-										{
-											$layer_name = $layer_info[0];
-											$layer_color = $layer_info[1];
-											$layer_url = $layer_info[2];
-											$layer_file = $layer_info[3];
-											$layer_link = (!$layer_url) ?
-												url::base().'media/uploads/'.$layer_file :
-												$layer_url;
-											echo '<li><a href="#" id="layer_'. $layer .'"
-											onclick="switchLayer(\''.$layer.'\',\''.$layer_link.'\',\''.$layer_color.'\'); return false;"><div class="swatch" style="background-color:#'.$layer_color.'"></div>
-											<div class="cat-title">'.$layer_name.'</div></a></li>';
-										}
-										?>
-									</ul>
-									<!-- /Layers -->
-									<?php
-								}
-								?>
-                                
 							</div>
+                            
 						</div>
 						<!-- / content column -->
 				
 					</div>
+                    <?php
+					if ($layers)
+					{
+						?>
+						<!-- Layers (KML/KMZ) -->
+						<div class="cat-filters clearingfix" style="margin-top:20px;">
+							<strong><?php echo Kohana::lang('ui_main.layers_filter');?></strong>
+						</div>
+						<ul id="kml-layers" class="category-filters cf-kml">
+							<?php
+							foreach ($layers as $layer => $layer_info)
+							{
+								$layer_name = $layer_info[0];
+								$layer_color = $layer_info[1];
+								$layer_url = $layer_info[2];
+								$layer_file = $layer_info[3];
+								$layer_link = (!$layer_url) ?
+									url::base().'media/uploads/'.$layer_file :
+									$layer_url;
+								echo '<li><a href="#" id="layer_'. $layer .'"
+								onclick="switchLayer(\''.$layer.'\',\''.$layer_link.'\',\''.$layer_color.'\'); return false;"><div class="swatch" style="background-color:#'.$layer_color.'"></div>
+								<div class="cat-title">'.$layer_name.'</div></a></li>';
+							}
+							?>
+						</ul>
+						<!-- /Layers -->
+						<?php
+					}
+					?>
 				</div>
 				<!-- / main body -->
 			

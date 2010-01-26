@@ -350,7 +350,7 @@ class Json_Cluster_Controller extends Template_Controller
 				url::base().'media/uploads/'.$layer_file :
 				$layer_url;
 			
-			$content = file_get_contents($layer_url);
+			$content = file_get_contents($layer_link);
 			
 			if ($content !== false)
 			{
