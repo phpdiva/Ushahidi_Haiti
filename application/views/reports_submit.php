@@ -214,14 +214,19 @@ $("#incident_ampm option[value='"+ampm+"']").attr("selected","true");
 								<?php if (!$multi_country)
 											{
 								?>
-								<div class="report_row">
+								<div class="report_row" id="find-location">
 									<h4><?php echo Kohana::lang('ui_main.reports_find_location'); ?></h4>
-									<?php print form::dropdown('select_city',$cities,'', ' class="select" '); ?>
-								</div>
-								<div class="report_row">
-									Lat: <?php print form::input('latitude', $form['latitude'], ' class="text short"'); ?>
-									&nbsp;Lon: <?php print form::input('longitude', $form['longitude'], ' class="text short"'); ?>
-								</div>
+									
+									<div class="select-city">
+										<?php print form::dropdown('select_city',$cities,'', ' class="select" '); ?>
+                                    </div>
+							
+								
+									<div class="coordinates">
+                                    	Lat: <?php print form::input('latitude', $form['latitude'], ' class="text short"'); ?>
+										&nbsp;Lon: <?php print form::input('longitude', $form['longitude'], ' class="text short"'); ?>
+									</div>
+                                </div>
 								<?php
 									 }
 								?>

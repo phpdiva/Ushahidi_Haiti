@@ -47,8 +47,8 @@ Author Email: david@ushahidi.com
 	
 /* Multimedia Integration */
 	.multimedia-integration { padding-bottom:18px; }
-	.mm-twitter { padding:0 0 0 10px; }
-	.mm-flickr { width:300px; padding:0 4px 0 20px; }
+	.mm-twitter { padding:0 0 0 10px;  vertical-align:top; }
+	.mm-flickr { width:300px; padding:0 4px 0 20px; vertical-align:top; }
 	.mm-youtube { vertical-align:top; }
 
 
@@ -94,7 +94,7 @@ Author Email: david@ushahidi.com
 
 /* KML Filters */
 	ul.cf-kml { margin:0; overflow:auto; }
-	ul.cf-kml li { float:left; width:181px; margin:0; }
+	ul.cf-kml li { float:left; width:172px; height:75px; margin:0; }
 	
 	ul.cf-kml li a { border:none; }
 	ul.cf-kml li a:hover,
@@ -117,13 +117,26 @@ Author Email: david@ushahidi.com
 	.gallery .gal-nav a.btn-prev, .gallery .gal-nav a.btn-next { margin-top: 23px; cursor: pointer; }
 
 
-/* Categories on submit report page */
+/*  Submit report page */
+	
+	/*Find a location*/
+	#find-location {  }
+	#find-location .select-city { float:left; margin:0 10px 0 0 }
+	#find-location .coordinates { float:left; }
+	#find-location .coordinates input { font-size:10px; padding-left:3px; padding-right:3px; width:70px; }
+	
+	/*Categories*/
 	#reportForm .report_category ul ul { width: auto; }
 	#reportForm .report_category ul li.sub_category { padding-left: 47px; }
 	#reportForm .report_category ul li.sub_category_last { background-position: 16px -1766px; }
 	#reportForm .report_category ul li input.check-box { margin: 0 3px 0 0; }
 	#reportForm .report_category ul li.hover,
 	#reportForm .report_category ul li li:hover { background-color: #efefef; }
+	
+	ul.treeview li.lastCollapsable,
+	ul.treeview li.lastExpandable { width:155px; }
+	
+	
 	
 /* Download Reports (front-end) */
 	.bg { padding:0 18px; margin:0 0 18px 0; overflow:auto; }
