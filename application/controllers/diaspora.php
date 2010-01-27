@@ -1,6 +1,6 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 /**
- * Pages controller
+ * Diaspora Page controller
  *
  * PHP version 5
  * LICENSE: This source file is subject to LGPL license 
@@ -13,22 +13,22 @@
  * @license    http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License (LGPL) 
  */
 
-class Page_Controller extends Main_Controller {
+class Diaspora_Controller extends Main_Controller {
 	
 	function __construct()
     {
         parent::__construct();	
     }
 
-	public function index($page_id = 1) 
+	public function index($page_id = 3) 
 	{
-		$this->template->header->this_page = "page_".$page_id;
-        $this->template->content = new View('page');
+		//$this->template->header->this_page = "page_".$page_id;
+        $this->template->content = new View('diaspora');
 		
-		if (!$page_id)
-		{
-			url::redirect('main');
-		}
+		//if (!$page_id)
+		//{
+		//	url::redirect('main');
+		//}
 		
 		$page = ORM::factory('page')->find($page_id);
 		if ($page->loaded)

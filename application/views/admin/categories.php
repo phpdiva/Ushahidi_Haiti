@@ -99,10 +99,11 @@
 										?>
 										<tr>
 											<td class="col-1">&nbsp;</td>
-											<td class="col-2">
+											<td class="col-2<?php echo ($parent_id > 0) ? '_sub' : ''; ?>">
 												<div class="post">
 													<h4><?php echo $category_title; ?></h4>
 													<p><?php echo $category_description; ?>...</p>
+                          <p><em><?php echo (int) $category->incident_count; ?> incident<?php echo ((int) $category->incident_count == 1) ? '' : 's'; ?></em></p>
 												</div>
 											</td>
 											<td class="col-3">
@@ -126,6 +127,10 @@
 											</td>
 										</tr>
 										<?php
+										/*
+										// @todo: Temporarily hiding the children.
+										// Need to resolve issue #256: http://dev.ushahidi.com/issues/show/256
+										// Cannot pull incident count using ORM magic (with little overhead).
 										
 										// Get All Category Children
 										foreach ($category->children as $child)
@@ -167,7 +172,8 @@
 												</td>
 											</tr>
 											<?php
-										}										
+										}	
+										*/
 									}
 									?>
 								</tbody>

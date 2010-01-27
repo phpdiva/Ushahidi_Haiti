@@ -75,5 +75,8 @@ $lang = array(
 	'shortcode_announcement_title' => 'Rapotaj voye pa mobil',
 	'shortcode_announcement_1' => 'An Ayiti? Text ',
 	'shortcode_announcement_2' => ' sur Digicel/Comcel avek ki <strong>kote ou ye e sa ou bezwen</strong>. Kontakte nou pou kriz e moun ou paka jwenn.',
-	'shortcode_announcement_3' => 'Entenasyonal:'
+	'shortcode_announcement_3' => 'Entenasyonal:',
+	'diaspora_announcement_title' => 'Diaspora: ',
+	'diaspora_announcement_1' => 'Nou beswen ede ou!',
+	'diaspora_announcement_2' => 'Ede Nou Ede Ayiti &raquo;'
 );

@@ -93,7 +93,7 @@
 									{ ?><li class="report r-sms">
 									
 										<?php echo Kohana::lang('ui_main.report_option_1-local').' '.$sms_no2."."; ?> <br />
-										<?php echo Kohana::lang('ui_main.report_option_1-international').' '.$sms_no1."."; ?>
+										<?php echo Kohana::lang('ui_main.report_option_1-international').'&nbsp;+44 762.480.2524.'; ?>
                                         
                                     </li><?php } ?>
 									
@@ -118,17 +118,7 @@
 					
 						<!-- content column -->
 						<div id="content" class="clearingfix">
-                        	<div id="shortcode-info">
-                            	<h3><?php echo Kohana::lang('ui_main.shortcode_announcement_title'); ?></h3>
-                                <p>
-								   <?php echo Kohana::lang('ui_main.shortcode_announcement_1'); ?> 
-                                    <span> <?php echo $sms_no2; ?> </span>  
-                                    <?php 
-                                        echo '&nbsp;('.Kohana::lang('ui_main.shortcode_announcement_3').'<span>'.$sms_no1.'</span>'.')&nbsp;';
-                                        echo Kohana::lang('ui_main.shortcode_announcement_2'); 
-                                    ?>
-                                </p>
-                            </div>
+                        	
 							<div class="floatbox">
 							
 								<!-- filters -->
@@ -284,7 +274,10 @@
                         </table>
                     </div>
 						<!-- left content block -->
-						<div class="content-block-left">
+						<table id="feed-grid-table">
+                        <tr>
+                        <td class="fgt-left">
+                        <div class="feed-grid">
 							<h5><?php echo Kohana::lang('ui_main.incidents_listed'); ?></h5>
 							<table class="table-list">
 								<thead>
@@ -312,9 +305,9 @@
 										$incident_location = $incident->location->location_name;
 									?>
 									<tr>
-										<td><a href="<?php echo url::base() . 'reports/view/' . $incident_id; ?>"> <?php echo $incident_title ?></a></td>
-										<td><?php echo $incident_location ?></td>
-										<td><?php echo $incident_date; ?></td>
+										<td class="title"><a href="<?php echo url::base() . 'reports/view/' . $incident_id; ?>"> <?php echo $incident_title ?></a></td>
+										<td class="location"><?php echo $incident_location ?></td>
+										<td class="date"><?php echo $incident_date; ?></td>
 									</tr>
 									<?php
 									}
@@ -322,19 +315,20 @@
 
 								</tbody>
 							</table>
-							<a class="more" href="<?php echo url::base() . 'reports/' ?>">View More...</a>
+							<p><a class="more" href="<?php echo url::base() . 'reports/' ?>">View More &raquo;</a></p>
 						</div>
 						<!-- / left content block -->
-				
+						</td>
+                        <td class="fgt-right">
 						<!-- right content block -->
-						<div class="content-block-right">
+						<div class="feed-grid">
 							<h5><?php echo Kohana::lang('ui_main.official_news'); ?></h5>
 							<table class="table-list">
 								<thead>
 									<tr>
-										<th scope="col"><?php echo Kohana::lang('ui_main.title'); ?></th>
-										<th scope="col"><?php echo Kohana::lang('ui_main.source'); ?></th>
-										<th scope="col"><?php echo Kohana::lang('ui_main.date'); ?></th>
+										<th scope="col" class="title"><?php echo Kohana::lang('ui_main.title'); ?></th>
+										<th scope="col" class="location"><?php echo Kohana::lang('ui_main.source'); ?></th>
+										<th scope="col" class="date"><?php echo Kohana::lang('ui_main.date'); ?></th>
 									</tr>
 								</thead>
 								<tbody>
@@ -348,34 +342,59 @@
 										$feed_source = text::limit_chars($feed->feed->feed_name, 15, "...");
 									?>
 									<tr>
-										<td><a href="<?php echo $feed_link; ?>" target="_blank"><?php echo $feed_title ?></a></td>
-										<td><?php echo $feed_source; ?></td>
-										<td><?php echo $feed_date; ?></td>
+										<td class="title"><a href="<?php echo $feed_link; ?>" target="_blank"><?php echo $feed_title ?></a></td>
+										<td class="location"><?php echo $feed_source; ?></td>
+										<td class="date"><?php echo $feed_date; ?></td>
 									</tr>
 									<?php
 									}
 									?>
 								</tbody>
 							</table>
-							<a class="more" href="<?php echo url::base() . 'feeds' ?>">View More...</a>
+							<a class="more" href="<?php echo url::base() . 'feeds' ?>">View More &raquo;</a>
+                            
 						</div>
-						<!-- / right content block -->
-				
+                        <div class="feed-grid">
+                            <h5>Citizen Journalism</h5>
+                            <table class="table-list">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="title"><?php echo Kohana::lang('ui_main.title'); ?></th>
+                                        <th scope="col" class="location"><?php echo Kohana::lang('ui_main.source'); ?></th>
+                                        <th scope="col" class="date"><?php echo Kohana::lang('ui_main.date'); ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    foreach ($gvfeeds as $feed)
+                                    {
+                                        $feed_id = $feed->id;
+                                        $feed_title = text::limit_chars($feed->item_title, 40, '...', True);
+                                        $feed_link = $feed->item_link;
+                                        $feed_date = date('M j Y', strtotime($feed->item_date));
+                                        $feed_source = text::limit_chars($feed->feed->feed_name, 15, "...");
+                                    ?>
+                                    <tr>
+                                        <td class="title"><a href="<?php echo $feed_link; ?>" target="_blank"><?php echo $feed_title ?></a></td>
+                                        <td class="location"><?php echo $feed_source; ?></td>
+                                        <td class="date"><?php echo $feed_date; ?></td>
+                                    </tr>
+                                    <?php
+                                    }
+                                    ?>
+                                </tbody>
+                            </table>
+                            <a class="more" href="<?php echo url::base() . 'feeds' ?>">View More &raquo;</a>
+                        </div>
+                        
+                        </td>
+                        </tr>
+						
+					</table>
 					</div>
+                    
 					<!-- /content blocks -->
-<?php
-/*
- *					<!-- site footer -->
- *					<div class="site-footer">
- *
- *						<h5>Site Footer</h5>
- *						Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Mauris porta. Sed eget nisi. Fusce rhoncus lorem ac erat. Maecenas turpis tellus, volutpat quis, sodales et, consectetuer ac, est. Nullam sed est sed augue vestibulum condimentum. In tellus. Integer luctus odio eu arcu. Pellentesque imperdiet felis eu tortor. Morbi ante dui, iaculis id, vulputate sit amet, venenatis in, turpis. Fusce in risus.
- *
- *					</div>
- *					<!-- / site footer -->
-*/
-?>
-			
+                    
 				</div>
 				<!-- content -->
 		
