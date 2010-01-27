@@ -24,7 +24,7 @@ class Georss_Controller extends Controller
         parent::__construct();
 		set_time_limit(60);
 		
-		//$profiler = New Profiler;
+		// $profiler = New Profiler;
 	}
 	
 	public function index()
@@ -115,25 +115,6 @@ class Georss_Controller extends Controller
 						$reporter->reporter_date = $date;
 						$reporter->save();
 					}
-					// Number is in our database
-					else
-					{
-						// Find previous message and use it as parent
-						$parent = ORM::factory('message')
-							->where('reporter_id', $reporter->id)
-							->where('message_type', '1')
-							->where('parent_id', '0')
-							->where('message_trash', '0')
-							->orderby('message_date', 'desc')
-							->find();
-						if ($parent->loaded)
-						{
-							$parent_id = $parent->id;
-							$parent->message_read = 0;
-							$parent->message_reply = 1;
-							$parent->save($parent->id);
-						}
-					}
 				
 				
 					// Step 4. If this message has a location, save it!
@@ -177,9 +158,41 @@ class Georss_Controller extends Controller
 					$message->message_detail = $message_detail;
 					$message->message_type = 1; // Inbox
 					$message->message_date = $date;
+					$message->message_date_reply = $date;
 					$message->message_actionable = $actionable;
 					$message->service_messageid = $service_messageid;
 					$message->save();
+					
+					
+					// Reset Parent ID's based on date FIFO
+					// Message with oldest date becomes parent
+					$parent = ORM::factory('message')
+						->where('reporter_id', $reporter->id)
+						->where('message_type', '1')
+						->where('message_trash', '0')
+						->orderby('message_date', 'asc')
+						->find();
+						
+					if ($parent->loaded)
+					{
+						$children = ORM::factory('message')
+							->where('reporter_id', $reporter->id)
+							->where('id !='.$parent->id)
+							->where('message_type', '1')
+							->where('message_trash', '0')
+							->orderby('message_date', 'asc')
+							->find_all();
+						
+						foreach ($children as $child)
+						{
+							$child->parent_id = $parent->id;
+							$child->save($child->id);
+						}
+						
+						$parent->parent_id = 0;
+						$parent->message_date_reply = $date;
+						$parent->save($parent->id);
+					}
 					
 					$i++;
 				}

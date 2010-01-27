@@ -113,6 +113,8 @@
 									$reply_count = $replies->where('parent_id', $message_id)
 										->count_all();
 										
+									$last_reply_date = 0;
+										
 									// Any Locks?
 									$username = "";
 									$user_id = "";
@@ -195,7 +197,7 @@
 															$message_replies = $replies->where('parent_id', $message_id)
 																->orderby('message_date', 'desc')
 																->find_all();
-
+															
 															foreach ($message_replies as $reply)
 															{
 																$reply_type = $reply->message_type;
@@ -211,6 +213,11 @@
 																if ($reply_detail)
 																	echo "<BR>~~~<BR>".$reply_detail;
 																echo "</div>";
+																
+																if (!$last_reply_date)
+																{
+																	$last_reply_date = date('Y-m-d', strtotime($reply->message_date));
+																}
 															}
 															?>
 														</div>
@@ -249,7 +256,13 @@
 												?>
 											</ul>
 										</td>
-										<td class="col-3"><?php echo $message_date; ?></td>
+										<td class="col-3"><?php echo $message_date; 
+										
+										if ($reply_count > 0)
+										{
+											echo "<br /><span style=\"font-size:80%; font-weight:normal;color:#7D0013\">Reply On: ".$last_reply_date."</span>";
+										}
+										?></td>
 										<td class="col-4">
 											<ul>
 												<?php
