@@ -91,7 +91,19 @@ Author Email: david@ushahidi.com
 		#clickatel-info h3 { }
 		.announcement p { }
 	
-	 
+/* Incident/Feed Grid */
+	#feed-grid-table {  }
+	#feed-grid-table td { width:454px; vertical-align:top; }
+	#feed-grid-table td td { width:auto; }
+		td.fgt-left {  }
+		td.fgt-right { padding:0 0 0 16px; }
+	
+	.feed-grid { background:#fff; padding:10px 13px; margin:0 0 42px; }
+	.feed-grid h5 span { font-size:12px; }
+	
+	table.table-list thead th.title { width:155px;}
+	table.table-list thead th.date { width:43px;}
+	table.table-list thead th.location { width:75px; }
 	
 /* Category Filter on Home Page */
 	ul.category-filters li a { font-size:11px; }
