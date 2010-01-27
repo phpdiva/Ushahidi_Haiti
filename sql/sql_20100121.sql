@@ -979,15 +979,15 @@ CREATE TABLE IF NOT EXISTS `api_banned` (
 -- Table structure for table `api_log`
 --
 
-CREATE TABLE IF NOT EXISTS `api_log` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE `api_log` (
+  `id` int(11) unsigned NOT NULL auto_increment,
   `api_task` varchar(10) NOT NULL,
-  `api_parameters` varchar(50) NOT NULL,
+  `api_parameters` text NOT NULL,
   `api_records` tinyint(11) NOT NULL,
   `api_ipaddress` varchar(50) NOT NULL,
   `api_date` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='For logging API activities' AUTO_INCREMENT=19 ;
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='For logging API activities' AUTO_INCREMENT=56 ;
 
 --
 -- Dumping data for table `api_log`
