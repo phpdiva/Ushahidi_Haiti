@@ -351,11 +351,11 @@
 									?>
 								</tbody>
 							</table>
-							<a class="more" href="<?php echo url::base() . 'feeds' ?>">View More...</a>
+							<a class="more" href="<?php echo url::base() . 'feeds' ?>">View More &raquo;</a>
                             
 						</div>
                         <div class="feed-grid">
-                            <h5>Global Voices Feed</h5>
+                            <h5>Citizen Journalism</h5>
                             <table class="table-list">
                                 <thead>
                                     <tr>
@@ -384,6 +384,7 @@
                                     ?>
                                 </tbody>
                             </table>
+                            <a class="more" href="<?php echo url::base() . 'feeds' ?>">View More &raquo;</a>
                         </div>
                         
                         </td>

@@ -208,7 +208,7 @@ class Main_Controller extends Template_Controller {
 			
         $this->template->content->incidents = ORM::factory('incident')
             ->where('incident_active', '1')
-			->limit('17')
+			->limit('14')
             ->orderby('incident_date', 'desc')
 			->with('location')
             ->find_all();
