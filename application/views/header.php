@@ -154,7 +154,7 @@
         	<?php echo Kohana::lang('ui_main.shortcode_announcement_1'); ?> 
             <span> <?php echo $sms_no2; ?> </span>  
             <?php 
-				echo '&nbsp;('.Kohana::lang('ui_main.shortcode_announcement_3').'<span>'.$sms_no1.'</span>'.')&nbsp;';
+				echo '&nbsp;('.Kohana::lang('ui_main.shortcode_announcement_3').'<span>+44 762.480.2524</span>)&nbsp;';
 				echo Kohana::lang('ui_main.shortcode_announcement_2'); 
 			?>
         </p>
@@ -223,8 +223,23 @@
 			<!-- submit incident -->
 			<div class="submit-incident clearingfix">
 				<a href="<?php echo url::base() . "reports/submit" ?>"><?php echo Kohana::lang('ui_main.submit'); ?></a>
+                
 			</div>
 			<!-- / submit incident -->
+            
+            <!-- Announcement Box -->
+            <div id="announcement-box">
+                <div class="announcement" id="diaspora-info">
+                    <h3><?php echo Kohana::lang('ui_main.diaspora_announcement_title'); ?> </h3>
+                    <p><strong><?php echo Kohana::lang('ui_main.diaspora_announcement_1'); ?> <a href="<?php echo url::base() . "diaspora"; ?>"><?php echo Kohana::lang('ui_main.diaspora_announcement_2'); ?></a></strong></p>
+                </div>
+                
+                <div  class="announcement" id="clickatel-info">
+                    <h3>Announcement</h3>
+                    <p>Clickatell has donated free messaging through the remainder of January. <a href="http://www.clickatell.com/press/press_article.php/154">Read More &raquo;</a></p>
+                </div>
+            </div>
+            <!-- / announcement Box -->
 		</div>
 		<!-- / header -->
 

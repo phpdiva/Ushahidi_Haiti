@@ -40,4 +40,33 @@ class Category_Model extends ORM_Tree
 		
 		return $cats;
 	}
+	
+	
+	/**
+	 * Returns all categories with incident count.
+	 * Optionally accepts pagination offsets, just like ORM::find_all().
+	 */
+	public function find_all_with_incident_count($limit = NULL, $offset = NULL) {
+		// Get the current locale.
+		// @todo: Should this be passed in as the function argument instead?
+		$locale = Kohana::config('locale.language');
+		
+		$sql = 'SELECT category.*, COUNT(incident_category.incident_id) AS incident_count '
+					. 'FROM category LEFT JOIN incident_category ON category.id = incident_category.category_id '
+					. 'WHERE locale = ? GROUP BY category.id ORDER BY category_title ASC';
+		$arguments = array($locale);
+		
+		// Add pagination
+		if ($limit !== NULL && $offset !== NULL)
+		{
+			$sql .= ' LIMIT ?, ?';
+			$arguments[] = $offset;
+			$arguments[] = $limit;
+		}
+		
+		$result = $this->db->query($sql, $arguments);
+		
+		// Return an iterated result
+		return new ORM_Iterator($this, $result);
+	}
 }
