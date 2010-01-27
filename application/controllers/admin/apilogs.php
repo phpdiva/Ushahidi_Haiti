@@ -130,7 +130,7 @@ class Apilogs_Controller extends Admin_Controller
 				
 				if ($post->action == 'd')	// Unban Action
 				{
-					foreach($post->api_ban_id as $item)
+					foreach($post->api_banned_id as $item)
 					{
 						$update = new API_Banned_Model($item);
 						if ($update->loaded == true)
@@ -142,7 +142,8 @@ class Apilogs_Controller extends Admin_Controller
 				}
 				elseif ($post->action == 'x')	// Unban All Logs Action
 				{
-					ORM::factory('api_log')->delete_all();
+					
+					ORM::factory('api_banned')->delete_all();
 					$form_action = "UNBANNED";
 				}
 				$form_saved = TRUE;

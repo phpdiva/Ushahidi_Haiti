@@ -25,8 +25,8 @@
 		<!-- tab -->
 		<div class="tab">
 			<ul>
-				<li><a href="#" onclick="apiBannedAction('d','DELETE', '');">UNBAN</a></li>
-				<li><a href="#" onclick="apiBannedAction('x','DELETE ALL ', '000');">UNBAN ALL </a></li>
+				<li><a href="#" onclick="apiBannedAction('d','UNBAN', '');">UNBAN</a></li>
+				<li><a href="#" onclick="apiBannedAction('x','UNBAN ALL ', '000');">UNBAN ALL </a></li>
 			</ul>
 		</div>
 	</div> 
@@ -47,7 +47,7 @@
 	?>
 		<!-- green-box -->
 		<div class="green-box" id="submitStatus">
-			<h3>API Logs <?php echo $form_action; ?> <a href="#" id="hideMessage" class="hide">hide this message</a></h3>
+			<h3>API <?php echo $form_action; ?> <a href="#" id="hideMessage" class="hide">hide this message</a></h3>
 		</div>
 		<?php
 	}

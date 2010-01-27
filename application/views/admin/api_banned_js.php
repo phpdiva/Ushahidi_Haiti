@@ -19,10 +19,10 @@
 <?php require SYSPATH.'../application/views/admin/form_utils_js.php' ?>
 
 	// Ajax Submission
-	function apiLogAction ( action, confirmAction, api_log_id )
+	function apiBannedAction ( action, confirmAction, api_banned_id )
 	{
 		var statusMessage;
-		if( !isChecked( "api_ban" ) && api_banned_id=='' )
+		if( !isChecked( "api_banned" ) && api_banned_id =='' )
 		{ 
 			alert('Please select at least one banned ip.');
 		} else {
@@ -31,10 +31,10 @@
 				// Set Submit Type
 				$("#action").attr("value", action);
 			
-				if (api_log_id != '') 
+				if (api_banned_id != '') 
 				{
 					// Submit Form For Single Item
-					$("#api_banned_single").attr("value", api_ban_id);
+					$("#api_banned_single").attr("value", api_banned_id);
 					$("#apiBannedMain").submit();
 				}
 				else
