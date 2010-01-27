@@ -150,7 +150,7 @@ Author Email: david@ushahidi.com
 	#find-location .coordinates input { font-size:10px; padding-left:3px; padding-right:3px; width:70px; }
 	
 	/*Categories*/
-	#reportForm .report_category ul ul { width: auto; }
+	#reportForm .report_category ul ul { width: auto; float: none; }
 	#reportForm .report_category ul li.sub_category { padding-left: 47px; }
 	#reportForm .report_category ul li.sub_category_last { background-position: 16px -1766px; }
 	#reportForm .report_category ul li input.check-box { margin: 0 3px 0 0; }

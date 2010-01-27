@@ -173,12 +173,9 @@ class Manage_Controller extends Admin_Controller
 													->where('parent_id','0')
 													->count_all()
                         ));
-
-        $categories = ORM::factory('category')
-						->where('parent_id','0')
-                        ->orderby('category_title', 'asc')
-                        ->find_all((int) Kohana::config('settings.items_per_page_admin'), 
-                            $pagination->sql_offset);
+					$categories = ORM::factory('category')
+						->find_all_with_incident_count((int) Kohana::config('settings.items_per_page_admin'), 
+							$pagination->sql_offset);
 		 $parents_array = ORM::factory('category')
             ->where('parent_id','0')
             ->select_list('id', 'category_title');
