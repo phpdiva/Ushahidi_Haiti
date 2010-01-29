@@ -1,4 +1,8 @@
 <?php defined('SYSPATH') or die('No direct script access.');
+
+// Set Timezone
+date_default_timezone_set('America/New_York');
+
 /**
 * Default Settings From Database
 */
@@ -72,8 +76,8 @@ $default_map = $settings->default_map;
 $api_google = $settings->api_google;
 $api_yahoo = $settings->api_yahoo;
 
-// Google/OSM Combo
-Kohana::config_set('settings.api_url', '<script src="http://maps.google.com/maps?file=api&v=2&key=' . $api_google . '" type="text/javascript"></script><script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>');
+// Google/OSM/MapBOX Combo
+Kohana::config_set('settings.api_url', '<script src="http://maps.google.com/maps?file=api&v=2&key=' . $api_google . '" type="text/javascript"></script><script src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script><script src="http://js.mapbox.com/ol/2.8/mapbox.js" type="text/javascript"></script>');
 
 // And in case you want to display all maps on one page...
 Kohana::config_set('settings.api_url_all', '<script src="http://dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=6"></script><script type="text/javascript" src="http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=' . $api_yahoo . '"></script><script src="http://maps.google.com/maps?file=api&v=2&key=' . $api_google . '" type="text/javascript"></script>'.html::script('media/js/OpenStreetMap'));
