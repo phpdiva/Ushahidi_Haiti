@@ -31,8 +31,10 @@
 	if ($map_enabled == 'streetmap') {
 		//echo html::script('media/js/OpenLayers', true);
 		echo html::script('http://assets.ushahidi.com/media/js/OpenLayers_2'.$gz, true);
-		echo "<script type=\"text/javascript\">OpenLayers.ImgPath = '".url::base().'media/img/openlayers/'."';</script>";
-		//echo 'STREET!';
+		//echo "<script type=\"text/javascript\">OpenLayers.ImgPath = '".url::base().'media/img/openlayers/'."';</script>";
+		
+		// Use MAPBOX THEME
+		echo "<script type=\"text/javascript\">OpenLayers.ImgPath = 'http://js.mapbox.com/theme/dark/';</script>";
 	}
 	
 	// Load jQuery
@@ -123,6 +125,11 @@
 	</script>
 	
 	<?php
+		// MAPBOX Integration
+		echo html::script('media/js/mapbox');
+		
+		
+	
 		if(isset($_GET['iframe'])){
 		?>
 		<style type="text/css">
@@ -154,7 +161,7 @@
         	<?php echo Kohana::lang('ui_main.shortcode_announcement_1'); ?> 
             <span> <?php echo $sms_no2; ?> </span>  
             <?php 
-				echo '&nbsp;('.Kohana::lang('ui_main.shortcode_announcement_3').'<span>'.$sms_no1.'</span>'.')&nbsp;';
+				echo '&nbsp;('.Kohana::lang('ui_main.shortcode_announcement_3').'<span>+44 762.480.2524</span>)&nbsp;';
 				echo Kohana::lang('ui_main.shortcode_announcement_2'); 
 			?>
         </p>

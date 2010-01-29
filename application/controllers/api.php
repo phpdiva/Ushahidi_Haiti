@@ -13,17 +13,19 @@
  * @license    http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License (LGPL)
  */
 
+define('ACCESS_LIMIT',10000);
 class Api_Controller extends Controller {
 	
 	private $db; //Database instance for queries
 	private $list_limit; //number of records to limit response to - set in __construct
+	private $access_limit = 200; 
 	private $responseType; //type of response, either json or xml as specified, defaults to json in set in __construct
 	private $error_messages; // validation error messages
 	private $messages = array(); // form validation error messages
 	private $cache_ttl; // API request cache TTL. @todo: move this into config somewhere?
 	private $cache; // Instance of cache
+	private $total_records;
 	
-
 	/**
 	 * constructor
 	*/
@@ -33,6 +35,7 @@ class Api_Controller extends Controller {
 		$this->responseType = 'json';
 		$this->cache = Cache::instance();
 		$this->cache_ttl = 3600; // set time to live to 1 hour.
+	
 	}
 	
 	/**
@@ -60,7 +63,7 @@ class Api_Controller extends Controller {
 			$task = $request['task'];
 		}
 		
-		// Response type. Define this regardless of caching, since we'll need it to set mime type.
+		//response type
 		if(!$this->_verifyArrayIndex($request, 'resp')){
 			$this->responseType = 'json';
 		} else {
@@ -73,7 +76,7 @@ class Api_Controller extends Controller {
 		// Is this request cache-able? TRUE if this is a GET request and time to live is set.
 		$is_cacheable = ((int) $this->cache_ttl > 0 && $_SERVER['REQUEST_METHOD'] == 'GET');
 		$request_identifier = NULL;
-		
+ 
 		// Check if this request is cached.
 		if ($is_cacheable) {
 			// Create a unique key for this request.
@@ -83,26 +86,51 @@ class Api_Controller extends Controller {
 			$request_identifier = 'api_'.$request_hash;
 			$ret = $this->cache->get($request_identifier);
 		}
-		
+ 
 		// If POST or request is not cached, generate response.
 		if ($ret == NULL) {
-			
 			switch($task){
 				case "report": //report/add an incident
-					$ret = $this->_report();
-				break;
-				
-				case "3dkml": //report/add an incident
-					$ret = $this->_3dkml();
-				break;
+					//check if an API call has reached its limit.
+					if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) { 
+						if( !$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] )){
+							$ret = $this->_report();
 					
+							$this->_apiLog($request); // log api activities
+						} else {
+							$error = array("error" => $this->_getErrorMsg(006, 'task'));	
+						}
+					
+					} else {
+						$error = array("error" => $this->_getErrorMsg(006, 'task'));
+					}
+				
+				break;
+			
+				case "3dkml": //report/add an incident
+					//check if an API call has reached its limit.
+					if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+						if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+							$ret = $this->_3dkml();
+					
+							$this->_apiLog($request); // log api activities
+						} else {
+							$error = array("error" => $this->_getErrorMsg(006, 'task'));
+						}
+					
+					} else {
+						$error = array("error" => $this->_getErrorMsg(006, 'task'));
+					}
+					
+				break;
+				
 				case "tagnews": //tag a news item to an incident
-				
+			
 				case "tagvideo": //report/add an incident
-				
+			
 				case "tagphoto": //report/add an incident
 					$incidentid = '';
-					
+				
 					if(!$this->_verifyArrayIndex($request, 'id')) {
 						$error = array("error" => 
 						$this->_getErrorMsg(001, 'id'));
@@ -110,19 +138,31 @@ class Api_Controller extends Controller {
 					} else {
 						$incidentid = $request['id'];
 					}	
-					
+				
 					$mediatype = 0;
-		
+	
 					if($task == "tagnews") $mediatype = 4;
-						
+					
 					if($task == "tagvideo") $mediatype = 2;
-						
+					
 					if($task == "tagphoto") $mediatype = 1;
-						
-					$ret = $this->_tagMedia($incidentid, $mediatype);
+					
+					//check if an API call has reached its limit.
+					if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+						if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+							$ret = $this->_tagMedia($incidentid, $mediatype);
+					
+							$this->_apiLog($request); // log api activities
+						} else {
+							$error = array("error" => $this->_getErrorMsg(006, 'task'));
+						}
+					
+					} else {
+						$error = array("error" => $this->_getErrorMsg(006, 'task'));
+					}
 					
 					break;
-			
+		
 				case "apikeys":
 					$by = '';
 					if(!$this->_verifyArrayIndex($request, 'by')) {
@@ -132,33 +172,85 @@ class Api_Controller extends Controller {
 					}else {
 						$by = $request['by'];
 					}
-				
+			
 					switch($by) {
 						case "google":
-							$ret = $this->_apiKey('api_google');
-							break;
 	
+							//check if an API call has reached its hourly limit.
+							if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] )) {
+								if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+									$ret = $this->_apiKey('api_google');
+					
+									$this->_apiLog($request); // log api activities
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));	
+								}
+					
+							} else {
+								$error = array("error" => $this->_getErrorMsg(006, 'task'));
+							}
+							break;
+
 						case "yahoo":
-							$ret = $this->_apiKey('api_yahoo');
+							
+							//check if an API call has reached its hourly limit.
+							if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+								if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){ 
+									$ret = $this->_apiKey('api_yahoo');
+					
+									$this->_apiLog($request); // log api activities
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
+					
+							} else {
+								$error = array("error" => $this->_getErrorMsg(006, 'task'));
+							}
 							break;
-	
+
 						case "microsoft":
-							$ret = $this->_apiKey('api_live');
+			
+							//check if an API call has reached its hourly limit.
+							if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] )) {
+								if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){ 
+									$ret = $this->_apiKey('api_live');
+					
+									$this->_apiLog($request); // log api activities
+								}else{
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
+					
+							} else {
+								$error = array("error" => $this->_getErrorMsg(006, 'task'));
+							}
 							break;
-						
+					
 						default:
 							$error = array("error" =>$this->_getErrorMsg(002));
 					}
 					break;
-						
+					
 				case "categories": //retrieve all categories
-					$ret = $this->_categories();
+					
+					//check if an API call has reached its hourly limit.
+					if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+						if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+							$ret = $this->_categories();
+					
+							$this->_apiLog($request); // log api activities
+						} else {
+							$error = array("error" => $this->_getErrorMsg(006, 'task'));
+						}
+					
+					} else {
+						$error = array("error" => $this->_getErrorMsg(006, 'task'));
+					}
 					break;
-				
+			
 				case "version": //retrieve an ushahidi instance version number
 					$ret = $this->_getVersionNumber();
 					break;
-				
+			
 				//search for reports
 				case "search":
 					$by = '';
@@ -170,18 +262,31 @@ class Api_Controller extends Controller {
 						$q = $request['q'];
 						if($this->_verifyArrayIndex($request,'limit')){ 
 							$limit = $request['limit'];
-						
+					
 						}else{
 							$limit = "";
 						}
 						
-						$ret = $this->_getSearchResults($q,$limit);
+						//check if an API call has reached its hourly limit.
+						if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+							if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+								$ret = $this->_getSearchResults($q,$limit);
+					
+								$this->_apiLog($request); // log api activities
+							} else {
+								$error = array("error" => $this->_getErrorMsg(006, 'task'));	
+							}
+					
+						} else {
+							$error = array("error" => $this->_getErrorMsg(006, 'task'));
+						}
+						
 						break;
 					}
-					
+				
 				case "category": //retrieve categories
 					$id = 0;
-					
+				
 					if(!$this->_verifyArrayIndex($request, 'id')){
 						$error = array("error" => 
 						$this->_getErrorMsg(001, 'id'));
@@ -189,17 +294,41 @@ class Api_Controller extends Controller {
 					} else {
 						$id = $request['id'];
 					}
+				
+					//check if an API call has reached its hourly limit.
+					if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+						if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+							$ret = $this->_category($id);
 					
-					$ret = $this->_category($id);
+							$this->_apiLog($request); // log api activities
+						} else {
+							$error = array("error" => $this->_getErrorMsg(006, 'task'));
+						}
+					
+					} else {
+						$error = array("error" => $this->_getErrorMsg(006, 'task'));
+					}
 					break;
-					
+				
 				case "locations": //retrieve locations
-					$ret = $this->_locations();
+					//check if an API call has reached its hourly limit.
+					if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) { 
+						if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){
+							$ret = $this->_locations();
+					
+							$this->_apiLog($request); // log api activities
+						} else {
+							$error = array("error" => $this->_getErrorMsg(006, 'task'));	
+						}
+					
+					} else {
+						$error = array("error" => $this->_getErrorMsg(006, 'task'));
+					}
 					break;		
-			
+		
 				case "location": //retrieve locations
 					$by = '';
-					
+				
 					if(!$this->_verifyArrayIndex($request, 'by')){
 						$error = array("error" => 
 						$this->_getErrorMsg(001, 'by'));
@@ -207,87 +336,166 @@ class Api_Controller extends Controller {
 					} else {
 						$by = $request['by'];
 					}
-			
+		
 					switch ($by){
 						case "latlon": //latitude and longitude
 							break;
-						
+					
 						case "locid": //id
 							if(($this->_verifyArrayIndex($request, 'id'))){
-								$ret = $this->_locationById($request['id']);
+								
+								//check if an API call has reached its hourly limit.
+								if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] )) {
+									if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){ 
+										$ret = $this->_locationById($request['id']);
+					
+										$this->_apiLog($request); // log api activities
+									} else {
+										$error = array("error" => $this->_getErrorMsg(006, 'task'));	
+									}
+					
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
+							} else {
+								$error = array("error" => $this->_getErrorMsg(001, 'id'));
+							}
+							break;
+			
+						case "country": //id
+							if(($this->_verifyArrayIndex($request, 'id'))){
+								
+								//check if an API call has reached its hourly limit.
+								if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+									if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+										$ret = $this->_locationByCountryId($request['id']);
+					
+										$this->_apiLog($request); // log api activities
+									} else {
+										$error = array("error" => $this->_getErrorMsg(006, 'task'));	
+									}
+					
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
 							} else {
 								$error = array("error" => $this->_getErrorMsg(001, 'id'));
 							}
 							break;
 				
-						case "country": //id
-							if(($this->_verifyArrayIndex($request, 'id'))){
-								$ret = $this->_locationByCountryId($request['id']);
-							} else {
-								$error = array("error" => $this->_getErrorMsg(001, 'id'));
-							}
-							break;
-					
 						default:
 							$error = array("error" => $this->_getErrorMsg(002));
 					}
-					
+				
 					break;
-					
+				
 				case "countries": //retrieve countries
-					$ret = $this->_countries();
-					break;
+				
+					//check if an API call has reached its hourly limit.
+					if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+						if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){ 
+							$ret = $this->_countries();
 					
+							$this->_apiLog($request); // log api activities
+						}else{
+							$error = array("error" => $this->_getErrorMsg(006, 'task'));	
+						}
+					
+					} else {
+						$error = array("error" => $this->_getErrorMsg(006, 'task'));
+					}
+					break;
+				
 				case "country": //retrieve countries
 					$by = '';
-				
+			
 					if(!$this->_verifyArrayIndex($request, 'by')){
 						$error = array("error" => $this->_getErrorMsg(001, 'by'));
 						break;
 					} else {
 						$by = $request['by'];
 					}
-				
+			
 					switch ($by){
 						case "countryid": //id
 							if(($this->_verifyArrayIndex($request, 'id'))){
-								$ret = $this->_countryById($request['id']);
+			
+								//check if an API call has reached its hourly limit.
+								if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] )) {
+									if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){ 
+										$ret = $this->_countryById($request['id']);
+					
+										$this->_apiLog($request); // log api activities
+									}else {
+										$error = array("error" => $this->_getErrorMsg(006, 'task'));	
+									}
+					
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
 							} else {
 								$error = array("error" => $this->_getErrorMsg(001, 'id'));
 							}
 							break;
-				
+			
 						case "countryname": //name
 							if(($this->_verifyArrayIndex($request, 'name'))){
-								$ret = $this->_countryByName($request['name']);
+								
+								//check if an API call has reached its hourly limit.
+								if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] )) {
+									if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+										$ret = $this->_countryByName($request['name']);
+					
+										$this->_apiLog($request); // log api activities
+									}else {
+										$error = array("error" => $this->_getErrorMsg(006, 'task'));
+									}
+					
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
+								
 							} else {
 								$error = array("error" => $this->_getErrorMsg(001, 'name'));
 							}
 							break;
-				
+			
 						case "countryiso": //name
 							if(($this->_verifyArrayIndex($request, 'iso'))){
-								$ret = $this->_countryByIso($request['iso']);
+								
+								//check if an API call has reached its hourly limit.
+								if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+									if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+										$ret = $this->_countryByIso($request['iso']);
+					
+										$this->_apiLog($request); // log api activities
+									} else {
+										$error = array("error" => $this->_getErrorMsg(006, 'task'));	
+									}
+					
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
 							} else {
 								$error = array("error" => $this->_getErrorMsg(001, 'iso'));
 							}
 							break;
-						
+					
 						default:
 							$error = array("error" => $this->_getErrorMsg(002));
 					}
-				
+			
 					break;
-					
+				
 				case "incidents": //retrieve incidents
 					/**
-					* 
+				 	* 
 					* there are several ways to get incidents by
 					*/
 					$by = '';
 					$sort = 'asc';
 					$orderfield = 'incidentid';
-				
+			
 					if(!$this->_verifyArrayIndex($request, 'by')){
 						$error = array("error" => $this->_getErrorMsg(001, 'by'));
 						break;
@@ -300,7 +508,7 @@ class Api_Controller extends Controller {
 							$sort = 'desc';
 						}
 					}						
-				
+			
 					/* Order field  */
 					if($this->_verifyArrayIndex($request, 'orderfield')){
 						switch ( $request['orderfield'] ){
@@ -317,67 +525,154 @@ class Api_Controller extends Controller {
 								/* Again... it's set but let's cast it in concrete */
 								$orderfield = 'incidentid';
 						}
-	
+
 					}
 					switch ($by){
 						case "all": // incidents
-							$ret = $this->_incidentsByAll($orderfield, $sort);
-							break;
+			
+							//check if an API call has reached its hourly limit.
+							if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] )) {
+								if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){ 
+									$ret = $this->_incidentsByAll($orderfield, $sort);
 					
+									$this->_apiLog($request); // log api activities
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));	
+								}
+					
+							} else {
+								$error = array("error" => $this->_getErrorMsg(006, 'task'));
+							}
+							break;
+				
 						case "latlon": //latitude and longitude
 							if(($this->_verifyArrayIndex($request, 'latitude')) && ($this->_verifyArrayIndex($request, 'longitude'))){
-								$ret = $this->_incidentsByLatLon($request['latitude'],$orderfield,$request['longitude'],$sort);
+								//check if an API call has reached its hourly limit.
+								if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] )) {
+									if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){ 
+										$ret = $this->_incidentsByLatLon($request['latitude'],$orderfield,$request['longitude'],$sort);
+					
+										$this->_apiLog($request); // log api activities
+									} else {
+										$error = array("error" => $this->_getErrorMsg(006, 'task'));
+									}
+					
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
 							} else {
 								$error = array("error" => $this->_getErrorMsg(001,'latitude or longitude'));
 							}
 							break;
-	
+
 						case "locid": //Location Id
 							if(($this->_verifyArrayIndex($request, 'id'))){
-								$ret = $this->_incidentsByLocitionId($request['id'], $orderfield, $sort);
+
+								//check if an API call has reached its hourly limit.
+								if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+									if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){ 
+										$ret = $this->_incidentsByLocitionId($request['id'], $orderfield, $sort);
+					
+										$this->_apiLog($request); // log api activities
+									} else {
+										$error = array("error" => $this->_getErrorMsg(006, 'task'));
+									}
+					
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
 							} else {
 								$error = array("error" => $this->_getErrorMsg(001, 'id'));
 							}
 							break;
-				
+			
 						case "locname": //Location Name
 							if(($this->_verifyArrayIndex($request, 'name'))){
-								$ret = $this->_incidentsByLocationName($request['name'], $orderfield, $sort);
+								
+								//check if an API call has reached its hourly limit.
+								if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) { 
+									if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){
+										$ret = $this->_incidentsByLocationName($request['name'], $orderfield, $sort);
+										$this->_apiLog($request); // log api activities
+									}else {
+										$error = array("error" => $this->_getErrorMsg(006, 'task'));	
+									}
+					
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
+								
 							} else {
 								$error = array("error" => $this->_getErrorMsg(001, 'name'));
 							}
 							break;
-						
+					
 						case "catid": //Category Id
 							if(($this->_verifyArrayIndex($request, 'id'))){
-								$ret = $this->_incidentsByCategoryId($request['id'], $orderfield, $sort);
+					
+								//check if an API call has reached its hourly limit.
+								if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] )) {
+									if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){ 
+										$ret = $this->_incidentsByCategoryId($request['id'], $orderfield, $sort);
+										$this->_apiLog($request); // log api activities
+									} else {
+										$error = array("error" => $this->_getErrorMsg(006, 'task'));
+									}
+					
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
 							} else {
 								$error = array("error" => $this->_getErrorMsg(001, 'id'));
 							}
 							break;
-				
+			
 						case "catname": //Category Name
 							if(($this->_verifyArrayIndex($request, 'name'))){
-								$ret = $this->_incidentsByCategoryName($request['name'], $orderfield, $sort);
+					
+								//check if an API call has reached its hourly limit.
+								if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+									if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){ 
+										$ret = $this->_incidentsByCategoryName($request['name'], $orderfield, $sort);
+										$this->_apiLog($request); // log api activities
+									} else {
+										$error = array("error" => $this->_getErrorMsg(006, 'task'));
+									}
+					
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}
 							} else {
 								$error = array("error" => $this->_getErrorMsg(001, 'name'));
 							}
-																									break;
-																					case "sinceid": //Since Id
-																									if(($this->_verifyArrayIndex($request,'id'))){
-																													$ret = $this->_incidentsBySinceId($request['id'], $orderfield, $sort);
-																									} else {
-																													$error = array("error" => $this->_getErrorMsg(001,'id'));
-																									}
-																									break;
-	
+                       		break;
+                    	case "sinceid": //Since Id
+                   			if(($this->_verifyArrayIndex($request,'id'))){
+                       	   
+                            	//check if an API call has reached its hourly limit.
+								if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+									if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+										$ret = $this->_incidentsBySinceId($request['id'], $orderfield, $sort);
+										$this->_apiLog($request); // log api activities
+									}else {
+										$error = array("error" => $this->_getErrorMsg(006, 'task'));
+									}
+					
+								} else {
+									$error = array("error" => $this->_getErrorMsg(006, 'task'));
+								}  		
+                       		} else {
+                        		$error = array("error" => $this->_getErrorMsg(001,'id'));
+                       		}
+                       		break;
+
 						default:
 							$error = array("error" => $this->_getErrorMsg(002));
 					}
-				
+			
 					break;
-					
-					
+				
+				
 				case "sharing": //Sharing Data based on Permissions
 					if( $this->_verifyArrayIndex($request, 'sharing_key') && $this->_verifyArrayIndex($request, 'sharing_site_name') && $this->_verifyArrayIndex($request, 'sharing_email') && $this->_verifyArrayIndex($request, 'sharing_url') && $this->_verifyArrayIndex($request, 'type') && $this->_verifyArrayIndex($request, 'session') ){
 						$ret = $this->_sharing($request['type'], 
@@ -391,28 +686,52 @@ class Api_Controller extends Controller {
 						$error = json_encode(array("error" => $this->_getErrorMsg(001,'Authentication Credentials')));
 					}
 					break;
-			
+		
 				case "validate": //Validate Session
 					if(!$this->_verifyArrayIndex($request,'session')){
 						$error = array("error" => $this->_getErrorMsg(006, 'session'));
 					} else {
-						$ret = $this->_validate($request['session']);
+						
+						//check if an API call has reached its hourly limit.
+						if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+							if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+								$ret = $this->_validate($request['session']);
+								$this->_apiLog($request); // log api activities
+							} else {
+								$error = array("error" => $this->_getErrorMsg(006, 'task'));
+							}
+					
+						} else {
+							$error = array("error" => $this->_getErrorMsg(006, 'task'));
+						}
 					}
 					break;
-					
+				
 				case "statistics":
 					if(!Kohana::config('settings.allow_stat_sharing')){
 						$error = array("error" => $this->_getErrorMsg(005));
 					} else {
-						$ret = $this->_statistics();
+						
+						//check if an API call has reached its hourly limit.
+						if( !$this->_apiLimitStatus( $_SERVER['REMOTE_ADDR'] ) ) {
+							if(!$this->_ipBannedStatus( $_SERVER['REMOTE_ADDR'] ) ){  
+								$ret = $this->_statistics();
+								$this->_apiLog($request); // log api activities
+							} else {
+								$error = array("error" => $this->_getErrorMsg(006, 'task'));
+							}
+					
+						} else {
+							$error = array("error" => $this->_getErrorMsg(006, 'task'));
+						}
 					}
 					break;
-				
+			
 				default:
 					$error = array("error" => $this->_getErrorMsg(999));
 					break;
 			}
-			
+		
 			//create the response depending on the kind that was requested
 			if(!empty($error) || count($error) > 0){
 				if($this->responseType == 'json'){
@@ -421,14 +740,7 @@ class Api_Controller extends Controller {
 					$ret = $this->_arrayAsXML($error, array());
 				}
 			}
-			
-			// Save response to cache.
-			if ($is_cacheable && $request_identifier != NULL) {
-				$this->cache->set($request_identifier, $ret, array('api'), $this->cache_ttl);
-			}
-			
 		} // end "if response is cached"
-		
 		
 		//avoid caching
 		header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
@@ -508,6 +820,9 @@ class Api_Controller extends Controller {
                     "$where $limit";
  
 		$items = $this->db->query($query);
+		
+		$this->total_records = sizeof($items);
+		
 		$i = 0;
 		foreach ($items as $item){
 			
@@ -1060,7 +1375,8 @@ class Api_Controller extends Controller {
 		$json_categories = array(); //incidents to parse to json
 		
 		$retJsonOrXml = ''; //will hold the json/xml string to return
-
+		
+		
 		//find incidents
 		$query = "SELECT id, category_title AS title, category_description AS 
 				description, category_color AS color, category_image as icon FROM `category` WHERE 
@@ -1068,6 +1384,8 @@ class Api_Controller extends Controller {
 
 		$items = $this->db->query($query);
 		$i = 0;
+		
+		$this->total_records = sizeof($items);
 		
 		$replar = array(); //assists in proper xml generation
 		
@@ -1118,6 +1436,9 @@ class Api_Controller extends Controller {
 		$i = 0;
 		
 		$replar = array(); //assists in proper xml generation
+		
+		//total records for api logger
+		$this->total_records = sizeof($items);
 		
 		foreach ($items as $item){
 			
@@ -1175,11 +1496,16 @@ class Api_Controller extends Controller {
 		
 		$retJsonOrXml = ''; //will hold the json/xml string to return
 
+		
 		//find incidents
 		$query = "SELECT id, location_name AS name, country_id , latitude, 
 				longitude FROM `location` $where $limit ";
-
+		
 		$items = $this->db->query($query);
+		
+		//total records for the api logger
+		$this->total_records = sizeof($items);
+		
 		$i = 0;
 		
 		$replar = array(); //assists in proper xml generation
@@ -1310,7 +1636,7 @@ class Api_Controller extends Controller {
 	function _doSearch( $q, $limit ) {
 		
 		/**
-		 * This is borrowed from the search functionality 
+		 * This is mostly borrowed from the search functionality 
 		 * see application/controller/search.php
 		 */
 		 
@@ -1376,17 +1702,16 @@ class Api_Controller extends Controller {
 			if( !empty($limit) && is_numeric($limit)  ) {
 				$l =  "LIMIT 0 ,".$limit;
 			} else {
-				$l =  " ";	
+				$l =  " LIMIT ,".$this->list_limit;	
 			}	
 			
 			$total_items = ORM::factory('incident')->where($where_string)->count_all();
 			
-			$db = new Database();
-			
 			$s = $search_query . $l;
 			
-			$query = $db->query($s );
+			$query = $this->db->query($s );
 			
+			$this->total_records = $total_items;
 			// Results Bar
 			if ($total_items != 0)
 			{	
@@ -1519,6 +1844,9 @@ class Api_Controller extends Controller {
 		$i = 0;
 			
 		$replar = array(); //assists in proper xml generation
+		
+		// get total records for api logger
+		$this->total_records = sizeof($items);
 			
 		foreach ($items as $item){
 			
@@ -1763,8 +2091,6 @@ class Api_Controller extends Controller {
 		$categories_total = ORM::factory('category')->count_all();
 		$locations_total = ORM::factory('location')->count_all();
 		
-		//print_r($messages_services);
-		
 		$data = array(
 			'incidents'=>array(
 				'total'=>$incidents_total,
@@ -1854,9 +2180,9 @@ class Api_Controller extends Controller {
 	}
 	
 	/**
- 	* Creates a XML response given an array
- 	* CREDIT TO: http://snippets.dzone.com/posts/show/3391
- 	*/
+ 	 * Creates a XML response given an array
+ 	 * CREDIT TO: http://snippets.dzone.com/posts/show/3391
+ 	 */
 	function _arrayAsXML($data, $replar = array()){
 		$xml = new XMLWriter();
 		$xml->openMemory();
@@ -1868,5 +2194,86 @@ class Api_Controller extends Controller {
 		$xml->endElement();
 		return $xml->outputMemory(true);
 	}
+	
+	/**
+	 * Logs activities of the API to the activity logger. 
+	 */
+	function _apiLog( $request ) {
+		
+		$task = $request['task'];
+		
+		$params = array_keys($request);
+		
+		$params = serialize($params); //serialize array 
+		
+		$reports = $this->total_records;
+		
+		$ipaddress = $_SERVER['REMOTE_ADDR'];
+		
+		$date = date("Y-m-d H:i:s");
+		
+		$query = "INSERT INTO api_log (api_task,api_parameters,api_records,api_ipaddress,api_date) " .
+				 "values ('$task','$params',$reports,'$ipaddress','$date')";
+				
+		$this->db->query($query);	
+	}
+	
+	/**
+	 * Check the limit status of an API call.
+	 * 
+	 * @param ipaddress - the IP address of the server doing the API call.
+	 * 
+	 * @return Boolean.
+	 */
+	function _apiLimitStatus( $ipaddress ) {
+			
+		$query = "SELECT COUNT( * ) AS total FROM api_log WHERE HOUR( api_date ) = HOUR( CURTIME( ) ) AND api_ipaddress =  '$ipaddress'  AND DATE( api_date ) = DATE( CURDATE( ) )";
+		
+		$total_items = $this->db->query($query);
+		
+		if( $total_items[0]->total == ACCESS_LIMIT) {
+			$this->_banIPAdress($ipaddress);
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+	
+	/**
+	 * Ban an IP address due  to abusive API call.
+	 * The API call for a day is limited to 200.
+	 * @param ipaddress - the IP address to be banned.
+	 */
+	function _banIPAdress($ipaddress) {
+		
+		//Make sure the ip address is not in the db.
+		
+		if( !$this->_ipBannedStatus($ipaddress) ) {
+			$date = date("Y-m-d H:i:s");
+			// ban ip address
+			$query = "INSERT INTO api_banned (banned_ipaddress,banned_date) values ('$ipaddress','$date')";
+			$this->db->query($query);			
+		}
+	}
+	
+	/**
+	 * Check if an IP address has been banned
+	 * @param ipaddress - the IP address to check  
+	 * 
+	 * @return Boolean
+	 */
+	function _ipBannedStatus($ipaddress) {
+		
+		$query = "SELECT count(*) AS total FROM api_banned WHERE banned_ipaddress = '$ipaddress' ";
+		$total_items = $this->db->query($query);
+		
+		if( $total_items[0]->total == 0 ) {
+			return false;	
+		} else {
+			return true;	
+		}
+	}
+	
 
 }

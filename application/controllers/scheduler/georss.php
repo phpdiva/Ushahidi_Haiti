@@ -24,7 +24,7 @@ class Georss_Controller extends Controller
         parent::__construct();
 		set_time_limit(60);
 		
-		//$profiler = New Profiler;
+		// $profiler = New Profiler;
 	}
 	
 	public function index()
@@ -42,7 +42,7 @@ class Georss_Controller extends Controller
 		//echo $last_message_date;
 		$settings = ORM::factory('settings', 1);		
 		$sms_rss = $settings->georss_feed."&only_phone=1&limit=0,".$this->items;	//."&uptots=".$last_message_date;
-		echo $sms_rss;
+		echo $sms_rss."<br>";
 		$curl_handle = curl_init();
 		curl_setopt($curl_handle,CURLOPT_URL,$sms_rss);
 		curl_setopt($curl_handle,CURLOPT_CONNECTTIMEOUT,2); // Timeout
@@ -64,16 +64,15 @@ class Georss_Controller extends Controller
 		foreach($feed_data->get_items(0,$this->items) as $feed_data_item)
 		{
 			$service_messageid = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'id');
-				$service_messageid = str_replace("http://4636.ushahidi.com/person.php?id=","",
-					trim($service_messageid[0]['data']));
+				$service_messageid = trim($service_messageid[0]['data']);
 			$date = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'updated');
 				$date = date("Y-m-d H:i:s",strtotime(trim($date[0]['data'])));
-			$phone = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'phone');
-				$phone = intval($phone[0]['data']);
+			$phone = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'author');
+				$phone = intval(str_replace("sms://","",trim($phone[0]['data'])));
 			$category = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'categorization');
 				$category = trim($category[0]['data']);
-			$message_sms = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'sms');
-				$message_sms = trim($message_sms[0]['data'])."\n\nTime:".$date;	
+			$message_sms = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'summary');
+				$message_sms = trim($message_sms[0]['data'])."\n\nTime: ".$date;	
 			$message_notes = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'notes');
 				$message_notes = trim($message_notes[0]['data']);
 			$message_detail = $message_notes."\n~~~~~~~~~~~~~~~~~\n";
@@ -82,12 +81,23 @@ class Georss_Controller extends Controller
 			$longitude = $feed_data_item->get_longitude();
 			$location_name = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'city');
 				$location_name = trim($location_name[0]['data']);				
-			$actionable = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'actionable');
-				$actionable = trim($actionable[0]['data']);
+			$actionable = 0;
+			//$actionable = $feed_data_item->get_item_tags('http://www.w3.org/2005/Atom', 'actionable');
+			//	$actionable = trim($actionable[0]['data']);
 			
 			// Okay now we have everything we need
 			
 			// Step 1. Does this message have a phone number?
+			
+//			echo "MESSAGE ID: ".$service_messageid."<BR />";
+//			echo "MESSAGE DATE: ".$date."<BR />";
+//			echo "PHONE: ".$phone."<BR />";
+//			echo "CATEGORY: ".$category."<BR />";
+//			echo "ORIGINAL SMS: ".$message_sms."<BR />";
+//			echo "TRANSLATED SMS: ".$message_notes."<BR />";
+//			echo "LATITUDE: ".$latitude."<BR />";
+//			echo "LONGITUDE: ".$longitude."<BR /><BR />~~~~~~~~~~~~~~~~~~~~~~~~~~~<BR /><BR />";
+			
 			if ($phone)
 			{
 				// Step 2. Has this particular message been saved before??
@@ -114,25 +124,6 @@ class Georss_Controller extends Controller
 						$reporter->service_account = $phone;
 						$reporter->reporter_date = $date;
 						$reporter->save();
-					}
-					// Number is in our database
-					else
-					{
-						// Find previous message and use it as parent
-						$parent = ORM::factory('message')
-							->where('reporter_id', $reporter->id)
-							->where('message_type', '1')
-							->where('parent_id', '0')
-							->where('message_trash', '0')
-							->orderby('message_date', 'desc')
-							->find();
-						if ($parent->loaded)
-						{
-							$parent_id = $parent->id;
-							$parent->message_read = 0;
-							$parent->message_reply = 1;
-							$parent->save($parent->id);
-						}
 					}
 				
 				
@@ -177,9 +168,41 @@ class Georss_Controller extends Controller
 					$message->message_detail = $message_detail;
 					$message->message_type = 1; // Inbox
 					$message->message_date = $date;
+					$message->message_date_reply = $date;
 					$message->message_actionable = $actionable;
 					$message->service_messageid = $service_messageid;
 					$message->save();
+					
+					
+					// Reset Parent ID's based on date FIFO
+					// Message with oldest date becomes parent
+					$parent = ORM::factory('message')
+						->where('reporter_id', $reporter->id)
+						->where('message_type', '1')
+						->where('message_trash', '0')
+						->orderby('message_date', 'asc')
+						->find();
+						
+					if ($parent->loaded)
+					{
+						$children = ORM::factory('message')
+							->where('reporter_id', $reporter->id)
+							->where('id !='.$parent->id)
+							->where('message_type', '1')
+							->where('message_trash', '0')
+							->orderby('message_date', 'asc')
+							->find_all();
+						
+						foreach ($children as $child)
+						{
+							$child->parent_id = $parent->id;
+							$child->save($child->id);
+						}
+						
+						$parent->parent_id = 0;
+						$parent->message_date_reply = $date;
+						$parent->save($parent->id);
+					}
 					
 					$i++;
 				}

@@ -165,6 +165,9 @@
 					<li><a href="<?php echo url::base() ?>admin/stats" <?php if($this_page=="stats") echo "class=\"active\"" ;?>>
 						<?php echo Kohana::lang('ui_admin.stats')?>
 						</a></li>
+					<li><a href="<?php echo url::base() ?>admin/apilogs" <?php if($this_page=="apilogs") echo "class=\"active\"" ;?>>
+						<?php echo Kohana::lang('ui_admin.apilogs')?>
+						</a></li>
 				</ul>
 				<!-- sub-nav -->
 				<ul class="sub-nav">

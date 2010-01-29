@@ -37,11 +37,22 @@
 			*/
 			
 			var options = {
-				units: "mi",
+				units: "m",
+				maxResolution: 156543.0339,
 				numZoomLevels: 16,
 				controls:[],
 				projection: proj_900913,
 				'displayProjection': proj_4326,
+				maxExtent: new OpenLayers.Bounds(
+					-20037508.34,
+					-20037508.34,
+					20037508.34,
+					20037508.34),
+				restrictedExtent: new OpenLayers.Bounds(
+					-8328425.7264025,
+					1948226.9765854,
+					-7830056.3020725,
+					2302894.787765),
 				eventListeners: {
 						"zoomend": mapMove
 				    }
@@ -66,12 +77,12 @@
 				maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 				});
 				
-			osm_sat = new OpenLayers.Layer.OSM.Mapnik("Open Street Maps Satellite", {
+			osm_st = new OpenLayers.Layer.OSM.Mapnik("Open Street Maps", {
 				sphericalMercator: true,
 				maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34)
 				});
 				
-			map.addLayers([osm_sat, google_st, google_sat]);
+			map.addLayers([osm_st, google_st, google_sat]);
 			
 			
 			// Add Controls

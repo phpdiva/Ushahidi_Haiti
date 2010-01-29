@@ -205,9 +205,10 @@ class Main_Controller extends Template_Controller {
         $this->template->content->total_items = ORM::factory('incident')
             ->where('incident_active', '1')
             ->limit('8')->count_all();
+			
         $this->template->content->incidents = ORM::factory('incident')
             ->where('incident_active', '1')
-			->limit('10')
+			->limit('14')
             ->orderby('incident_date', 'desc')
 			->with('location')
             ->find_all();
@@ -248,12 +249,19 @@ class Main_Controller extends Template_Controller {
 			$this->template->header->sms_no1 = $sms_no1;
 			$this->template->header->sms_no2 = $sms_no2;
 
-		// Get RSS News Feeds
+		// Get RSS News Feeds but don't include Global Voices (8)
 		$this->template->content->feeds = ORM::factory('feed_item')
 			->limit('10')
+			->where('feed_id !=', '8')
             ->orderby('item_date', 'desc')
             ->find_all();
-		
+			
+		// Get Global Voices Feed
+		$this->template->content->gvfeeds = ORM::factory('feed_item')
+			->limit('10')
+			->where('feed_id', '8')
+            ->orderby('item_date', 'desc')
+            ->find_all();
 		
 		
         // Get The START, END and most ACTIVE Incident Dates
