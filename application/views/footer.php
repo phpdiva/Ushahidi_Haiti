@@ -36,10 +36,9 @@
 					<li><a href="<?php echo url::base() . "reports/submit" ?>"><?php echo Kohana::lang('ui_main.report_an_incident'); ?></a></li>
 					<li><a href="<?php echo url::base() . "alerts" ?>"><?php echo Kohana::lang('ui_main.alerts'); ?></a></li>
 					<li><a href="<?php echo url::base() . "help" ?>"><?php echo Kohana::lang('ui_main.help'); ?></a></li>
-					<li><a href="#"><?php echo Kohana::lang('ui_main.about'); ?></a></li>
-					<li><a href="#"><?php echo Kohana::lang('ui_main.contact'); ?></a></li>
-					<li><a href="#"><?php echo Kohana::lang('ui_main.blog'); ?></a></li>
-                    <li><a href="<?php echo url::base() ?>feed/">All Reports RSS</a></li>
+					<li><a href="<?php echo url::site('page/index/1'); ?>"><?php echo Kohana::lang('ui_main.about'); ?></a></li>
+					<li><a href="<?php echo url::site('contact'); ?>"><?php echo Kohana::lang('ui_main.contact'); ?></a></li>
+					<li><a href="<?php echo url::base() ?>feed/">All Reports RSS</a></li>
 				</ul>
 				<p><?php echo Kohana::lang('ui_main.copyright'); ?></p>
 			</div>
